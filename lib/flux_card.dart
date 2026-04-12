@@ -6,12 +6,13 @@ export 'src/core/theme.dart';
 export 'src/core/constraints.dart';
 
 // Shapes
-export 'src/shapes/flux_ticket_shape.dart';
+export 'src/shapes/flux_notch_shape.dart';
 
 // Ticket system
-export 'src/ticket/flux_ticket_decoration.dart'
-    show FluxTicketDecoration, FluxTicketClipper, FluxTicketBorderPainter, TicketPathBuilder;
-export 'src/ticket/flux_slot_divider.dart';
+export 'src/notch/flux_notch.dart' show FluxNotch;
+
+// Divider
+export 'src/divider/flux_divider.dart';
 
 // Components
 export 'src/components/flux_background.dart';

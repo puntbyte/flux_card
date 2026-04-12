@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import '../components/flux_background.dart';
 import '../components/flux_overlay.dart';
 import '../core/enums.dart';
-import '../ticket/flux_slot_divider.dart';
+import '../divider/flux_divider.dart';
 
 /// Static helpers that compose individual card slots and content groups.
 abstract final class SlotResolver {
   /// Wraps [child] in a [Stack] that injects targeted backgrounds and overlays.
   ///
-  /// [contentPadding] is applied to [child] INSIDE the Stack so that background
-  /// layers (via `Positioned.fill`) extend behind the padding area.
+  /// [contentPadding] is applied to [child] INSIDE the Stack so that
+  /// background layers (via `Positioned.fill`) extend behind the padding area.
   ///
   /// Overlays are wrapped in `Positioned.fill` so that [Align] inside
   /// [FluxOverlay] has bounded dimensions, enabling bottom-edge alignments.
@@ -59,7 +59,9 @@ abstract final class SlotResolver {
     final children = <Widget>[];
     for (final slot in slots) {
       if (slot == null) continue;
-      if (children.isNotEmpty) children.add(SizedBox(height: spacing));
+      if (children.isNotEmpty && spacing > 0) {
+        children.add(SizedBox(height: spacing));
+      }
       children.add(slot);
     }
     if (children.isEmpty) return const SizedBox.shrink();
@@ -72,18 +74,23 @@ abstract final class SlotResolver {
 
   /// Builds the padded content column for header / body / footer slots.
   ///
-  /// Per-slot padding splits vertically so adjacent slots have [spacing] between
-  /// them while slot backgrounds cover the full padded area. [dividers] are
-  /// inserted (replacing the plain gap) at matching [FluxSlotBoundary] positions.
-  /// [boundaryKeys] are zero-height markers inserted at boundaries for
-  /// post-layout measurement (used by [FluxTicketDecoration]).
+  /// Per-slot padding splits vertically so adjacent slots always have
+  /// [spacing] of breathing room between them while slot backgrounds cover the
+  /// full padded area.
+  ///
+  /// If [divider] supplies a widget for a given boundary, that widget is
+  /// inserted between the half-padding sections of the two adjacent slots,
+  /// centring it inside the gap.
+  ///
+  /// [boundaryKeys] inserts zero-height keyed [SizedBox] markers at boundary
+  /// positions for post-layout measurement (used by [FluxNotch]).
   static Widget? contentColumn({
     required List<(FluxTarget, Widget?)> entries,
     required List<Widget> allBackgrounds,
     required List<Widget> allOverlays,
     required EdgeInsets padding,
     required double spacing,
-    List<FluxSlotDivider>? dividers,
+    FluxDivider? divider,
     Map<FluxSlotBoundary, GlobalKey>? boundaryKeys,
   }) {
     final present = entries.where((e) => e.$2 != null).toList();
@@ -93,6 +100,9 @@ abstract final class SlotResolver {
 
     for (int i = 0; i < present.length; i++) {
       final (target, child) = present[i];
+
+      // Each slot gets half the spacing on its inner edges so adjacent slots
+      // produce the full spacing gap (top_half + bottom_half = spacing).
       final slotPad = EdgeInsets.only(
         left: padding.left,
         right: padding.right,
@@ -113,31 +123,18 @@ abstract final class SlotResolver {
       // and/or a divider widget.
       if (i < present.length - 1) {
         final boundary = _boundaryBetween(present[i].$1, present[i + 1].$1);
-        final GlobalKey? key = boundary == null ? null : boundaryKeys?[boundary];
-        final divider = boundary != null
-            ? dividers
-            ?.where((d) => d.boundary == boundary)
-            .firstOrNull
-            : null;
-
-        if (key != null || divider != null) {
-          // Zero-height keyed marker sits at the exact boundary Y position.
+        if (boundary != null) {
+          // Zero-height keyed marker for boundary Y-position measurement.
+          final key = boundaryKeys?[boundary];
           if (key != null) {
             children.add(SizedBox(key: key, height: 0, width: double.infinity));
           }
-          // Divider replaces the plain gap; plain gap added if no divider.
-          if (divider != null) {
-            children.add(Builder(
-              builder: (context) => divider.build(context),
-            ));
-          }
-          // If there's only a key (no divider), still add the regular spacing.
-          if (divider == null && key != null) {
-            children.add(SizedBox(height: spacing));
+          // Visual divider widget at this boundary (sits in the gap centre).
+          final dividerWidget = divider?.widgetFor(boundary);
+          if (dividerWidget != null) {
+            children.add(dividerWidget);
           }
         }
-        // No key, no divider — regular spacing already handled by slotPad
-        // (bottom: spacing/2 on this slot + top: spacing/2 on next = spacing).
       }
     }
 
@@ -149,7 +146,7 @@ abstract final class SlotResolver {
     );
   }
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
+  // ── Helpers ──────────────────────────────────────────────────────────────
 
   static FluxSlotBoundary? _boundaryBetween(FluxTarget a, FluxTarget b) {
     if (a == FluxTarget.header && b == FluxTarget.body) {
@@ -159,7 +156,7 @@ abstract final class SlotResolver {
       return FluxSlotBoundary.afterBody;
     }
     if (a == FluxTarget.header && b == FluxTarget.footer) {
-      // body slot absent — treat header→footer as afterHeader boundary
+      // body absent — header→footer gap uses the afterHeader boundary.
       return FluxSlotBoundary.afterHeader;
     }
     return null;

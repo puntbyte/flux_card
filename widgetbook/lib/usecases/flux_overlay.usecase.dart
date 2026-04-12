@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -18,8 +17,10 @@ Widget buildOverlayInteractiveUseCase(BuildContext context) {
         FluxCard(
           media: FluxMedia(
             aspectRatio: 16 / 9,
-            child: CachedNetworkImage(
-              imageUrl: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200',
+            child: Ink.image(
+              image: const NetworkImage(
+                'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200',
+              ),
               fit: BoxFit.cover,
             ),
           ),
@@ -30,13 +31,19 @@ Widget buildOverlayInteractiveUseCase(BuildContext context) {
               interactive: interactive,
               children: [
                 ActionChip(
-                  label: const Text('Featured', style: TextStyle(fontSize: 10, color: Colors.white)),
+                  label: const Text(
+                    'Featured',
+                    style: TextStyle(fontSize: 10, color: Colors.white),
+                  ),
                   backgroundColor: Colors.deepPurple,
                   side: BorderSide.none,
                   onPressed: () => tapped.value = 'Featured tapped!',
                 ),
                 ActionChip(
-                  label: const Text('SALE 12%', style: TextStyle(fontSize: 10, color: Colors.white)),
+                  label: const Text(
+                    'SALE 12%',
+                    style: TextStyle(fontSize: 10, color: Colors.white),
+                  ),
                   backgroundColor: Colors.red,
                   side: BorderSide.none,
                   onPressed: () => tapped.value = 'Sale tapped!',
@@ -46,7 +53,7 @@ Widget buildOverlayInteractiveUseCase(BuildContext context) {
           ],
           header: const FluxSection(
             title: Text('Interactive overlays'),
-            subtitle: Text('Toggle the knob — chips should be tappable when interactive=true.'),
+            subtitle: Text('Toggle the knob — chips are tappable when interactive=true.'),
             padding: EdgeInsets.zero,
           ),
           theme: FluxCardThemeData.elevated,
@@ -74,7 +81,12 @@ Widget buildOverlaySlotTargetingUseCase(BuildContext context) {
   );
   final alignment = context.knobs.object.segmented<Alignment>(
     label: 'Alignment',
-    options: const [Alignment.topLeft, Alignment.topRight, Alignment.bottomLeft, Alignment.bottomRight],
+    options: const [
+      Alignment.topLeft,
+      Alignment.topRight,
+      Alignment.bottomLeft,
+      Alignment.bottomRight,
+    ],
     labelBuilder: (a) {
       if (a == Alignment.topLeft) return 'topLeft';
       if (a == Alignment.topRight) return 'topRight';
@@ -88,8 +100,10 @@ Widget buildOverlaySlotTargetingUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: CachedNetworkImage(
-          imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200',
+        child: Ink.image(
+          image: const NetworkImage(
+            'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200',
+          ),
           fit: BoxFit.cover,
         ),
       ),
@@ -116,6 +130,7 @@ Widget buildOverlaySlotTargetingUseCase(BuildContext context) {
         padding: EdgeInsets.zero,
       ),
       theme: FluxCardThemeData.elevated,
+      onTap: () {},
     ),
   );
 }
@@ -138,7 +153,10 @@ Widget buildOverlayZIndexUseCase(BuildContext context) {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               color: Colors.blue.withAlpha(200),
-              child: const Text('zIndex 0 (bottom)', style: TextStyle(color: Colors.white, fontSize: 11)),
+              child: const Text(
+                'zIndex 0 (bottom)',
+                style: TextStyle(color: Colors.white, fontSize: 11),
+              ),
             ),
           ],
         ),
@@ -151,7 +169,10 @@ Widget buildOverlayZIndexUseCase(BuildContext context) {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               color: Colors.purple.withAlpha(220),
-              child: const Text('zIndex 1 (top)', style: TextStyle(color: Colors.white, fontSize: 11)),
+              child: const Text(
+                'zIndex 1 (top)',
+                style: TextStyle(color: Colors.white, fontSize: 11),
+              ),
             ),
           ],
         ),
@@ -176,8 +197,10 @@ Widget buildOverlayOffsetUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: CachedNetworkImage(
-          imageUrl: 'https://fastly.picsum.photos/id/20/3670/2462.jpg?hmac=CmQ0ln-k5ZqkdtLvVO23LjVAEabZQx2wOaT4pyeG10I',
+        child: Ink.image(
+          image: const NetworkImage(
+            'https://fastly.picsum.photos/id/20/3670/2462.jpg?hmac=CmQ0ln-k5ZqkdtLvVO23LjVAEabZQx2wOaT4pyeG10I',
+          ),
           fit: BoxFit.cover,
         ),
       ),
@@ -201,6 +224,7 @@ Widget buildOverlayOffsetUseCase(BuildContext context) {
         padding: EdgeInsets.zero,
       ),
       theme: FluxCardThemeData.elevated,
+      onTap: () {},
     ),
   );
 }

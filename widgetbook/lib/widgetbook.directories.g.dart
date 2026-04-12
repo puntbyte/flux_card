@@ -20,8 +20,8 @@ import 'package:flux_card_widgetbook/usecases/flux_content.usecase.dart'
     as _flux_card_widgetbook_usecases_flux_content_usecase;
 import 'package:flux_card_widgetbook/usecases/flux_loading.usecase.dart'
     as _flux_card_widgetbook_usecases_flux_loading_usecase;
-import 'package:flux_card_widgetbook/usecases/flux_media.dart'
-    as _flux_card_widgetbook_usecases_flux_media;
+import 'package:flux_card_widgetbook/usecases/flux_media.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_media_usecase;
 import 'package:flux_card_widgetbook/usecases/flux_overlay.usecase.dart'
     as _flux_card_widgetbook_usecases_flux_overlay_usecase;
 import 'package:flux_card_widgetbook/usecases/flux_section.usecase.dart'
@@ -71,6 +71,11 @@ final directories = <_widgetbook.WidgetbookNode>[
                 name: 'Column',
                 builder: _flux_card_widgetbook_usecases_flux_card_usecase
                     .buildColumnLayoutUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Inline',
+                builder: _flux_card_widgetbook_usecases_flux_card_usecase
+                    .buildInlineLayoutUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Interactive',
@@ -194,27 +199,27 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Aspect ratio',
-                builder: _flux_card_widgetbook_usecases_flux_media
+                builder: _flux_card_widgetbook_usecases_flux_media_usecase
                     .buildMediaAspectRatioUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Custom widget',
-                builder: _flux_card_widgetbook_usecases_flux_media
+                builder: _flux_card_widgetbook_usecases_flux_media_usecase
                     .buildMediaCustomWidgetUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Fixed size',
-                builder: _flux_card_widgetbook_usecases_flux_media
+                builder: _flux_card_widgetbook_usecases_flux_media_usecase
                     .buildMediaFixedSizeUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Rounded corners',
-                builder: _flux_card_widgetbook_usecases_flux_media
+                builder: _flux_card_widgetbook_usecases_flux_media_usecase
                     .buildMediaRoundedUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Row — BoxFit fills slot',
-                builder: _flux_card_widgetbook_usecases_flux_media
+                builder: _flux_card_widgetbook_usecases_flux_media_usecase
                     .buildMediaRowBoxFitUseCase,
               ),
             ],
@@ -320,7 +325,7 @@ final directories = <_widgetbook.WidgetbookNode>[
         name: 'Ticket Shape',
         children: [
           _widgetbook.WidgetbookComponent(
-            name: 'FluxTicketShape',
+            name: 'FluxNotchShape',
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Basic ticket',

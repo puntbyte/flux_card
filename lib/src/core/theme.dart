@@ -76,7 +76,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
   /// Optional custom [ShapeBorder] for the card surface.
   ///
   /// When null, [RoundedRectangleBorder] is constructed from [borderRadius]
-  /// and [borderSide]. Use [FluxTicketShape] here for ticket-style cards.
+  /// and [borderSide]. Use [FluxTicketShape] here for notch-style cards.
   final ShapeBorder? shape;
 
   // ── Presets ──────────────────────────────────────────────────────────────

@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -22,7 +21,7 @@ Widget buildProductCardUseCase(BuildContext context) {
       loading: loading,
       media: FluxMedia(
         aspectRatio: 1,
-        child: CachedNetworkImage(imageUrl: product.image, fit: BoxFit.cover),
+        child: Ink.image(image: NetworkImage(product.image), fit: BoxFit.cover),
       ),
       overlays: [
         if (showDiscount && product.hasDiscount)
@@ -81,7 +80,7 @@ Widget buildTravelCardUseCase(BuildContext context) {
   final destination = demoDestinations[1];
   final layout = context.knobs.object.segmented<FluxLayoutMode>(
     label: 'Layout',
-    options: const [FluxLayoutMode.column, FluxLayoutMode.inColumn, FluxLayoutMode.row],
+    options: const [FluxLayoutMode.column, FluxLayoutMode.inline, FluxLayoutMode.row],
     labelBuilder: (m) => m.name,
   );
   final mediaPosition = context.knobs.object.segmented<FluxMediaPosition>(
@@ -97,7 +96,7 @@ Widget buildTravelCardUseCase(BuildContext context) {
       mediaPosition: mediaPosition,
       media: FluxMedia(
         aspectRatio: layout == FluxLayoutMode.row ? 1.2 : 16 / 10,
-        child: Image.network(destination.image, fit: BoxFit.cover),
+        child: Ink.image(image: NetworkImage(destination.image), fit: BoxFit.cover),
       ),
       overlays: [
         FluxOverlay(
@@ -167,7 +166,7 @@ Widget buildBlogCardUseCase(BuildContext context) {
       ],
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Image.network(post.image, fit: BoxFit.cover),
+        child: Ink.image(image: NetworkImage(post.image), fit: BoxFit.cover),
       ),
       overlays: [
         if (post.featured)
@@ -185,13 +184,15 @@ Widget buildBlogCardUseCase(BuildContext context) {
       ],
       header: FluxSection(
         leading: const CircleAvatar(child: Icon(Icons.person)),
-        title: Text(post.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title:
+        Text(post.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         subtitle: Text('${post.category} • ${post.publishedLabel}'),
         trailing: [Text(post.readTime, style: const TextStyle(fontSize: 11))],
         padding: EdgeInsets.zero,
       ),
       body: const Text(
-        'Explore how modern layout engines are changing the way we think about cross-platform UI development.',
+        'Explore how modern layout engines are changing the way we think about '
+            'cross-platform UI development.',
       ),
       footer: FluxSection(
         actions: [
@@ -214,29 +215,30 @@ Widget buildBlogCardUseCase(BuildContext context) {
 Widget buildEventTicketUseCase(BuildContext context) {
   final loading = context.knobs.boolean(label: 'Loading');
 
+  // The body slot is gone — the dashed divider is declared on FluxDivider and
+  // the notch snaps to the afterHeader boundary automatically.
   return previewSurface(
     context,
     FluxCard(
       loading: loading,
       media: FluxMedia(
         aspectRatio: 16 / 7,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.network(
-              'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
-              fit: BoxFit.cover,
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.transparent, Colors.black54],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+        child: Ink.image(
+          image: const NetworkImage(
+            'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
+          ),
+          fit: BoxFit.cover,
+          // Gradient scrim painted inside the ink layer so the ripple sweeps
+          // over both the photo and the overlay seamlessly.
+          child: const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.transparent, Colors.black54],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
-          ],
+          ),
         ),
       ),
       overlays: const [
@@ -253,50 +255,37 @@ Widget buildEventTicketUseCase(BuildContext context) {
         ),
       ],
       header: const FluxSection(
-        title: Text('Flutter Dev Summit 2026', style: TextStyle(fontWeight: FontWeight.w800)),
+        title: Text(
+          'Flutter Dev Summit 2026',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
         subtitle: Text('San Francisco Convention Center'),
         padding: EdgeInsets.zero,
       ),
-      body: _TicketDividerLine(),
-      footer:  FluxSection(
+      footer: const FluxSection(
         actions: [
           Text('Sat 18 Apr 2026 • 9:00 AM', style: TextStyle(fontWeight: FontWeight.w600)),
           Chip(label: Text('General Admission')),
           Text('Gate C4'),
-          
         ],
         padding: EdgeInsets.zero,
       ),
+      notch: const FluxNotch(
+        boundary: FluxSlotBoundary.afterHeader,
+        notchRadius: 14,
+        side: BorderSide(width: 2, color: Colors.black),
+      ),
+      divider: const FluxDivider(
+        afterHeader: FluxDashedDivider(indent: 14, endIndent: 14),
+      ),
       theme: FluxCardThemeData.outlined.copyWith(
-        borderSide: BorderSide(width: 2, color: Colors.black),
-        shape: const FluxTicketShape(notchRadius: 14, notchPosition: 0.68),
+        borderSide: const BorderSide(width: 2, color: Colors.black),
         padding: const EdgeInsets.all(20),
       ),
       onTap: () {},
     ),
     maxWidth: 400,
   );
-}
-
-class _TicketDividerLine extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-      child: Row(
-        children: List.generate(
-          26,
-          (i) => Expanded(
-            child: Container(
-              height: 1,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              color: i.isEven ? Theme.of(context).dividerColor : Colors.transparent,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 @widgetbook.UseCase(name: 'Speak Card', type: FluxCard, path: '[Flux Card]/Compositions')
@@ -313,22 +302,18 @@ Widget buildSpeakCardUseCase(BuildContext context) {
           ),
         ),
       ],
-
-      header: FluxSection(
+      header: const FluxSection(
         title: Text('Speak Premium Member'),
         trailing: [Icon(Icons.multitrack_audio)],
       ),
-
-      body: FluxSection(
+      body: const FluxSection(
         title: Text('alexsmith.mobbin@gmail.com'),
-        subtitle: Text('Member since Aug //2020'),
+        subtitle: Text('Member since Aug 2020'),
       ),
-
-      footer: FluxSection(
+      footer: const FluxSection(
         title: Text('Annual Subscription'),
         subtitle: Text('6 Day Free Trial'),
       ),
-
       theme: FluxCardThemeData.elevated,
     ),
   );

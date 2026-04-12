@@ -9,7 +9,7 @@ import '../shared/preview_surface.dart';
 Widget buildLoadingSkeletonUseCase(BuildContext context) {
   final layout = context.knobs.object.segmented<FluxLayoutMode>(
     label: 'Layout',
-    options: const [FluxLayoutMode.column, FluxLayoutMode.row, FluxLayoutMode.inColumn],
+    options: const [FluxLayoutMode.column, FluxLayoutMode.row, FluxLayoutMode.inline],
     labelBuilder: (m) => m.name,
   );
   final hasMedia = context.knobs.boolean(label: 'Has media', initialValue: true);
@@ -20,7 +20,7 @@ Widget buildLoadingSkeletonUseCase(BuildContext context) {
     FluxCard(
       loading: true,
       layout: layout,
-      // Provide real slots so skeleton mirrors what the loaded card looks like.
+      // Provide real slots so the skeleton mirrors what the loaded card looks like.
       media: hasMedia ? const SizedBox() : null,
       header: const SizedBox(),
       body: const SizedBox(),
@@ -32,7 +32,9 @@ Widget buildLoadingSkeletonUseCase(BuildContext context) {
 }
 
 @widgetbook.UseCase(
-  name: 'Toggle loaded / loading', type: FluxCardSkeleton, path: '[Flux Card]/Loading',
+  name: 'Toggle loaded / loading',
+  type: FluxCardSkeleton,
+  path: '[Flux Card]/Loading',
 )
 Widget buildLoadingToggleUseCase(BuildContext context) {
   final loading = context.knobs.boolean(label: 'Loading', initialValue: true);
@@ -43,8 +45,10 @@ Widget buildLoadingToggleUseCase(BuildContext context) {
       loading: loading,
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Image.network(
-          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+        child: Ink.image(
+          image: const NetworkImage(
+            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+          ),
           fit: BoxFit.cover,
         ),
       ),
@@ -69,12 +73,15 @@ Widget buildLoadingToggleUseCase(BuildContext context) {
 }
 
 @widgetbook.UseCase(
-  name: 'External shimmer bridge', type: FluxCardSkeleton, path: '[Flux Card]/Loading',
+  name: 'External shimmer bridge',
+  type: FluxCardSkeleton,
+  path: '[Flux Card]/Loading',
 )
 Widget buildLoadingExternalShimmerUseCase(BuildContext context) {
   // Demonstrates the loadingWrapper pattern for integrating packages like
   // 'shimmer' without depending on them here.
-  // Replace the Container below with: Shimmer.fromColors(baseColor:..., child: skeleton)
+  // Replace the _FakeShimmerWrapper below with:
+  //   Shimmer.fromColors(baseColor: Colors.grey.shade300, highlightColor: Colors.grey.shade100, child: skeleton)
   return previewSurface(
     context,
     Column(
@@ -84,7 +91,7 @@ Widget buildLoadingExternalShimmerUseCase(BuildContext context) {
           padding: EdgeInsets.only(bottom: 12),
           child: Text(
             'loadingWrapper simulates an external shimmer package.\n'
-            'Replace the wrapper with Shimmer.fromColors(...) from the shimmer package.',
+                'Replace _FakeShimmerWrapper with Shimmer.fromColors(...) from the shimmer package.',
             style: TextStyle(fontSize: 12),
           ),
         ),
@@ -95,10 +102,7 @@ Widget buildLoadingExternalShimmerUseCase(BuildContext context) {
           body: const SizedBox(),
           footer: const SizedBox(),
           theme: FluxCardThemeData.elevated,
-          loadingWrapper: (context, skeleton) {
-            // Simulated external wrapper — replace with actual shimmer package.
-            return _FakeShimmerWrapper(child: skeleton);
-          },
+          loadingWrapper: (context, skeleton) => _FakeShimmerWrapper(child: skeleton),
         ),
       ],
     ),
@@ -137,10 +141,7 @@ class _FakeShimmerWrapperState extends State<_FakeShimmerWrapper>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _ctrl,
-      builder: (_, child) => Opacity(
-        opacity: 0.4 + 0.6 * _ctrl.value,
-        child: child,
-      ),
+      builder: (_, child) => Opacity(opacity: 0.4 + 0.6 * _ctrl.value, child: child),
       child: widget.child,
     );
   }

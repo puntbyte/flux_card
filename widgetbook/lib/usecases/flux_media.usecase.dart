@@ -17,6 +17,7 @@ Widget _mediaShell(BuildContext context, Widget child, {String? label}) => previ
       padding: EdgeInsets.zero,
     ),
     theme: FluxCardThemeData.elevated,
+    onTap: () {},
   ),
   maxWidth: 360,
 );
@@ -37,7 +38,10 @@ Widget buildMediaAspectRatioUseCase(BuildContext context) {
     context,
     FluxMedia(
       aspectRatio: ratio,
-      child: Image.network(demoProducts.first.image, fit: BoxFit.cover),
+      child: Ink.image(
+        image: NetworkImage(demoProducts.first.image),
+        fit: BoxFit.cover,
+      ),
     ),
     label: 'Aspect ratio ${ratio.toStringAsFixed(2)}',
   );
@@ -57,7 +61,12 @@ Widget buildMediaRowBoxFitUseCase(BuildContext context) {
       layout: FluxLayoutMode.row,
       // No aspectRatio or height — child fills the row slot height.
       // BoxFit is applied to the full slot area, not a fixed-size sub-region.
-      media: FluxMedia(child: Image.network(demoProducts[1].image, fit: fit)),
+      media: FluxMedia(
+        child: Ink.image(
+          image: NetworkImage(demoProducts[1].image),
+          fit: fit,
+        ),
+      ),
       header: const FluxSection(
         title: Text('Row — no explicit size'),
         subtitle: Text('FluxMedia fills row slot height. BoxFit is respected.'),
@@ -65,6 +74,7 @@ Widget buildMediaRowBoxFitUseCase(BuildContext context) {
       ),
       body: const Text('Switch the BoxFit knob to see cover, contain, fill, and fitHeight.'),
       theme: FluxCardThemeData.elevated,
+      onTap: () {},
     ),
     maxWidth: 500,
   );
@@ -87,14 +97,19 @@ Widget buildMediaFixedSizeUseCase(BuildContext context) {
         width: size,
         height: size,
         borderRadius: BorderRadius.circular(size / 4),
-        child: Image.network(demoProducts.first.image, fit: BoxFit.cover),
+        child: Ink.image(
+          image: NetworkImage(demoProducts.first.image),
+          fit: BoxFit.cover,
+        ),
       ),
       header: const FluxSection(
         title: Text('Fixed-size thumbnail'),
-        subtitle: Text('Both width and height set.'),
+        subtitle: Text('Both width and height set — card drives the row height.'),
         padding: EdgeInsets.zero,
       ),
+      body: const Text('borderRadius clips the thumbnail; tap to see the ripple over the image.'),
       theme: FluxCardThemeData.elevated,
+      onTap: () {},
     ),
     maxWidth: 420,
   );
@@ -114,7 +129,10 @@ Widget buildMediaRoundedUseCase(BuildContext context) {
     FluxMedia(
       aspectRatio: 16 / 9,
       borderRadius: BorderRadius.circular(radius),
-      child: Image.network(demoDestinations.first.image, fit: BoxFit.cover),
+      child: Ink.image(
+        image: NetworkImage(demoDestinations.first.image),
+        fit: BoxFit.cover,
+      ),
     ),
     label: 'borderRadius: ${radius.toStringAsFixed(0)}',
   );

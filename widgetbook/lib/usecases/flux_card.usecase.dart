@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -36,7 +35,10 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
       loading: loading,
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: CachedNetworkImage(imageUrl: product.image, fit: BoxFit.cover),
+        child: Ink.image(
+          image: NetworkImage(product.image),
+          fit: BoxFit.cover,
+        ),
       ),
       overlays: [
         if (showOverlay && product.hasDiscount)
@@ -64,18 +66,18 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
       body: Text(product.tags.join(' • ')),
       footer: showFooter
           ? FluxSection(
-              actions: [
-                Text(
-                  product.priceLabel,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                ),
-                IconButton(
-                  onPressed: product.inStock ? () {} : null,
-                  icon: const Icon(Icons.add_shopping_cart_outlined, size: 18),
-                ),
-              ],
-              padding: EdgeInsets.zero,
-            )
+        actions: [
+          Text(
+            product.priceLabel,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
+          IconButton(
+            onPressed: product.inStock ? () {} : null,
+            icon: const Icon(Icons.add_shopping_cart_outlined, size: 18),
+          ),
+        ],
+        padding: EdgeInsets.zero,
+      )
           : null,
       theme: FluxCardThemeData.elevated,
       onTap: () {},
@@ -86,6 +88,8 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
 
 @widgetbook.UseCase(name: 'Ripple over media', type: FluxCard, path: '[Flux Card]/Cards')
 Widget buildRippleOverMediaUseCase(BuildContext context) {
+  // Ink.image paints via the Material ink layer, so the card's ripple sweeps
+  // seamlessly across both the image and the text content below it.
   return previewSurface(
     context,
     Column(
@@ -93,7 +97,7 @@ Widget buildRippleOverMediaUseCase(BuildContext context) {
         const Padding(
           padding: EdgeInsets.only(bottom: 12),
           child: Text(
-            'Tap the card — the ripple renders above the image.',
+            'Tap the card — the ripple sweeps over the image and all slots.',
             style: TextStyle(fontSize: 12),
             textAlign: TextAlign.center,
           ),
@@ -101,15 +105,18 @@ Widget buildRippleOverMediaUseCase(BuildContext context) {
         FluxCard(
           media: FluxMedia(
             aspectRatio: 16 / 9,
-            child: CachedNetworkImage(imageUrl: demoDestinations.first.image, fit: BoxFit.cover),
+            child: Ink.image(
+              image: NetworkImage(demoDestinations.first.image),
+              fit: BoxFit.cover,
+            ),
           ),
           header: const FluxSection(
             title: Text('Tap anywhere'),
-            subtitle: Text('Ripple is above media, header, and footer.'),
+            subtitle: Text('Ink.image paints on the Material ink layer — ripple covers media too.'),
             padding: EdgeInsets.zero,
           ),
           footer: FluxSection(
-            actions: [ElevatedButton(onPressed: () {}, child: const Text('Action'))],
+            actions: [ElevatedButton(onPressed: () {}, child: const Text('Button still works'))],
             padding: EdgeInsets.zero,
           ),
           theme: FluxCardThemeData.elevated,
@@ -131,26 +138,29 @@ Widget buildDecorationUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Image.network(demoPosts.first.image, fit: BoxFit.cover),
+        child: Ink.image(
+          image: NetworkImage(demoPosts.first.image),
+          fit: BoxFit.cover,
+        ),
       ),
       decoration: useGradient
           ? BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.primaryContainer,
-                  Theme.of(context).colorScheme.secondaryContainer,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: useBorder
-                  ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
-                  : null,
-            )
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primaryContainer,
+            Theme.of(context).colorScheme.secondaryContainer,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: useBorder
+            ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
+            : null,
+      )
           : useBorder
           ? BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1.5),
-            )
+        border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1.5),
+      )
           : null,
       header: const FluxSection(
         title: Text('Surface decoration'),
@@ -176,7 +186,10 @@ Widget buildColumnLayoutUseCase(BuildContext context) {
       layout: FluxLayoutMode.column,
       media: FluxMedia(
         aspectRatio: 1,
-        child: CachedNetworkImage(imageUrl: product.image, fit: BoxFit.cover),
+        child: Ink.image(
+          image: NetworkImage(product.image),
+          fit: BoxFit.cover,
+        ),
       ),
       header: FluxSection(
         title: Text(product.name),
@@ -212,9 +225,12 @@ Widget buildRowLayoutUseCase(BuildContext context) {
     context,
     FluxCard(
       layout: FluxLayoutMode.row,
-      // No aspectRatio — image fills row slot height with BoxFit.cover
+      // No aspectRatio — image fills row slot height via BoxFit.cover
       media: FluxMedia(
-        child: CachedNetworkImage(imageUrl: destination.image, fit: BoxFit.cover),
+        child: Ink.image(
+          image: NetworkImage(destination.image),
+          fit: BoxFit.cover,
+        ),
       ),
       header: FluxSection(
         title: Text(destination.title),
@@ -235,6 +251,48 @@ Widget buildRowLayoutUseCase(BuildContext context) {
   );
 }
 
+@widgetbook.UseCase(name: 'Inline', type: FluxCard, path: '[Flux Card]/Cards')
+Widget buildInlineLayoutUseCase(BuildContext context) {
+  final mediaPosition = context.knobs.object.segmented<FluxMediaPosition>(
+    label: 'Media position',
+    options: FluxMediaPosition.values,
+    labelBuilder: (m) => m.name,
+  );
+
+  final post = demoPosts.first;
+  return previewSurface(
+    context,
+    FluxCard(
+      layout: FluxLayoutMode.inline,
+      mediaPosition: mediaPosition,
+      // aspectRatio drives media size; media is embedded between header and body.
+      media: FluxMedia(
+        aspectRatio: 16 / 9,
+        child: Ink.image(
+          image: NetworkImage(post.image),
+          fit: BoxFit.cover,
+        ),
+      ),
+      header: FluxSection(
+        title: Text(post.title),
+        subtitle: Text('${post.author} · ${post.category}'),
+        padding: EdgeInsets.zero,
+      ),
+      body: const Text(
+        'inline places media inside the content column — between header and body '
+            'when position=start, or between body and footer when position=end.',
+      ),
+      footer: FluxSection(
+        actions: [TextButton(onPressed: () {}, child: const Text('Read more'))],
+        padding: EdgeInsets.zero,
+      ),
+      theme: FluxCardThemeData.elevated,
+      onTap: () {},
+    ),
+    maxWidth: 400,
+  );
+}
+
 @widgetbook.UseCase(name: 'Responsive', type: FluxCard, path: '[Flux Card]/Cards')
 Widget buildResponsiveLayoutUseCase(BuildContext context) {
   final breakpoint = context.knobs.double.slider(
@@ -251,7 +309,10 @@ Widget buildResponsiveLayoutUseCase(BuildContext context) {
       layout: FluxLayoutMode.responsive,
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: CachedNetworkImage(imageUrl: post.image, fit: BoxFit.cover),
+        child: Ink.image(
+          image: NetworkImage(post.image),
+          fit: BoxFit.cover,
+        ),
       ),
       header: FluxSection(
         title: Text(post.title),

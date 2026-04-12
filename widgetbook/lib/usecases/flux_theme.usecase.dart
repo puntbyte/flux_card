@@ -5,14 +5,17 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import '../shared/preview_surface.dart';
 
+const _kThemeImageUrl =
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800';
+
 Widget _themeCard(BuildContext context, FluxCardThemeData theme, String label, String description) =>
     previewSurface(
       context,
       FluxCard(
         media: FluxMedia(
           aspectRatio: 16 / 9,
-          child: Image.network(
-            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+          child: Ink.image(
+            image: const NetworkImage(_kThemeImageUrl),
             fit: BoxFit.cover,
           ),
         ),
@@ -23,9 +26,7 @@ Widget _themeCard(BuildContext context, FluxCardThemeData theme, String label, S
         ),
         body: const Text('Combine with copyWith() to fine-tune any preset.'),
         footer: FluxSection(
-          actions: [
-            ElevatedButton(onPressed: () {}, child: const Text('Action')),
-          ],
+          actions: [ElevatedButton(onPressed: () {}, child: const Text('Action'))],
           padding: EdgeInsets.zero,
         ),
         theme: theme,
@@ -61,8 +62,8 @@ Widget buildThemeOutlinedUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Image.network(
-          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+        child: Ink.image(
+          image: const NetworkImage(_kThemeImageUrl),
           fit: BoxFit.cover,
         ),
       ),
@@ -136,13 +137,15 @@ Widget buildThemeExtensionUseCase(BuildContext context) {
         ],
       ),
       child: FluxCard(
-        // No explicit theme — picks up from ThemeExtension.
+        // No explicit theme — picks up from ThemeData.extensions.
         header: const FluxSection(
           title: Text('ThemeExtension'),
           subtitle: Text('No per-card theme set — inherited from ThemeData.extensions.'),
           padding: EdgeInsets.zero,
         ),
-        body: const Text('Register FluxCardThemeData in MaterialApp.theme for app-wide defaults.'),
+        body: const Text(
+          'Register FluxCardThemeData in MaterialApp.theme for app-wide defaults.',
+        ),
         onTap: () {},
       ),
     ),
