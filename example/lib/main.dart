@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'pages/blog_page.dart';
 import 'pages/destination_list_page.dart';
 import 'pages/product_grid_page.dart';
@@ -26,7 +27,6 @@ class _FluxShowcaseState extends State<FluxShowcase> {
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        centerTitle: false,
       ),
     );
   }
@@ -42,7 +42,6 @@ class _FluxShowcaseState extends State<FluxShowcase> {
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        centerTitle: false,
       ),
     );
   }
@@ -58,21 +57,14 @@ class _FluxShowcaseState extends State<FluxShowcase> {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text(
-              'Flux Card Engine',
-              style: TextStyle(fontWeight: FontWeight.w900),
-            ),
+            title: const Text('Flux Card Engine', style: TextStyle(fontWeight: FontWeight.w900)),
             actions: [
               IconButton(
                 tooltip: 'Toggle theme',
-                icon: Icon(
-                  _mode == ThemeMode.light ? Icons.dark_mode : Icons.light_mode,
-                ),
+                icon: Icon(_mode == ThemeMode.light ? Icons.dark_mode : Icons.light_mode),
                 onPressed: () {
                   setState(() {
-                    _mode = _mode == ThemeMode.light
-                        ? ThemeMode.dark
-                        : ThemeMode.light;
+                    _mode = _mode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
                   });
                 },
               ),
@@ -87,13 +79,7 @@ class _FluxShowcaseState extends State<FluxShowcase> {
               ],
             ),
           ),
-          body: const TabBarView(
-            children: [
-              ProductGridPage(),
-              DestinationListPage(),
-              BlogPage(),
-            ],
-          ),
+          body: const TabBarView(children: [ProductGridPage(), DestinationListPage(), BlogPage()]),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 name: flux_card_widgetbook
 version: 0.0.2+1
-description: Widgetbook project for the flux_card package using build_runner and annotations.
+description: >-
+  Widgetbook project for the flux_card package using build_runner and annotations.
 publish_to: 'none'
 
 environment:

@@ -14,19 +14,14 @@ class ProductPricing {
   final double? discount;
   final double? formerPrice;
 
-  const ProductPricing({
-    required this.price,
-    this.discount,
-    this.formerPrice,
-  });
+  const ProductPricing({required this.price, this.discount, this.formerPrice});
 
   double get currentPrice => price;
 
   bool get hasDiscount => (discount ?? 0) > 0 || formerPrice != null;
 
-  double get savings => formerPrice != null
-      ? (formerPrice! - price).clamp(0, double.infinity)
-      : (discount ?? 0);
+  double get savings =>
+      formerPrice != null ? (formerPrice! - price).clamp(0, double.infinity) : (discount ?? 0);
 
   double get discountPercent {
     if (formerPrice == null || formerPrice! <= 0) {

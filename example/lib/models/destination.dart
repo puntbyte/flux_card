@@ -57,6 +57,7 @@ final List<Destination> mockDestinations = [
     featured: true,
     tags: const ['sunset', 'romantic', 'island'],
   ),
+
   Destination(
     id: 'd2',
     title: 'Kyoto Temples',
@@ -70,6 +71,7 @@ final List<Destination> mockDestinations = [
     featured: true,
     tags: const ['culture', 'temples', 'tradition'],
   ),
+
   Destination(
     id: 'd3',
     title: 'Banff National Park',
@@ -82,6 +84,7 @@ final List<Destination> mockDestinations = [
     description: 'Turquoise lakes, alpine peaks, and scenic hiking trails.',
     tags: const ['lake', 'hiking', 'mountains'],
   ),
+
   Destination(
     id: 'd4',
     title: 'Swiss Alps',
@@ -95,6 +98,7 @@ final List<Destination> mockDestinations = [
     featured: true,
     tags: const ['skiing', 'luxury', 'snow'],
   ),
+
   Destination(
     id: 'd5',
     title: 'Paris City Lights',
@@ -107,6 +111,7 @@ final List<Destination> mockDestinations = [
     description: 'A timeless city filled with art, cafés, fashion, and landmarks.',
     tags: const ['art', 'food', 'romantic'],
   ),
+
   Destination(
     id: 'd6',
     title: 'Bali Rice Terraces',
@@ -120,6 +125,7 @@ final List<Destination> mockDestinations = [
     featured: true,
     tags: const ['tropical', 'wellness', 'nature'],
   ),
+
   Destination(
     id: 'd7',
     title: 'Machu Picchu',
@@ -132,6 +138,7 @@ final List<Destination> mockDestinations = [
     description: 'A breathtaking ancient citadel high in the Andes Mountains.',
     tags: const ['ancient', 'adventure', 'unesco'],
   ),
+
   Destination(
     id: 'd8',
     title: 'Reykjavik & Northern Lights',

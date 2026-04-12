@@ -31,55 +31,36 @@ class ProductGridPage extends StatelessWidget {
             final product = mockProducts[i];
 
             return FluxCard(
-              layout: crossAxisCount == 1
-                  ? const FluxCardLayout.row()
-                  : const FluxCardLayout.column(),
-              background: AspectRatio(
+              layout: crossAxisCount == 1 ? FluxLayoutMode.row : FluxLayoutMode.column,
+              mediaPosition: FluxMediaPosition.start,
+              media: FluxMedia(
                 aspectRatio: 1,
-                child: Stack(
-                  fit: StackFit.expand,
+                child: Image.network(product.image, fit: BoxFit.cover),
+              ),
+              backgrounds: const [
+                FluxBackground.gradient(
+                  gradient: LinearGradient(colors: [Color(0xFFF8FAFC), Color(0xFFE2E8F0)]),
+                  targets: {FluxTarget.body},
+                ),
+              ],
+              overlays: [
+                FluxOverlay(
+                  targets: const {FluxTarget.media},
+                  alignment: Alignment.topLeft,
                   children: [
-                    Image.network(product.image, fit: BoxFit.cover),
-                    if (!product.inStock)
-                      Container(
-                        color: Colors.black45,
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'OUT OF STOCK',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: 1.2,
-                          ),
+                    if (product.hasDiscount)
+                      Chip(
+                        label: Text(
+                          'SALE ${product.discountPercent.round()}%',
+                          style: const TextStyle(fontSize: 10, color: Colors.white),
                         ),
+                        backgroundColor: Colors.red,
+                        side: BorderSide.none,
                       ),
                   ],
                 ),
-              ),
-              overlay: FluxOverlay(
-                alignment: Alignment.topLeft,
-                children: [
-                  if (product.hasDiscount)
-                    Chip(
-                      label: Text(
-                        'SALE ${product.discountPercent.round()}%',
-                        style: const TextStyle(fontSize: 10, color: Colors.white),
-                      ),
-                      backgroundColor: Colors.red,
-                      side: BorderSide.none,
-                    ),
-                  if (!product.inStock)
-                    const Chip(
-                      label: Text(
-                        'SOLD OUT',
-                        style: TextStyle(fontSize: 10, color: Colors.white),
-                      ),
-                      backgroundColor: Colors.black87,
-                      side: BorderSide.none,
-                    ),
-                ],
-              ),
-              header: FluxHeader(
+              ],
+              header: FluxSection(
                 title: Text(
                   product.name,
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
@@ -88,21 +69,19 @@ class ProductGridPage extends StatelessWidget {
                   '${product.brand} • ${product.categoryLabel}',
                   style: const TextStyle(fontSize: 12),
                 ),
+                padding: EdgeInsets.zero,
               ),
-              content: Text(
+              body: Text(
                 '${product.rating.toStringAsFixed(1)} ★ • ${product.reviewCount} reviews'
-                    '${product.tags.isNotEmpty ? ' • ${product.tags.join(' · ')}' : ''}',
+                '${product.tags.isNotEmpty ? ' • ${product.tags.join(' · ')}' : ''}',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              footer: FluxFooter(
+              footer: FluxSection(
                 actions: [
                   Text(
                     product.priceLabel,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
                   ),
                   if (product.hasDiscount)
                     Text(
@@ -118,6 +97,7 @@ class ProductGridPage extends StatelessWidget {
                     icon: const Icon(Icons.add_shopping_cart_outlined, size: 18),
                   ),
                 ],
+                padding: EdgeInsets.zero,
               ),
               theme: FluxCardThemeData.elevated.copyWith(
                 padding: const EdgeInsets.all(16),

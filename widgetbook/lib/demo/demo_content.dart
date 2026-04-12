@@ -27,6 +27,8 @@ class DemoProduct {
       '\$${formerPrice.toStringAsFixed(formerPrice.truncateToDouble() == formerPrice ? 0 : 2)}';
 
   double get discountPercent => ((formerPrice - price) / formerPrice * 100).clamp(0, 100);
+
+  bool get hasDiscount => discountPercent > 0;
 }
 
 const demoProducts = <DemoProduct>[
@@ -40,16 +42,18 @@ const demoProducts = <DemoProduct>[
     reviewCount: 1284,
     tags: ['running', 'sport'],
   ),
+
   DemoProduct(
     name: 'Noise Cancelling Headphones',
     brand: 'Sony',
-    image: 'https://images.unsplash.com/photo-1518443895914-6b3f4c1a8c7e?w=1200',
+    image: 'https://www.canford.co.uk/Images/ItemImages/large/54-436_01.jpg',
     price: 349,
     formerPrice: 399,
     rating: 4.9,
     reviewCount: 2110,
     tags: ['audio', 'premium'],
   ),
+
   DemoProduct(
     name: 'Ergonomic Office Chair',
     brand: 'Herman Miller',
@@ -98,6 +102,7 @@ const demoDestinations = <DemoDestination>[
     description: 'Iconic whitewashed cliffs, blue domes, and unforgettable sunsets.',
     featured: true,
   ),
+
   DemoDestination(
     title: 'Kyoto Temples',
     location: 'Japan',
@@ -108,6 +113,7 @@ const demoDestinations = <DemoDestination>[
     description: 'A peaceful blend of ancient shrines, gardens, and rich culture.',
     featured: true,
   ),
+
   DemoDestination(
     title: 'Swiss Alps',
     location: 'Switzerland',
@@ -140,7 +146,7 @@ class DemoPost {
   });
 
   String get publishedLabel =>
-      '\${publishedAt.day} \${_month(publishedAt.month)} \${publishedAt.year}';
+      '${publishedAt.day} ${_month(publishedAt.month)} ${publishedAt.year}';
 }
 
 String _month(int month) {
@@ -158,6 +164,7 @@ String _month(int month) {
     'Nov',
     'Dec',
   ];
+
   return months[month - 1];
 }
 
@@ -171,6 +178,7 @@ final demoPosts = <DemoPost>[
     publishedAt: DateTime(2026, 3, 14),
     featured: true,
   ),
+
   DemoPost(
     title: 'Design Systems That Scale Across Teams',
     author: 'Alex Kim',
@@ -179,6 +187,7 @@ final demoPosts = <DemoPost>[
     image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200',
     publishedAt: DateTime(2026, 3, 18),
   ),
+
   DemoPost(
     title: 'Building Better User Flows for Mobile Apps',
     author: 'Sara Ahmed',

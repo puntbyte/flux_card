@@ -1,6 +1,7 @@
-import 'package:example/models/destination.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
+
+import '../models/destination.dart';
 
 class DestinationListPage extends StatelessWidget {
   const DestinationListPage({super.key});
@@ -22,10 +23,7 @@ class DestinationListPage extends StatelessWidget {
             ),
             itemCount: mockDestinations.length,
             itemBuilder: (context, i) {
-              return DestinationCard(
-                destination: mockDestinations[i],
-                isHorizontal: false,
-              );
+              return DestinationCard(destination: mockDestinations[i], isHorizontal: false);
             },
           );
         }
@@ -35,10 +33,7 @@ class DestinationListPage extends StatelessWidget {
           itemCount: mockDestinations.length,
           separatorBuilder: (_, __) => const SizedBox(height: 16),
           itemBuilder: (context, i) {
-            return DestinationCard(
-              destination: mockDestinations[i],
-              isHorizontal: true,
-            );
+            return DestinationCard(destination: mockDestinations[i], isHorizontal: true);
           },
         );
       },
@@ -50,93 +45,66 @@ class DestinationCard extends StatelessWidget {
   final Destination destination;
   final bool isHorizontal;
 
-  const DestinationCard({
-    super.key,
-    required this.destination,
-    this.isHorizontal = false,
-  });
+  const DestinationCard({super.key, required this.destination, this.isHorizontal = false});
 
   @override
   Widget build(BuildContext context) {
-    final background = FluxBackground.image(
-      image: Image.network(destination.image, fit: BoxFit.cover),
-      aspectRatio: isHorizontal ? 1.3 : 1.2,
-      height: isHorizontal ? 180 : 220,
-    );
-
     return FluxCard(
-      layout: isHorizontal
-          ? const FluxCardLayout.row()
-          : const FluxCardLayout.stack(),
-      background: background,
-      overlay: isHorizontal
-          ? null
-          : FluxOverlay(
-        alignment: Alignment.topRight,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '★ ${destination.rating.toStringAsFixed(1)}',
-              style: const TextStyle(fontSize: 12, color: Colors.white),
-            ),
-          ),
-          if (destination.featured)
-            const Chip(
-              label: Text(
-                'Featured',
-                style: TextStyle(fontSize: 10, color: Colors.white),
-              ),
-              backgroundColor: Colors.deepPurple,
-              side: BorderSide.none,
-            ),
-        ],
+      layout: isHorizontal ? FluxLayoutMode.row : FluxLayoutMode.column,
+      mediaPosition: FluxMediaPosition.start,
+      media: FluxMedia(
+        aspectRatio: isHorizontal ? 1.3 : 1.2,
+        child: Image.network(destination.image, fit: BoxFit.cover),
       ),
-      header: FluxHeader(
-        title: Text(
-          destination.title,
-          style: const TextStyle(fontWeight: FontWeight.w800),
+      overlays: [
+        FluxOverlay(
+          targets: const {FluxTarget.media},
+          alignment: Alignment.topRight,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '★ ${destination.rating.toStringAsFixed(1)}',
+                style: const TextStyle(fontSize: 12, color: Colors.white),
+              ),
+            ),
+            if (destination.featured)
+              const Chip(
+                label: Text('Featured', style: TextStyle(fontSize: 10, color: Colors.white)),
+                backgroundColor: Colors.deepPurple,
+                side: BorderSide.none,
+              ),
+          ],
         ),
-        subtitle: Text(
-          '${destination.location} • ${destination.categoryLabel}',
-        ),
+      ],
+      header: FluxSection(
+        title: Text(destination.title, style: const TextStyle(fontWeight: FontWeight.w800)),
+        subtitle: Text('${destination.location} • ${destination.categoryLabel}'),
         trailing: [
           if (destination.isTopRated)
             const Chip(
-              label: Text(
-                'Top rated',
-                style: TextStyle(fontSize: 10),
-              ),
+              label: Text('Top rated', style: TextStyle(fontSize: 10)),
               visualDensity: VisualDensity.compact,
             ),
         ],
+        padding: EdgeInsets.zero,
       ),
-      content: isHorizontal
-          ? Text(
-        destination.description,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      )
+      body: isHorizontal
+          ? Text(destination.description, maxLines: 2, overflow: TextOverflow.ellipsis)
           : null,
-      footer: FluxFooter(
-        alignment: MainAxisAlignment.spaceBetween,
+      footer: FluxSection(
         actions: [
           Text(
             destination.priceLabel,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          ElevatedButton(
-            onPressed: () {},
-            child: const Text('Book now'),
-          ),
+          ElevatedButton(onPressed: () {}, child: const Text('Book now')),
         ],
+        padding: EdgeInsets.zero,
       ),
       theme: FluxCardThemeData.elevated.copyWith(
         padding: const EdgeInsets.all(16),

@@ -1,11 +1,4 @@
-enum PostCategory {
-  engineering,
-  design,
-  product,
-  business,
-  news,
-  other,
-}
+enum PostCategory { engineering, design, product, business, news, other }
 
 extension PostCategoryLabel on PostCategory {
   String get label => name[0].toUpperCase() + name.substring(1);
@@ -26,7 +19,6 @@ String _formatDate(DateTime date) {
     'Nov',
     'Dec',
   ];
-
   return '${date.day} ${months[date.month - 1]} ${date.year}';
 }
 
@@ -72,6 +64,7 @@ final List<Post> posts = [
     featured: true,
     tags: const ['flutter', 'architecture', 'mobile'],
   ),
+
   Post(
     id: 'post_2',
     title: 'Design Systems That Scale Across Teams',
@@ -82,6 +75,7 @@ final List<Post> posts = [
     publishedAt: DateTime(2026, 3, 18),
     tags: const ['ui', 'design system', 'components'],
   ),
+
   Post(
     id: 'post_3',
     title: 'How Product Teams Ship Faster Without Losing Quality',
@@ -92,6 +86,7 @@ final List<Post> posts = [
     publishedAt: DateTime(2026, 3, 20),
     tags: const ['product', 'delivery', 'workflow'],
   ),
+
   Post(
     id: 'post_4',
     title: 'Why Startup Metrics Matter More Than Vanity Numbers',
@@ -102,6 +97,7 @@ final List<Post> posts = [
     publishedAt: DateTime(2026, 3, 22),
     tags: const ['metrics', 'startup', 'growth'],
   ),
+
   Post(
     id: 'post_5',
     title: 'Building Better User Flows for Mobile Apps',
@@ -113,6 +109,7 @@ final List<Post> posts = [
     featured: true,
     tags: const ['ux', 'mobile', 'flow'],
   ),
+
   Post(
     id: 'post_6',
     title: 'Lessons From Migrating a Large Codebase to Dart 3',
