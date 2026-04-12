@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -5,69 +6,200 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import '../shared/preview_surface.dart';
 
-Alignment _alignment(BuildContext context) {
-  return context.knobs.object.segmented<Alignment>(
-    label: 'Alignment',
-    options: const [Alignment.topLeft, Alignment.topRight, Alignment.bottomLeft, Alignment.bottomRight, Alignment.center],
-    labelBuilder: (value) {
-      if (value == Alignment.topLeft) return 'Top left';
-      if (value == Alignment.topRight) return 'Top right';
-      if (value == Alignment.bottomLeft) return 'Bottom left';
-      if (value == Alignment.bottomRight) return 'Bottom right';
-      return 'Center';
-    },
+@widgetbook.UseCase(name: 'Interactive badges', type: FluxOverlay, path: '[Flux Card]/Overlays')
+Widget buildOverlayInteractiveUseCase(BuildContext context) {
+  final interactive = context.knobs.boolean(label: 'Interactive', initialValue: true);
+  final tapped = ValueNotifier<String?>('');
+
+  return previewSurface(
+    context,
+    Column(
+      children: [
+        FluxCard(
+          media: FluxMedia(
+            aspectRatio: 16 / 9,
+            child: CachedNetworkImage(
+              imageUrl: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200',
+              fit: BoxFit.cover,
+            ),
+          ),
+          overlays: [
+            FluxOverlay(
+              targets: const {FluxTarget.media},
+              alignment: Alignment.topLeft,
+              interactive: interactive,
+              children: [
+                ActionChip(
+                  label: const Text('Featured', style: TextStyle(fontSize: 10, color: Colors.white)),
+                  backgroundColor: Colors.deepPurple,
+                  side: BorderSide.none,
+                  onPressed: () => tapped.value = 'Featured tapped!',
+                ),
+                ActionChip(
+                  label: const Text('SALE 12%', style: TextStyle(fontSize: 10, color: Colors.white)),
+                  backgroundColor: Colors.red,
+                  side: BorderSide.none,
+                  onPressed: () => tapped.value = 'Sale tapped!',
+                ),
+              ],
+            ),
+          ],
+          header: const FluxSection(
+            title: Text('Interactive overlays'),
+            subtitle: Text('Toggle the knob — chips should be tappable when interactive=true.'),
+            padding: EdgeInsets.zero,
+          ),
+          theme: FluxCardThemeData.elevated,
+          onTap: () => tapped.value = 'Card tapped!',
+        ),
+        const SizedBox(height: 16),
+        ValueListenableBuilder<String?>(
+          valueListenable: tapped,
+          builder: (_, msg, __) => Text(
+            msg?.isEmpty == true ? 'Tap a chip or the card…' : msg ?? '',
+            style: const TextStyle(fontSize: 13),
+          ),
+        ),
+      ],
+    ),
   );
 }
 
-@widgetbook.UseCase(name: 'Badges', type: FluxOverlay, path: '[Flux Card]/Overlay')
-Widget buildOverlayBadgesUseCase(BuildContext context) {
+@widgetbook.UseCase(name: 'Slot targeting', type: FluxOverlay, path: '[Flux Card]/Overlays')
+Widget buildOverlaySlotTargetingUseCase(BuildContext context) {
+  final target = context.knobs.object.segmented<FluxTarget>(
+    label: 'Target',
+    options: const [FluxTarget.card, FluxTarget.media, FluxTarget.header, FluxTarget.footer],
+    labelBuilder: (t) => t.name,
+  );
+  final alignment = context.knobs.object.segmented<Alignment>(
+    label: 'Alignment',
+    options: const [Alignment.topLeft, Alignment.topRight, Alignment.bottomLeft, Alignment.bottomRight],
+    labelBuilder: (a) {
+      if (a == Alignment.topLeft) return 'topLeft';
+      if (a == Alignment.topRight) return 'topRight';
+      if (a == Alignment.bottomLeft) return 'bottomLeft';
+      return 'bottomRight';
+    },
+  );
+
   return previewSurface(
     context,
     FluxCard(
-      media: const FluxMedia.fill(
-        height: 260,
-        child: ColoredBox(color: Color(0xFF1E293B)),
+      media: FluxMedia(
+        aspectRatio: 16 / 9,
+        child: CachedNetworkImage(
+          imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200',
+          fit: BoxFit.cover,
+        ),
       ),
-      overlay: FluxOverlay(
-        alignment: _alignment(context),
-        children: const [
-          Chip(label: Text('SALE', style: TextStyle(fontSize: 10, color: Colors.white)), backgroundColor: Colors.red, side: BorderSide.none),
-          Chip(label: Text('NEW', style: TextStyle(fontSize: 10, color: Colors.white)), backgroundColor: Colors.deepPurple, side: BorderSide.none),
-        ],
+      overlays: [
+        FluxOverlay(
+          targets: {target},
+          alignment: alignment,
+          children: const [
+            Chip(
+              label: Text('★ 4.9', style: TextStyle(fontSize: 10, color: Colors.white)),
+              backgroundColor: Colors.black87,
+              side: BorderSide.none,
+            ),
+          ],
+        ),
+      ],
+      header: const FluxSection(
+        title: Text('Slot targeting'),
+        subtitle: Text('Overlay is injected into the selected slot only.'),
+        padding: EdgeInsets.zero,
       ),
-      header: const FluxHeader(title: Text('Overlay badges')),
-      content: const Text('Overlays are ideal for tags, status labels, and floating controls.'),
+      footer: const FluxSection(
+        actions: [Chip(label: Text('Footer area'))],
+        padding: EdgeInsets.zero,
+      ),
       theme: FluxCardThemeData.elevated,
     ),
   );
 }
 
-@widgetbook.UseCase(name: 'Rating chip', type: FluxOverlay, path: '[Flux Card]/Overlay')
-Widget buildOverlayRatingUseCase(BuildContext context) {
-  final rating = context.knobs.double.slider(label: 'Rating', min: 1, max: 5, divisions: 40, initialValue: 4.8);
+@widgetbook.UseCase(name: 'zIndex ordering', type: FluxOverlay, path: '[Flux Card]/Overlays')
+Widget buildOverlayZIndexUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      media: const FluxMedia.cover(
-        aspectRatio: 16 / 10,
-        height: 260,
-        child: ColoredBox(color: Color(0xFFCBD5E1)),
+      media: FluxMedia(
+        height: 180,
+        child: Container(color: const Color(0xFF0F172A)),
       ),
-      overlay: FluxOverlay(
-        alignment: Alignment.topRight,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(8),
+      overlays: [
+        FluxOverlay(
+          targets: const {FluxTarget.media},
+          alignment: Alignment.center,
+          zIndex: 0,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              color: Colors.blue.withAlpha(200),
+              child: const Text('zIndex 0 (bottom)', style: TextStyle(color: Colors.white, fontSize: 11)),
             ),
-            child: Text('★ ${rating.toStringAsFixed(1)}', style: const TextStyle(fontSize: 12, color: Colors.white)),
-          ),
-        ],
+          ],
+        ),
+        FluxOverlay(
+          targets: const {FluxTarget.media},
+          alignment: Alignment.center,
+          zIndex: 1,
+          padding: const EdgeInsets.only(top: 48),
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              color: Colors.purple.withAlpha(220),
+              child: const Text('zIndex 1 (top)', style: TextStyle(color: Colors.white, fontSize: 11)),
+            ),
+          ],
+        ),
+      ],
+      header: const FluxSection(
+        title: Text('zIndex ordering'),
+        subtitle: Text('Higher zIndex renders on top within the same slot.'),
+        padding: EdgeInsets.zero,
       ),
-      header: const FluxHeader(title: Text('Overlay rating')),
-      content: const Text('Place ratings, metadata, and floating info on top of the media.'),
+      theme: FluxCardThemeData.elevated,
+    ),
+  );
+}
+
+@widgetbook.UseCase(name: 'Offset nudge', type: FluxOverlay, path: '[Flux Card]/Overlays')
+Widget buildOverlayOffsetUseCase(BuildContext context) {
+  final dx = context.knobs.double.slider(label: 'X offset', min: -32, max: 32, divisions: 16);
+  final dy = context.knobs.double.slider(label: 'Y offset', min: -32, max: 32, divisions: 16);
+
+  return previewSurface(
+    context,
+    FluxCard(
+      media: FluxMedia(
+        aspectRatio: 16 / 9,
+        child: CachedNetworkImage(
+          imageUrl: 'https://fastly.picsum.photos/id/20/3670/2462.jpg?hmac=CmQ0ln-k5ZqkdtLvVO23LjVAEabZQx2wOaT4pyeG10I',
+          fit: BoxFit.cover,
+        ),
+      ),
+      overlays: [
+        FluxOverlay(
+          targets: const {FluxTarget.media},
+          alignment: Alignment.topRight,
+          offset: Offset(dx, dy),
+          children: const [
+            Chip(
+              label: Text('4.9 ★', style: TextStyle(fontSize: 10, color: Colors.white)),
+              backgroundColor: Colors.black87,
+              side: BorderSide.none,
+            ),
+          ],
+        ),
+      ],
+      header: const FluxSection(
+        title: Text('Offset nudge'),
+        subtitle: Text('Use offset to fine-tune badge placement.'),
+        padding: EdgeInsets.zero,
+      ),
       theme: FluxCardThemeData.elevated,
     ),
   );

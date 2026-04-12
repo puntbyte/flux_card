@@ -1,12 +1,25 @@
 library flux_card;
 
-export 'src/core/contracts.dart';
+// Core
+export 'src/core/enums.dart';
 export 'src/core/theme.dart';
-export 'src/components/background.dart';
-export 'src/components/media.dart';
-export 'src/components/header.dart';
-export 'src/components/content.dart';
-export 'src/components/footer.dart';
-export 'src/components/overlay.dart';
+export 'src/core/constraints.dart';
+
+// Shapes
+export 'src/shapes/flux_ticket_shape.dart';
+
+// Components
+export 'src/components/flux_background.dart';
+export 'src/components/flux_content.dart';
+export 'src/components/flux_media.dart';
+export 'src/components/flux_overlay.dart';
+export 'src/components/flux_section.dart';
+
+// Layout helpers (exposed for advanced use cases)
+export 'src/layout/slot_resolver.dart';
+
+// Loading
+export 'src/loading/flux_card_skeleton.dart';
+
+// Card
 export 'src/flux_card.dart';
-export 'src/flux_card_extensions.dart';
