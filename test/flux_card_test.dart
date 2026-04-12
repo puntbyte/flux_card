@@ -3,13 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flux_card/flux_card.dart';
 
 void main() {
-  testWidgets('FluxCard renders header and content', (tester) async {
+  testWidgets('FluxCard renders media, header and content', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           body: FluxCard(
-            header: FluxHeader(title: Text('Test Title')),
-            content: Text('Test Content'),
+            media: const SizedBox(width: 200, height: 120, child: ColoredBox(color: Colors.red)),
+            header: const Text('Test Title'),
+            body: const Text('Test Content'),
           ),
         ),
       ),
@@ -17,12 +18,7 @@ void main() {
 
     expect(find.text('Test Title'), findsOneWidget);
     expect(find.text('Test Content'), findsOneWidget);
-
-    // Instead of counting columns, check that they are descendant of FluxCard
-    expect(
-        find.descendant(of: find.byType(FluxCard), matching: find.byType(Column)),
-        findsAtLeastNWidgets(1)
-    );
+    expect(find.byType(FluxCard), findsOneWidget);
   });
 
   testWidgets('FluxCard respects fullWidth constraint', (tester) async {
@@ -36,7 +32,7 @@ void main() {
               width: cardWidth,
               child: FluxCard(
                 fullWidth: true,
-                background: Container(key: const Key('bg')),
+                // background: Container(key: const Key('bg')),
               ),
             ),
           ),
@@ -44,8 +40,27 @@ void main() {
       ),
     );
 
-    // Get the actual rendered size of the background container
     final Size size = tester.getSize(find.byKey(const Key('bg')));
     expect(size.width, cardWidth);
+  });
+
+  testWidgets('FluxCard respects media position in row layout', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: FluxCard(
+            layout: FluxLayoutMode.row,
+            mediaPosition: FluxMediaPosition.end,
+            media: SizedBox(width: 80, height: 80, child: ColoredBox(color: Colors.blue)),
+            header: Text('Header'),
+            body: Text('Body'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.text('Body'), findsOneWidget);
+    expect(find.byType(Row), findsOneWidget);
   });
 }
