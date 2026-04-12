@@ -1,4 +1,4 @@
-library flux_card;
+library;
 
 // Core
 export 'src/core/enums.dart';

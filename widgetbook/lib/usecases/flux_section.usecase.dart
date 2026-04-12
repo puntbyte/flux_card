@@ -26,9 +26,6 @@ Widget buildSectionAnatomyUseCase(BuildContext context) {
       title: const Text('FluxSection'),
       subtitle: const Text('Header row + child + actions'),
       trailing: showTrailing ? const [Chip(label: Text('NEW'))] : null,
-      child: showChild
-          ? const Text('Free-form body content placed between the header row and actions.')
-          : null,
       actions: showActions
           ? [
               TextButton(onPressed: () {}, child: const Text('PRIMARY')),
@@ -37,6 +34,9 @@ Widget buildSectionAnatomyUseCase(BuildContext context) {
           : null,
       spacing: spacing,
       padding: const EdgeInsets.all(20),
+      child: showChild
+          ? const Text('Free-form body content placed between the header row and actions.')
+          : null,
     ),
     maxWidth: 420,
   );

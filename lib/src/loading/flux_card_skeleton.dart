@@ -4,7 +4,6 @@ import '../core/enums.dart';
 import '../core/theme.dart';
 import '../components/flux_media.dart';
 import '../layout/flux_card_layout.dart';
-import '../layout/slot_resolver.dart';
 
 /// Built-in loading skeleton for [FluxCard].
 ///

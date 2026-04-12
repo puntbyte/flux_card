@@ -55,7 +55,7 @@ Widget buildOverlayInteractiveUseCase(BuildContext context) {
         const SizedBox(height: 16),
         ValueListenableBuilder<String?>(
           valueListenable: tapped,
-          builder: (_, msg, __) => Text(
+          builder: (_, msg, _) => Text(
             msg?.isEmpty == true ? 'Tap a chip or the card…' : msg ?? '',
             style: const TextStyle(fontSize: 13),
           ),

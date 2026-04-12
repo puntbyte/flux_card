@@ -11,7 +11,7 @@ class BlogPage extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(20),
       itemCount: posts.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (context, i) {
         final post = posts[i];
 
