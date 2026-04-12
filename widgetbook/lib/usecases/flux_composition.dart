@@ -48,11 +48,15 @@ Widget buildProductCardUseCase(BuildContext context) {
       body: Text(product.tags.join(' • '), maxLines: 2, overflow: TextOverflow.ellipsis),
       footer: FluxSection(
         actions: [
-          Text(product.priceLabel,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+          Text(
+            product.priceLabel,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
           if (product.hasDiscount)
-            Text(product.formerPriceLabel,
-                style: const TextStyle(decoration: TextDecoration.lineThrough)),
+            Text(
+              product.formerPriceLabel,
+              style: const TextStyle(decoration: TextDecoration.lineThrough),
+            ),
           IconButton(
             onPressed: inStock ? () {} : null,
             icon: Icon(
@@ -114,8 +118,10 @@ Widget buildTravelCardUseCase(BuildContext context) {
       body: Text(destination.description),
       footer: FluxSection(
         actions: [
-          Text(destination.priceLabel,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+          Text(
+            destination.priceLabel,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
           Text('${destination.rating.toStringAsFixed(1)} ★'),
           ElevatedButton(onPressed: () {}, child: const Text('Reserve')),
         ],
@@ -153,9 +159,7 @@ Widget buildBlogCardUseCase(BuildContext context) {
       layout: FluxLayoutMode.responsive,
       backgrounds: const [
         FluxBackground.gradient(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          ),
+          gradient: LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),
           targets: {FluxTarget.body},
         ),
       ],
@@ -179,8 +183,7 @@ Widget buildBlogCardUseCase(BuildContext context) {
       ],
       header: FluxSection(
         leading: const CircleAvatar(child: Icon(Icons.person)),
-        title: Text(post.title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: Text(post.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         subtitle: Text('${post.category} • ${post.publishedLabel}'),
         trailing: [Text(post.readTime, style: const TextStyle(fontSize: 11))],
         padding: EdgeInsets.zero,
@@ -248,26 +251,23 @@ Widget buildEventTicketUseCase(BuildContext context) {
         ),
       ],
       header: const FluxSection(
-        title: Text('Flutter Dev Summit 2026',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+        title: Text('Flutter Dev Summit 2026', style: TextStyle(fontWeight: FontWeight.w800)),
         subtitle: Text('San Francisco Convention Center'),
         padding: EdgeInsets.zero,
       ),
       body: _TicketDividerLine(),
-      footer: const FluxSection(
+      footer:  FluxSection(
         actions: [
-          Text('Sat 18 Apr 2026 • 9:00 AM',
-              style: TextStyle(fontWeight: FontWeight.w600)),
+          Text('Sat 18 Apr 2026 • 9:00 AM', style: TextStyle(fontWeight: FontWeight.w600)),
           Chip(label: Text('General Admission')),
           Text('Gate C4'),
+          
         ],
         padding: EdgeInsets.zero,
       ),
-      theme: FluxCardThemeData.elevated.copyWith(
-        shape: const FluxTicketShape(
-          notchRadius: 14,
-          notchPosition: 0.68,
-        ),
+      theme: FluxCardThemeData.outlined.copyWith(
+        borderSide: BorderSide(width: 2, color: Colors.black),
+        shape: const FluxTicketShape(notchRadius: 14, notchPosition: 0.68),
         padding: const EdgeInsets.all(20),
       ),
       onTap: () {},
@@ -295,4 +295,39 @@ class _TicketDividerLine extends StatelessWidget {
       ),
     );
   }
+}
+
+@widgetbook.UseCase(name: 'Speak Card', type: FluxCard, path: '[Flux Card]/Compositions')
+Widget buildSpeakCardUseCase(BuildContext context) {
+  return previewSurface(
+    context,
+    FluxCard(
+      backgrounds: const [
+        FluxBackground.gradient(
+          gradient: LinearGradient(
+            colors: [Color(0xFFeeab24), Color(0xFFf5c561)],
+            begin: Alignment.bottomLeft,
+            end: Alignment.topRight,
+          ),
+        ),
+      ],
+
+      header: FluxSection(
+        title: Text('Speak Premium Member'),
+        trailing: [Icon(Icons.multitrack_audio)],
+      ),
+
+      body: FluxSection(
+        title: Text('alexsmith.mobbin@gmail.com'),
+        subtitle: Text('Member since Aug //2020'),
+      ),
+
+      footer: FluxSection(
+        title: Text('Annual Subscription'),
+        subtitle: Text('6 Day Free Trial'),
+      ),
+
+      theme: FluxCardThemeData.elevated,
+    ),
+  );
 }

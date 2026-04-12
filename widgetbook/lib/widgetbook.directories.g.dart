@@ -123,6 +123,11 @@ final directories = <_widgetbook.WidgetbookNode>[
                     .buildProductCardUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
+                name: 'Speak Card',
+                builder: _flux_card_widgetbook_usecases_flux_composition
+                    .buildSpeakCardUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
                 name: 'Travel card',
                 builder: _flux_card_widgetbook_usecases_flux_composition
                     .buildTravelCardUseCase,

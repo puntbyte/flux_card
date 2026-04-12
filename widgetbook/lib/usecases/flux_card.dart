@@ -63,10 +63,14 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
       footer: showFooter
           ? FluxSection(
               actions: [
-                Text(product.priceLabel,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
-                Text(product.formerPriceLabel,
-                    style: const TextStyle(decoration: TextDecoration.lineThrough)),
+                Text(
+                  product.priceLabel,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                ),
+                Text(
+                  product.formerPriceLabel,
+                  style: const TextStyle(decoration: TextDecoration.lineThrough),
+                ),
                 IconButton(
                   onPressed: product.inStock ? () {} : null,
                   icon: const Icon(Icons.add_shopping_cart_outlined, size: 18),
@@ -109,26 +113,18 @@ Widget buildColumnLayoutUseCase(BuildContext context) {
       theme: FluxCardThemeData.elevated,
       onTap: () {},
     ),
-    maxWidth: 360,
+    //maxWidth: 360,
   );
 }
 
 @widgetbook.UseCase(name: 'Row', type: FluxCard, path: '[Flux Card]/Cards')
 Widget buildRowLayoutUseCase(BuildContext context) {
-  final flexMedia = context.knobs.double.slider(
-    label: 'Media flex',
-    min: 1,
-    max: 5,
-    divisions: 4,
-    initialValue: 2,
-  ).round();
-  final flexContent = context.knobs.double.slider(
-    label: 'Content flex',
-    min: 1,
-    max: 5,
-    divisions: 4,
-    initialValue: 3,
-  ).round();
+  final flexMedia = context.knobs.double
+      .slider(label: 'Media flex', min: 1, max: 5, divisions: 4, initialValue: 2)
+      .round();
+  final flexContent = context.knobs.double
+      .slider(label: 'Content flex', min: 1, max: 5, divisions: 4, initialValue: 3)
+      .round();
 
   final destination = demoDestinations.first;
   return previewSurface(
@@ -136,7 +132,7 @@ Widget buildRowLayoutUseCase(BuildContext context) {
     FluxCard(
       layout: FluxLayoutMode.row,
       media: FluxMedia(
-        aspectRatio: 1,
+        aspectRatio: 0.8,
         child: CachedNetworkImage(imageUrl: destination.image, fit: BoxFit.cover),
       ),
       header: FluxSection(
@@ -147,15 +143,18 @@ Widget buildRowLayoutUseCase(BuildContext context) {
       body: Text(destination.description, maxLines: 2, overflow: TextOverflow.ellipsis),
       footer: FluxSection(
         actions: [
-          Text(destination.priceLabel,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(destination.priceLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
         padding: EdgeInsets.zero,
       ),
-      theme: FluxCardThemeData.elevated.copyWith(flexMedia: flexMedia, flexContent: flexContent),
+      theme: FluxCardThemeData.elevated,
+      // theme: FluxCardThemeData.elevated.copyWith(
+      //   flexMedia: flexMedia,
+      //   flexContent: flexContent,
+      // ),
       onTap: () {},
     ),
-    maxWidth: 480,
+    //maxWidth: 480,
   );
 }
 
@@ -185,8 +184,7 @@ Widget buildInColumnLayoutUseCase(BuildContext context) {
       body: Text(destination.description),
       footer: FluxSection(
         actions: [
-          Text(destination.priceLabel,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(destination.priceLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
           ElevatedButton(onPressed: () {}, child: const Text('Book')),
         ],
         padding: EdgeInsets.zero,
@@ -224,9 +222,7 @@ Widget buildResponsiveLayoutUseCase(BuildContext context) {
       ),
       body: const Text('Resize the viewport addon to see the layout switch.'),
       footer: FluxSection(
-        actions: [
-          TextButton(onPressed: () {}, child: const Text('Read more')),
-        ],
+        actions: [TextButton(onPressed: () {}, child: const Text('Read more'))],
         padding: EdgeInsets.zero,
       ),
       theme: FluxCardThemeData.elevated.copyWith(responsiveBreakpoint: breakpoint),
@@ -241,9 +237,7 @@ Widget buildEmptyShellUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      backgrounds: const [
-        FluxBackground.color(color: Color(0xFFE2E8F0)),
-      ],
+      backgrounds: const [FluxBackground.color(color: Color(0xFFE2E8F0))],
       theme: FluxCardThemeData.standard,
       height: 180,
     ),
