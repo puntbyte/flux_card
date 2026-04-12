@@ -3,22 +3,23 @@ import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../demo/demo_destination.dart';
+import '../demo/demo_product.dart';
 import '../shared/preview_surface.dart';
 
-Widget _mediaShell(BuildContext context, Widget child, {String? label}) =>
-    previewSurface(
-      context,
-      FluxCard(
-        media: child,
-        header: FluxSection(
-          title: Text(label ?? 'FluxMedia'),
-          subtitle: const Text('Layout-only container — fit belongs on the child.'),
-          padding: EdgeInsets.zero,
-        ),
-        theme: FluxCardThemeData.elevated,
-      ),
-      maxWidth: 360,
-    );
+Widget _mediaShell(BuildContext context, Widget child, {String? label}) => previewSurface(
+  context,
+  FluxCard(
+    media: child,
+    header: FluxSection(
+      title: Text(label ?? 'FluxMedia'),
+      subtitle: const Text('Layout-only container — fit belongs on the child.'),
+      padding: EdgeInsets.zero,
+    ),
+    theme: FluxCardThemeData.elevated,
+  ),
+  maxWidth: 360,
+);
 
 @widgetbook.UseCase(name: 'Aspect ratio', type: FluxMedia, path: '[Flux Card]/Media')
 Widget buildMediaAspectRatioUseCase(BuildContext context) {
@@ -32,17 +33,40 @@ Widget buildMediaAspectRatioUseCase(BuildContext context) {
       return '3:4';
     },
   );
-
   return _mediaShell(
     context,
     FluxMedia(
       aspectRatio: ratio,
-      child: Image.network(
-        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200',
-        fit: BoxFit.cover,
-      ),
+      child: Image.network(demoProducts.first.image, fit: BoxFit.cover),
     ),
-    label: 'Aspect ratio: ${ratio.toStringAsFixed(2)}',
+    label: 'Aspect ratio ${ratio.toStringAsFixed(2)}',
+  );
+}
+
+@widgetbook.UseCase(name: 'Row — BoxFit fills slot', type: FluxMedia, path: '[Flux Card]/Media')
+Widget buildMediaRowBoxFitUseCase(BuildContext context) {
+  final fit = context.knobs.object.segmented<BoxFit>(
+    label: 'BoxFit',
+    options: const [BoxFit.cover, BoxFit.contain, BoxFit.fill, BoxFit.fitHeight],
+    labelBuilder: (f) => f.name,
+  );
+
+  return previewSurface(
+    context,
+    FluxCard(
+      layout: FluxLayoutMode.row,
+      // No aspectRatio or height — child fills the row slot height.
+      // BoxFit is applied to the full slot area, not a fixed-size sub-region.
+      media: FluxMedia(child: Image.network(demoProducts[1].image, fit: fit)),
+      header: const FluxSection(
+        title: Text('Row — no explicit size'),
+        subtitle: Text('FluxMedia fills row slot height. BoxFit is respected.'),
+        padding: EdgeInsets.zero,
+      ),
+      body: const Text('Switch the BoxFit knob to see cover, contain, fill, and fitHeight.'),
+      theme: FluxCardThemeData.elevated,
+    ),
+    maxWidth: 500,
   );
 }
 
@@ -55,7 +79,6 @@ Widget buildMediaFixedSizeUseCase(BuildContext context) {
     divisions: 28,
     initialValue: 100,
   );
-
   return previewSurface(
     context,
     FluxCard(
@@ -64,14 +87,11 @@ Widget buildMediaFixedSizeUseCase(BuildContext context) {
         width: size,
         height: size,
         borderRadius: BorderRadius.circular(size / 4),
-        child: Image.network(
-          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600',
-          fit: BoxFit.cover,
-        ),
+        child: Image.network(demoProducts.first.image, fit: BoxFit.cover),
       ),
       header: const FluxSection(
-        title: Text('Fixed-size media'),
-        subtitle: Text('Useful for thumbnails in row layout.'),
+        title: Text('Fixed-size thumbnail'),
+        subtitle: Text('Both width and height set.'),
         padding: EdgeInsets.zero,
       ),
       theme: FluxCardThemeData.elevated,
@@ -83,22 +103,18 @@ Widget buildMediaFixedSizeUseCase(BuildContext context) {
 @widgetbook.UseCase(name: 'Rounded corners', type: FluxMedia, path: '[Flux Card]/Media')
 Widget buildMediaRoundedUseCase(BuildContext context) {
   final radius = context.knobs.double.slider(
-    label: 'Border radius',
+    label: 'Radius',
     min: 0,
     max: 40,
     divisions: 20,
     initialValue: 16,
   );
-
   return _mediaShell(
     context,
     FluxMedia(
       aspectRatio: 16 / 9,
       borderRadius: BorderRadius.circular(radius),
-      child: Image.network(
-        'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200',
-        fit: BoxFit.cover,
-      ),
+      child: Image.network(demoDestinations.first.image, fit: BoxFit.cover),
     ),
     label: 'borderRadius: ${radius.toStringAsFixed(0)}',
   );

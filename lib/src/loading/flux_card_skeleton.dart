@@ -62,21 +62,19 @@ class FluxCardSkeleton extends StatefulWidget {
   State<FluxCardSkeleton> createState() => _FluxCardSkeletonState();
 }
 
-class _FluxCardSkeletonState extends State<FluxCardSkeleton>
-    with SingleTickerProviderStateMixin {
+class _FluxCardSkeletonState extends State<FluxCardSkeleton> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat();
-    _animation = Tween<double>(begin: -1.5, end: 2.5).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
+      ..repeat();
+    _animation = Tween<double>(
+      begin: -1.5,
+      end: 2.5,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -95,98 +93,73 @@ class _FluxCardSkeletonState extends State<FluxCardSkeleton>
   }
 
   Widget _buildSkeleton(BuildContext context) {
-    final p = widget.theme.padding;
-    final s = widget.theme.spacing;
+    final mediaSlot = widget.hasMedia
+        ? FluxMedia(
+            aspectRatio: 16 / 9,
+            child: _SkeletonBox(borderRadius: 0, color: _baseColor(context)),
+          )
+        : null;
 
-    Widget? mediaSlot;
-    if (widget.hasMedia) {
-      mediaSlot = FluxMedia(
-        aspectRatio: 16 / 9,
-        child: _SkeletonBox(borderRadius: 0, color: _baseColor(context)),
-      );
-    }
+    final headerSlot = widget.hasHeader
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SkeletonBox(height: 14, widthFraction: 0.6, color: _baseColor(context)),
+              SizedBox(height: widget.theme.spacing / 2),
+              _SkeletonBox(height: 11, widthFraction: 0.4, color: _baseColor(context)),
+            ],
+          )
+        : null;
 
-    Widget? headerSlot;
-    if (widget.hasHeader) {
-      headerSlot = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _SkeletonBox(
-            height: 14,
-            widthFraction: 0.6,
-            color: _baseColor(context),
-          ),
-          SizedBox(height: s / 2),
-          _SkeletonBox(
-            height: 11,
-            widthFraction: 0.4,
-            color: _baseColor(context),
-          ),
-        ],
-      );
-    }
+    final bodySlot = widget.hasBody
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SkeletonBox(height: 11, color: _baseColor(context)),
+              SizedBox(height: widget.theme.spacing / 3),
+              _SkeletonBox(height: 11, widthFraction: 0.75, color: _baseColor(context)),
+            ],
+          )
+        : null;
 
-    Widget? bodySlot;
-    if (widget.hasBody) {
-      bodySlot = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _SkeletonBox(height: 11, color: _baseColor(context)),
-          SizedBox(height: s / 3),
-          _SkeletonBox(
-            height: 11,
-            widthFraction: 0.75,
-            color: _baseColor(context),
-          ),
-        ],
-      );
-    }
-
-    Widget? footerSlot;
-    if (widget.hasFooter) {
-      footerSlot = Row(
-        children: [
-          _SkeletonBox(
-            height: 32,
-            widthFraction: 0.35,
-            borderRadius: 8,
-            color: _baseColor(context),
-          ),
-          SizedBox(width: s),
-          _SkeletonBox(
-            height: 32,
-            widthFraction: 0.25,
-            borderRadius: 8,
-            color: _baseColor(context),
-          ),
-        ],
-      );
-    }
+    final footerSlot = widget.hasFooter
+        ? Row(
+            children: [
+              _SkeletonBox(
+                height: 32,
+                widthFraction: 0.35,
+                borderRadius: 8,
+                color: _baseColor(context),
+              ),
+              SizedBox(width: widget.theme.spacing),
+              _SkeletonBox(
+                height: 32,
+                widthFraction: 0.25,
+                borderRadius: 8,
+                color: _baseColor(context),
+              ),
+            ],
+          )
+        : null;
 
     return FluxCardLayout(
-      mode: widget.layout == FluxLayoutMode.responsive
-          ? FluxLayoutMode.column
-          : widget.layout,
+      mode: widget.layout == FluxLayoutMode.responsive ? FluxLayoutMode.column : widget.layout,
       mediaPosition: widget.mediaPosition,
       theme: widget.theme,
-      resolvedPadding: EdgeInsets.all(8),
-    ).build(allBackgrounds: [], allOverlays: []);
-    //     .build(
-    //   mediaSlot: mediaSlot,
-    //   headerSlot: headerSlot != null
-    //       ? Padding(padding: p, child: headerSlot)
-    //       : null,
-    //   bodySlot: bodySlot != null ? Padding(padding: p, child: bodySlot) : null,
-    //   footerSlot: footerSlot != null
-    //       ? Padding(padding: p, child: footerSlot)
-    //       : null,
-    // );
+      resolvedPadding: const EdgeInsets.all(8),
+    ).build(
+      media: mediaSlot,
+      header: headerSlot,
+      body: bodySlot,
+      footer: footerSlot,
+      allBackgrounds: const [],
+      allOverlays: const [],
+    );
   }
 
-  Color _baseColor(BuildContext context) =>
-      Theme.of(context).colorScheme.surfaceContainerHighest;
+  Color _baseColor(BuildContext context) => Theme.of(context).colorScheme.surfaceContainerHighest;
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -209,10 +182,7 @@ class _SkeletonBox extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget box = Container(
       height: height,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(borderRadius)),
     );
 
     if (widthFraction != null) {
@@ -245,11 +215,7 @@ class _ShimmerLayer extends StatelessWidget {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [base, highlight, base],
-            stops: [
-              (v - 0.4).clamp(0.0, 1.0),
-              v.clamp(0.0, 1.0),
-              (v + 0.4).clamp(0.0, 1.0),
-            ],
+            stops: [(v - 0.4).clamp(0.0, 1.0), v.clamp(0.0, 1.0), (v + 0.4).clamp(0.0, 1.0)],
           ).createShader(bounds),
           child: child,
         );

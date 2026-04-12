@@ -4,7 +4,9 @@ import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../demo/demo_content.dart';
+import '../demo/demo_destination.dart';
+import '../demo/demo_post.dart';
+import '../demo/demo_product.dart';
 import '../shared/preview_surface.dart';
 
 @widgetbook.UseCase(name: 'Interactive', type: FluxCard, path: '[Flux Card]/Cards')
@@ -59,17 +61,13 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
         trailing: [Text('${product.reviewCount} reviews', style: const TextStyle(fontSize: 11))],
         padding: EdgeInsets.zero,
       ),
-      body: Text(product.tags.join(' • '), maxLines: 2, overflow: TextOverflow.ellipsis),
+      body: Text(product.tags.join(' • ')),
       footer: showFooter
           ? FluxSection(
               actions: [
                 Text(
                   product.priceLabel,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                ),
-                Text(
-                  product.formerPriceLabel,
-                  style: const TextStyle(decoration: TextDecoration.lineThrough),
                 ),
                 IconButton(
                   onPressed: product.inStock ? () {} : null,
@@ -83,6 +81,89 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
       onTap: () {},
     ),
     maxWidth: useWideSurface ? 920 : 420,
+  );
+}
+
+@widgetbook.UseCase(name: 'Ripple over media', type: FluxCard, path: '[Flux Card]/Cards')
+Widget buildRippleOverMediaUseCase(BuildContext context) {
+  return previewSurface(
+    context,
+    Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 12),
+          child: Text(
+            'Tap the card — the ripple renders above the image.',
+            style: TextStyle(fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        FluxCard(
+          media: FluxMedia(
+            aspectRatio: 16 / 9,
+            child: CachedNetworkImage(imageUrl: demoDestinations.first.image, fit: BoxFit.cover),
+          ),
+          header: const FluxSection(
+            title: Text('Tap anywhere'),
+            subtitle: Text('Ripple is above media, header, and footer.'),
+            padding: EdgeInsets.zero,
+          ),
+          footer: FluxSection(
+            actions: [ElevatedButton(onPressed: () {}, child: const Text('Action'))],
+            padding: EdgeInsets.zero,
+          ),
+          theme: FluxCardThemeData.elevated,
+          onTap: () {},
+        ),
+      ],
+    ),
+    maxWidth: 420,
+  );
+}
+
+@widgetbook.UseCase(name: 'Surface decoration', type: FluxCard, path: '[Flux Card]/Cards')
+Widget buildDecorationUseCase(BuildContext context) {
+  final useGradient = context.knobs.boolean(label: 'Gradient', initialValue: true);
+  final useBorder = context.knobs.boolean(label: 'Border');
+
+  return previewSurface(
+    context,
+    FluxCard(
+      media: FluxMedia(
+        aspectRatio: 16 / 9,
+        child: Image.network(demoPosts.first.image, fit: BoxFit.cover),
+      ),
+      decoration: useGradient
+          ? BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primaryContainer,
+                  Theme.of(context).colorScheme.secondaryContainer,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: useBorder
+                  ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
+                  : null,
+            )
+          : useBorder
+          ? BoxDecoration(
+              border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1.5),
+            )
+          : null,
+      header: const FluxSection(
+        title: Text('Surface decoration'),
+        subtitle: Text('BoxDecoration on the card surface, under content.'),
+        padding: EdgeInsets.zero,
+      ),
+      body: const Text('Combine with transparent cardColor for full gradient control.'),
+      theme: FluxCardThemeData.elevated.copyWith(
+        cardColor: useGradient ? Colors.transparent : null,
+      ),
+      onTap: () {},
+    ),
+    maxWidth: 420,
   );
 }
 
@@ -102,7 +183,7 @@ Widget buildColumnLayoutUseCase(BuildContext context) {
         subtitle: Text(product.brand),
         padding: EdgeInsets.zero,
       ),
-      body: const Text('Column layout works well for focused, editorial-style cards.'),
+      body: const Text('Column layout is ideal for editorial and product cards.'),
       footer: FluxSection(
         actions: [
           Text(product.priceLabel, style: const TextStyle(fontWeight: FontWeight.w900)),
@@ -113,7 +194,7 @@ Widget buildColumnLayoutUseCase(BuildContext context) {
       theme: FluxCardThemeData.elevated,
       onTap: () {},
     ),
-    //maxWidth: 360,
+    maxWidth: 360,
   );
 }
 
@@ -131,8 +212,8 @@ Widget buildRowLayoutUseCase(BuildContext context) {
     context,
     FluxCard(
       layout: FluxLayoutMode.row,
+      // No aspectRatio — image fills row slot height with BoxFit.cover
       media: FluxMedia(
-        aspectRatio: 0.8,
         child: CachedNetworkImage(imageUrl: destination.image, fit: BoxFit.cover),
       ),
       header: FluxSection(
@@ -147,52 +228,10 @@ Widget buildRowLayoutUseCase(BuildContext context) {
         ],
         padding: EdgeInsets.zero,
       ),
-      theme: FluxCardThemeData.elevated,
-      // theme: FluxCardThemeData.elevated.copyWith(
-      //   flexMedia: flexMedia,
-      //   flexContent: flexContent,
-      // ),
+      theme: FluxCardThemeData.elevated.copyWith(flexMedia: flexMedia, flexContent: flexContent),
       onTap: () {},
     ),
-    //maxWidth: 480,
-  );
-}
-
-@widgetbook.UseCase(name: 'InColumn', type: FluxCard, path: '[Flux Card]/Cards')
-Widget buildInColumnLayoutUseCase(BuildContext context) {
-  final mediaPosition = context.knobs.object.segmented<FluxMediaPosition>(
-    label: 'Media position',
-    options: FluxMediaPosition.values,
-    labelBuilder: (m) => m.name,
-  );
-
-  final destination = demoDestinations.first;
-  return previewSurface(
-    context,
-    FluxCard(
-      layout: FluxLayoutMode.inColumn,
-      mediaPosition: mediaPosition,
-      media: FluxMedia(
-        aspectRatio: 16 / 9,
-        child: CachedNetworkImage(imageUrl: destination.image, fit: BoxFit.cover),
-      ),
-      header: FluxSection(
-        title: Text(destination.title),
-        subtitle: Text(destination.location),
-        padding: EdgeInsets.zero,
-      ),
-      body: Text(destination.description),
-      footer: FluxSection(
-        actions: [
-          Text(destination.priceLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
-          ElevatedButton(onPressed: () {}, child: const Text('Book')),
-        ],
-        padding: EdgeInsets.zero,
-      ),
-      theme: FluxCardThemeData.elevated,
-      onTap: () {},
-    ),
-    maxWidth: 400,
+    maxWidth: 500,
   );
 }
 
@@ -205,7 +244,6 @@ Widget buildResponsiveLayoutUseCase(BuildContext context) {
     divisions: 25,
     initialValue: 540,
   );
-
   final post = demoPosts.first;
   return previewSurface(
     context,
@@ -220,7 +258,7 @@ Widget buildResponsiveLayoutUseCase(BuildContext context) {
         subtitle: Text('${post.author} • ${post.category}'),
         padding: EdgeInsets.zero,
       ),
-      body: const Text('Resize the viewport addon to see the layout switch.'),
+      body: const Text('Resize the viewport addon to trigger the layout switch.'),
       footer: FluxSection(
         actions: [TextButton(onPressed: () {}, child: const Text('Read more'))],
         padding: EdgeInsets.zero,
@@ -229,18 +267,5 @@ Widget buildResponsiveLayoutUseCase(BuildContext context) {
       onTap: () {},
     ),
     maxWidth: 720,
-  );
-}
-
-@widgetbook.UseCase(name: 'Empty shell', type: FluxCard, path: '[Flux Card]/Cards')
-Widget buildEmptyShellUseCase(BuildContext context) {
-  return previewSurface(
-    context,
-    FluxCard(
-      backgrounds: const [FluxBackground.color(color: Color(0xFFE2E8F0))],
-      theme: FluxCardThemeData.standard,
-      height: 180,
-    ),
-    maxWidth: 360,
   );
 }

@@ -51,8 +51,6 @@ class FluxCardConstraints {
   /// Falls back to [double.infinity] when the parent is unbounded.
   double get availableWidth {
     if (resolvedWidth != null) return resolvedWidth!;
-    return parentConstraints.hasBoundedWidth
-        ? parentConstraints.maxWidth
-        : double.infinity;
+    return parentConstraints.hasBoundedWidth ? parentConstraints.maxWidth : double.infinity;
   }
 }

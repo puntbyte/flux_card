@@ -63,12 +63,12 @@ class FluxOverlay extends StatelessWidget {
 
   bool get isGlobal =>
       targets.contains(FluxTarget.card) ||
-          targets.containsAll(const {
-            FluxTarget.media,
-            FluxTarget.header,
-            FluxTarget.body,
-            FluxTarget.footer,
-          });
+      targets.containsAll(const {
+        FluxTarget.media,
+        FluxTarget.header,
+        FluxTarget.body,
+        FluxTarget.footer,
+      });
 
   bool targetsSlot(FluxTarget slot) => !isGlobal && targets.contains(slot);
 

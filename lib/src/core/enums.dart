@@ -67,3 +67,19 @@ enum FluxNotchSide {
   /// Both edges.
   both,
 }
+
+/// Named boundary positions between [FluxCard] slots.
+///
+/// Used by [FluxTicketDecoration] and [FluxSlotDivider] to target the exact
+/// rendered position between two adjacent slots, regardless of padding values.
+enum FluxSlotBoundary {
+  /// Between the media slot and the content group (header / body / footer).
+  afterMedia,
+
+  /// Between the header slot and the body slot.
+  afterHeader,
+
+  /// Between the body slot and the footer slot.
+  afterBody,
+}
+

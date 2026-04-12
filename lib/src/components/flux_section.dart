@@ -92,17 +92,17 @@ class FluxSection extends StatelessWidget {
     final theme = FluxCardThemeData.of(context);
     final textTheme = Theme.of(context).textTheme;
 
-    final resolvedTitleStyle = titleStyle ??
+    final resolvedTitleStyle =
+        titleStyle ??
         theme.defaultTitleStyle ??
         textTheme.titleMedium ??
         const TextStyle(fontWeight: FontWeight.w700);
 
-    final resolvedSubtitleStyle = subtitleStyle ??
-        theme.defaultSubtitleStyle ??
-        textTheme.bodyMedium ??
-        const TextStyle();
+    final resolvedSubtitleStyle =
+        subtitleStyle ?? theme.defaultSubtitleStyle ?? textTheme.bodyMedium ?? const TextStyle();
 
-    final hasHeader = leading != null ||
+    final hasHeader =
+        leading != null ||
         title != null ||
         subtitle != null ||
         (trailing != null && trailing!.isNotEmpty);
@@ -120,26 +120,17 @@ class FluxSection extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (leading != null) ...[
-              leading!,
-              SizedBox(width: spacing),
-            ],
+            if (leading != null) ...[leading!, SizedBox(width: spacing)],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (title != null)
-                    DefaultTextStyle.merge(
-                      style: resolvedTitleStyle,
-                      child: title!,
-                    ),
+                    DefaultTextStyle.merge(style: resolvedTitleStyle, child: title!),
                   if (subtitle != null) ...[
                     SizedBox(height: spacing / 2),
-                    DefaultTextStyle.merge(
-                      style: resolvedSubtitleStyle,
-                      child: subtitle!,
-                    ),
+                    DefaultTextStyle.merge(style: resolvedSubtitleStyle, child: subtitle!),
                   ],
                 ],
               ),
@@ -184,9 +175,8 @@ class FluxSection extends StatelessWidget {
 
     final padded = Padding(padding: padding, child: column);
 
-    if (decoration != null) {
-      return DecoratedBox(decoration: decoration!, child: padded);
-    }
+    if (decoration != null) return DecoratedBox(decoration: decoration!, child: padded);
+
     return padded;
   }
 }

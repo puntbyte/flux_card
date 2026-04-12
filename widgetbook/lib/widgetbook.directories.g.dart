@@ -10,26 +10,26 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:flux_card_widgetbook/usecases/flux_background.dart'
-    as _flux_card_widgetbook_usecases_flux_background;
-import 'package:flux_card_widgetbook/usecases/flux_card.dart'
-    as _flux_card_widgetbook_usecases_flux_card;
-import 'package:flux_card_widgetbook/usecases/flux_composition.dart'
-    as _flux_card_widgetbook_usecases_flux_composition;
-import 'package:flux_card_widgetbook/usecases/flux_content.dart'
-    as _flux_card_widgetbook_usecases_flux_content;
-import 'package:flux_card_widgetbook/usecases/flux_loading.dart'
-    as _flux_card_widgetbook_usecases_flux_loading;
+import 'package:flux_card_widgetbook/usecases/flux_background.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_background_usecase;
+import 'package:flux_card_widgetbook/usecases/flux_card.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_card_usecase;
+import 'package:flux_card_widgetbook/usecases/flux_composition.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_composition_usecase;
+import 'package:flux_card_widgetbook/usecases/flux_content.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_content_usecase;
+import 'package:flux_card_widgetbook/usecases/flux_loading.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_loading_usecase;
 import 'package:flux_card_widgetbook/usecases/flux_media.dart'
     as _flux_card_widgetbook_usecases_flux_media;
-import 'package:flux_card_widgetbook/usecases/flux_overlay.dart'
-    as _flux_card_widgetbook_usecases_flux_overlay;
-import 'package:flux_card_widgetbook/usecases/flux_section.dart'
-    as _flux_card_widgetbook_usecases_flux_section;
-import 'package:flux_card_widgetbook/usecases/flux_theme.dart'
-    as _flux_card_widgetbook_usecases_flux_theme;
-import 'package:flux_card_widgetbook/usecases/flux_ticket.dart'
-    as _flux_card_widgetbook_usecases_flux_ticket;
+import 'package:flux_card_widgetbook/usecases/flux_overlay.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_overlay_usecase;
+import 'package:flux_card_widgetbook/usecases/flux_section.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_section_usecase;
+import 'package:flux_card_widgetbook/usecases/flux_theme.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_theme_usecase;
+import 'package:flux_card_widgetbook/usecases/flux_ticket.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_ticket_usecase;
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
@@ -44,17 +44,17 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Color',
-                builder: _flux_card_widgetbook_usecases_flux_background
+                builder: _flux_card_widgetbook_usecases_flux_background_usecase
                     .buildBackgroundColorUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Gradient',
-                builder: _flux_card_widgetbook_usecases_flux_background
+                builder: _flux_card_widgetbook_usecases_flux_background_usecase
                     .buildBackgroundGradientUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Slot-targeted',
-                builder: _flux_card_widgetbook_usecases_flux_background
+                builder: _flux_card_widgetbook_usecases_flux_background_usecase
                     .buildBackgroundSlotTargetedUseCase,
               ),
             ],
@@ -69,33 +69,33 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Column',
-                builder: _flux_card_widgetbook_usecases_flux_card
+                builder: _flux_card_widgetbook_usecases_flux_card_usecase
                     .buildColumnLayoutUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Empty shell',
-                builder: _flux_card_widgetbook_usecases_flux_card
-                    .buildEmptyShellUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'InColumn',
-                builder: _flux_card_widgetbook_usecases_flux_card
-                    .buildInColumnLayoutUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
                 name: 'Interactive',
-                builder: _flux_card_widgetbook_usecases_flux_card
+                builder: _flux_card_widgetbook_usecases_flux_card_usecase
                     .buildInteractiveCardUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Responsive',
-                builder: _flux_card_widgetbook_usecases_flux_card
+                builder: _flux_card_widgetbook_usecases_flux_card_usecase
                     .buildResponsiveLayoutUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
+                name: 'Ripple over media',
+                builder: _flux_card_widgetbook_usecases_flux_card_usecase
+                    .buildRippleOverMediaUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
                 name: 'Row',
-                builder: _flux_card_widgetbook_usecases_flux_card
+                builder: _flux_card_widgetbook_usecases_flux_card_usecase
                     .buildRowLayoutUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Surface decoration',
+                builder: _flux_card_widgetbook_usecases_flux_card_usecase
+                    .buildDecorationUseCase,
               ),
             ],
           ),
@@ -109,27 +109,27 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Blog card',
-                builder: _flux_card_widgetbook_usecases_flux_composition
+                builder: _flux_card_widgetbook_usecases_flux_composition_usecase
                     .buildBlogCardUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Event ticket',
-                builder: _flux_card_widgetbook_usecases_flux_composition
+                builder: _flux_card_widgetbook_usecases_flux_composition_usecase
                     .buildEventTicketUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Product card',
-                builder: _flux_card_widgetbook_usecases_flux_composition
+                builder: _flux_card_widgetbook_usecases_flux_composition_usecase
                     .buildProductCardUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Speak Card',
-                builder: _flux_card_widgetbook_usecases_flux_composition
+                builder: _flux_card_widgetbook_usecases_flux_composition_usecase
                     .buildSpeakCardUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Travel card',
-                builder: _flux_card_widgetbook_usecases_flux_composition
+                builder: _flux_card_widgetbook_usecases_flux_composition_usecase
                     .buildTravelCardUseCase,
               ),
             ],
@@ -144,17 +144,17 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Min / max height',
-                builder: _flux_card_widgetbook_usecases_flux_content
+                builder: _flux_card_widgetbook_usecases_flux_content_usecase
                     .buildContentConstraintsUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Scrollable body',
-                builder: _flux_card_widgetbook_usecases_flux_content
+                builder: _flux_card_widgetbook_usecases_flux_content_usecase
                     .buildContentScrollableUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'With decoration',
-                builder: _flux_card_widgetbook_usecases_flux_content
+                builder: _flux_card_widgetbook_usecases_flux_content_usecase
                     .buildContentDecorationUseCase,
               ),
             ],
@@ -169,17 +169,17 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Built-in skeleton',
-                builder: _flux_card_widgetbook_usecases_flux_loading
+                builder: _flux_card_widgetbook_usecases_flux_loading_usecase
                     .buildLoadingSkeletonUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'External shimmer bridge',
-                builder: _flux_card_widgetbook_usecases_flux_loading
+                builder: _flux_card_widgetbook_usecases_flux_loading_usecase
                     .buildLoadingExternalShimmerUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Toggle loaded / loading',
-                builder: _flux_card_widgetbook_usecases_flux_loading
+                builder: _flux_card_widgetbook_usecases_flux_loading_usecase
                     .buildLoadingToggleUseCase,
               ),
             ],
@@ -212,6 +212,11 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder: _flux_card_widgetbook_usecases_flux_media
                     .buildMediaRoundedUseCase,
               ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Row — BoxFit fills slot',
+                builder: _flux_card_widgetbook_usecases_flux_media
+                    .buildMediaRowBoxFitUseCase,
+              ),
             ],
           ),
         ],
@@ -224,22 +229,22 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Interactive badges',
-                builder: _flux_card_widgetbook_usecases_flux_overlay
+                builder: _flux_card_widgetbook_usecases_flux_overlay_usecase
                     .buildOverlayInteractiveUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Offset nudge',
-                builder: _flux_card_widgetbook_usecases_flux_overlay
+                builder: _flux_card_widgetbook_usecases_flux_overlay_usecase
                     .buildOverlayOffsetUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Slot targeting',
-                builder: _flux_card_widgetbook_usecases_flux_overlay
+                builder: _flux_card_widgetbook_usecases_flux_overlay_usecase
                     .buildOverlaySlotTargetingUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'zIndex ordering',
-                builder: _flux_card_widgetbook_usecases_flux_overlay
+                builder: _flux_card_widgetbook_usecases_flux_overlay_usecase
                     .buildOverlayZIndexUseCase,
               ),
             ],
@@ -254,17 +259,17 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'As standalone',
-                builder: _flux_card_widgetbook_usecases_flux_section
+                builder: _flux_card_widgetbook_usecases_flux_section_usecase
                     .buildSectionStandaloneUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Full anatomy',
-                builder: _flux_card_widgetbook_usecases_flux_section
+                builder: _flux_card_widgetbook_usecases_flux_section_usecase
                     .buildSectionAnatomyUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'With decoration',
-                builder: _flux_card_widgetbook_usecases_flux_section
+                builder: _flux_card_widgetbook_usecases_flux_section_usecase
                     .buildSectionDecorationUseCase,
               ),
             ],
@@ -279,32 +284,32 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Compact',
-                builder: _flux_card_widgetbook_usecases_flux_theme
+                builder: _flux_card_widgetbook_usecases_flux_theme_usecase
                     .buildThemeCompactUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Custom',
-                builder: _flux_card_widgetbook_usecases_flux_theme
+                builder: _flux_card_widgetbook_usecases_flux_theme_usecase
                     .buildThemeCustomUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Elevated',
-                builder: _flux_card_widgetbook_usecases_flux_theme
+                builder: _flux_card_widgetbook_usecases_flux_theme_usecase
                     .buildThemeElevatedUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Outlined',
-                builder: _flux_card_widgetbook_usecases_flux_theme
+                builder: _flux_card_widgetbook_usecases_flux_theme_usecase
                     .buildThemeOutlinedUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Standard',
-                builder: _flux_card_widgetbook_usecases_flux_theme
+                builder: _flux_card_widgetbook_usecases_flux_theme_usecase
                     .buildThemeStandardUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'ThemeExtension',
-                builder: _flux_card_widgetbook_usecases_flux_theme
+                builder: _flux_card_widgetbook_usecases_flux_theme_usecase
                     .buildThemeExtensionUseCase,
               ),
             ],
@@ -319,17 +324,17 @@ final directories = <_widgetbook.WidgetbookNode>[
             useCases: [
               _widgetbook.WidgetbookUseCase(
                 name: 'Basic ticket',
-                builder: _flux_card_widgetbook_usecases_flux_ticket
+                builder: _flux_card_widgetbook_usecases_flux_ticket_usecase
                     .buildTicketBasicUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Horizontal ticket',
-                builder: _flux_card_widgetbook_usecases_flux_ticket
+                builder: _flux_card_widgetbook_usecases_flux_ticket_usecase
                     .buildTicketHorizontalUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Outlined ticket',
-                builder: _flux_card_widgetbook_usecases_flux_ticket
+                builder: _flux_card_widgetbook_usecases_flux_ticket_usecase
                     .buildTicketOutlinedUseCase,
               ),
             ],

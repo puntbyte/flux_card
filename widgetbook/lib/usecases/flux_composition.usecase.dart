@@ -4,7 +4,9 @@ import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../demo/demo_content.dart';
+import '../demo/demo_destination.dart';
+import '../demo/demo_post.dart';
+import '../demo/demo_product.dart';
 import '../shared/preview_surface.dart';
 
 @widgetbook.UseCase(name: 'Product card', type: FluxCard, path: '[Flux Card]/Compositions')

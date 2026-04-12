@@ -2,39 +2,32 @@ import 'package:flutter/material.dart';
 
 import '../core/enums.dart';
 import '../core/theme.dart';
+import '../ticket/flux_slot_divider.dart';
 import 'slot_resolver.dart';
 
 /// Stateless layout engine for [FluxCard].
-///
-/// Receives raw (un-padded, un-wrapped) slot widgets along with the full
-/// background / overlay lists and resolved padding, then assembles the card
-/// body according to [mode] and [mediaPosition].
-///
-/// Slot wrapping (backgrounds, overlays, per-slot padding) is done here via
-/// [SlotResolver.contentColumn] so that slot backgrounds extend behind their
-/// own padding area rather than stopping at the content boundary.
 class FluxCardLayout {
   const FluxCardLayout({
     required this.mode,
     required this.mediaPosition,
     required this.theme,
     required this.resolvedPadding,
+    this.dividers,
+    this.boundaryKeys,
   });
 
   final FluxLayoutMode mode;
   final FluxMediaPosition mediaPosition;
   final FluxCardThemeData theme;
-
-  /// Resolved (LTR/RTL aware) padding from [FluxCardThemeData.padding].
   final EdgeInsets resolvedPadding;
 
-  /// Assembles the card body.
-  ///
-  /// [mode] must already be resolved — [FluxLayoutMode.responsive] must have
-  /// been converted to [FluxLayoutMode.column] or [FluxLayoutMode.row] by the
-  /// caller.
+  /// Dividers inserted between slot pairs.
+  final List<FluxSlotDivider>? dividers;
+
+  /// Zero-height keyed markers at slot boundaries for post-layout measurement.
+  final Map<FluxSlotBoundary, GlobalKey>? boundaryKeys;
+
   Widget build({
-    // Raw slot widgets — no padding applied, no backgrounds injected yet.
     Widget? media,
     Widget? header,
     Widget? body,
@@ -43,15 +36,15 @@ class FluxCardLayout {
     required List<Widget> allOverlays,
   }) {
     assert(
-    mode != FluxLayoutMode.responsive,
-    'FluxCardLayout.build() received mode=responsive. '
-        'Resolve the responsive breakpoint before calling build().',
+      mode != FluxLayoutMode.responsive,
+      'Resolve responsive layout before calling FluxCardLayout.build().',
     );
 
     final p = resolvedPadding;
     final s = theme.spacing;
 
-    // Media is never padded — it fills its slot edge-to-edge.
+    // Media fills its slot edge-to-edge — no padding, no slot wrapping needed
+    // for backgrounds (global backgrounds cover it at the card Stack level).
     final mediaSlot = SlotResolver.wrapSlot(
       target: FluxTarget.media,
       child: media,
@@ -59,79 +52,77 @@ class FluxCardLayout {
       allOverlays: allOverlays,
     );
 
-    // ── Content column helpers ─────────────────────────────────────────────
-
-    // All three slots as a single group (column / row modes).
     Widget? fullContentColumn() => SlotResolver.contentColumn(
-      entries: [
-        (FluxTarget.header, header),
-        (FluxTarget.body, body),
-        (FluxTarget.footer, footer),
-      ],
+      entries: [(FluxTarget.header, header), (FluxTarget.body, body), (FluxTarget.footer, footer)],
       allBackgrounds: allBackgrounds,
       allOverlays: allOverlays,
       padding: p,
       spacing: s,
+      dividers: dividers,
+      boundaryKeys: boundaryKeys,
     );
 
-    // A sub-group used in inColumn mode.
-    Widget? subColumn(List<(FluxTarget, Widget?)> entries) =>
-        SlotResolver.contentColumn(
-          entries: entries,
-          allBackgrounds: allBackgrounds,
-          allOverlays: allOverlays,
-          padding: p,
-          spacing: s,
-        );
+    Widget? subColumn(List<(FluxTarget, Widget?)> entries) => SlotResolver.contentColumn(
+      entries: entries,
+      allBackgrounds: allBackgrounds,
+      allOverlays: allOverlays,
+      padding: p,
+      spacing: s,
+      dividers: dividers,
+      boundaryKeys: boundaryKeys,
+    );
 
-    // ── Layout switch ──────────────────────────────────────────────────────
+    // afterMedia boundary marker (not inside contentColumn — lives between
+    // the media slot and the content group).
+    Widget? afterMediaMarker() {
+      final key = boundaryKeys?[FluxSlotBoundary.afterMedia];
+      if (key == null) return null;
+      return SizedBox(key: key, height: 0, width: double.infinity);
+    }
+
+    Widget buildColumnWithMedia(Widget? content) {
+      final marker = afterMediaMarker();
+      final slots = mediaPosition == FluxMediaPosition.start
+          ? [mediaSlot, marker, content]
+          : [content, marker, mediaSlot];
+      return SlotResolver.verticalGroup(slots: slots, spacing: 0);
+    }
 
     switch (mode) {
       case FluxLayoutMode.column:
         final content = fullContentColumn();
         if (mediaSlot == null) return content ?? const SizedBox.shrink();
-        return SlotResolver.verticalGroup(
-          slots: mediaPosition == FluxMediaPosition.start
-              ? [mediaSlot, content]
-              : [content, mediaSlot],
-          spacing: 0,
-        );
+        return buildColumnWithMedia(content);
 
       case FluxLayoutMode.row:
         final content = fullContentColumn();
         if (mediaSlot == null) return content ?? const SizedBox.shrink();
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: mediaPosition == FluxMediaPosition.start
-                ? [
-              Flexible(flex: theme.flexMedia, child: mediaSlot),
-              Expanded(
-                flex: theme.flexContent,
-                child: content ?? const SizedBox.shrink(),
-              ),
-            ]
-                : [
-              Expanded(
-                flex: theme.flexContent,
-                child: content ?? const SizedBox.shrink(),
-              ),
-              Flexible(flex: theme.flexMedia, child: mediaSlot),
-            ],
-          ),
+        // No IntrinsicHeight — Row with crossAxisAlignment.stretch determines
+        // height from the content column. FluxMedia without explicit sizing
+        // fills the row height directly, making BoxFit work correctly.
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: mediaPosition == FluxMediaPosition.start
+              ? [
+                  Flexible(flex: theme.flexMedia, child: mediaSlot),
+                  Expanded(flex: theme.flexContent, child: content ?? const SizedBox.shrink()),
+                ]
+              : [
+                  Expanded(flex: theme.flexContent, child: content ?? const SizedBox.shrink()),
+                  Flexible(flex: theme.flexMedia, child: mediaSlot),
+                ],
         );
 
       case FluxLayoutMode.inColumn:
         final beforeEntries = mediaPosition == FluxMediaPosition.start
             ? [(FluxTarget.header, header)]
             : [(FluxTarget.header, header), (FluxTarget.body, body)];
-
         final afterEntries = mediaPosition == FluxMediaPosition.start
             ? [(FluxTarget.body, body), (FluxTarget.footer, footer)]
             : [(FluxTarget.footer, footer)];
 
         return SlotResolver.verticalGroup(
-          slots: [subColumn(beforeEntries), mediaSlot, subColumn(afterEntries)],
+          slots: [subColumn(beforeEntries), afterMediaMarker(), mediaSlot, subColumn(afterEntries)],
           spacing: 0,
         );
 

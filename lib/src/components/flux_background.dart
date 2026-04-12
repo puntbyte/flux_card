@@ -25,22 +25,22 @@ class FluxBackground extends StatelessWidget {
     super.key,
     required this.color,
     this.targets = const {FluxTarget.card},
-  })  : gradient = null,
-        decoration = null;
+  }) : gradient = null,
+       decoration = null;
 
   const FluxBackground.gradient({
     super.key,
     required this.gradient,
     this.targets = const {FluxTarget.card},
-  })  : color = null,
-        decoration = null;
+  }) : color = null,
+       decoration = null;
 
   const FluxBackground.custom({
     super.key,
     required this.decoration,
     this.targets = const {FluxTarget.card},
-  })  : color = null,
-        gradient = null;
+  }) : color = null,
+       gradient = null;
 
   /// Whether this background is scoped to the entire card surface.
   ///
@@ -60,13 +60,9 @@ class FluxBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedDecoration =
-        decoration ?? BoxDecoration(color: color, gradient: gradient);
+    final resolvedDecoration = decoration ?? BoxDecoration(color: color, gradient: gradient);
     return IgnorePointer(
-      child: DecoratedBox(
-        decoration: resolvedDecoration,
-        child: const SizedBox.expand(),
-      ),
+      child: DecoratedBox(decoration: resolvedDecoration, child: const SizedBox.expand()),
     );
   }
 }

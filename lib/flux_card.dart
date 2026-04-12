@@ -8,6 +8,11 @@ export 'src/core/constraints.dart';
 // Shapes
 export 'src/shapes/flux_ticket_shape.dart';
 
+// Ticket system
+export 'src/ticket/flux_ticket_decoration.dart'
+    show FluxTicketDecoration, FluxTicketClipper, FluxTicketBorderPainter, TicketPathBuilder;
+export 'src/ticket/flux_slot_divider.dart';
+
 // Components
 export 'src/components/flux_background.dart';
 export 'src/components/flux_content.dart';

@@ -96,9 +96,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     padding: EdgeInsets.all(16.0),
     spacing: 12.0,
     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-    defaultShadows: [
-      BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
-    ],
+    defaultShadows: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))],
     elevation: 4.0,
   );
 
@@ -115,9 +113,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
   BorderSide resolveBorderSide(BuildContext context) {
     if (borderSide == BorderSide.none) return BorderSide.none;
     if (borderSide.color == _kThemeOutlineColor) {
-      return borderSide.copyWith(
-        color: Theme.of(context).colorScheme.outline,
-      );
+      return borderSide.copyWith(color: Theme.of(context).colorScheme.outline);
     }
     return borderSide;
   }
@@ -126,10 +122,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
   /// the resolved [borderSide].
   ShapeBorder resolveShape(BuildContext context) {
     if (shape != null) return shape!;
-    return RoundedRectangleBorder(
-      borderRadius: borderRadius,
-      side: resolveBorderSide(context),
-    );
+    return RoundedRectangleBorder(borderRadius: borderRadius, side: resolveBorderSide(context));
   }
 
   // ── Theme lookup ──────────────────────────────────────────────────────────
@@ -138,8 +131,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
   ///
   /// Priority: [FluxCardTheme] InheritedWidget → [ThemeExtension] → [standard].
   static FluxCardThemeData of(BuildContext context) {
-    final inherited =
-        context.dependOnInheritedWidgetOfExactType<FluxCardTheme>();
+    final inherited = context.dependOnInheritedWidgetOfExactType<FluxCardTheme>();
     if (inherited != null) return inherited.data;
     return Theme.of(context).extension<FluxCardThemeData>() ?? standard;
   }
@@ -164,53 +156,45 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     int? flexContent,
     double? responsiveBreakpoint,
     ShapeBorder? shape,
-  }) =>
-      FluxCardThemeData(
-        padding: padding ?? this.padding,
-        spacing: spacing ?? this.spacing,
-        borderRadius: borderRadius ?? this.borderRadius,
-        borderSide: borderSide ?? this.borderSide,
-        defaultShadows: defaultShadows ?? this.defaultShadows,
-        defaultTitleStyle: defaultTitleStyle ?? this.defaultTitleStyle,
-        defaultSubtitleStyle: defaultSubtitleStyle ?? this.defaultSubtitleStyle,
-        cardColor: cardColor ?? this.cardColor,
-        shadowColor: shadowColor ?? this.shadowColor,
-        surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
-        elevation: elevation ?? this.elevation,
-        clipBehavior: clipBehavior ?? this.clipBehavior,
-        flexMedia: flexMedia ?? this.flexMedia,
-        flexContent: flexContent ?? this.flexContent,
-        responsiveBreakpoint: responsiveBreakpoint ?? this.responsiveBreakpoint,
-        shape: shape ?? this.shape,
-      );
+  }) => FluxCardThemeData(
+    padding: padding ?? this.padding,
+    spacing: spacing ?? this.spacing,
+    borderRadius: borderRadius ?? this.borderRadius,
+    borderSide: borderSide ?? this.borderSide,
+    defaultShadows: defaultShadows ?? this.defaultShadows,
+    defaultTitleStyle: defaultTitleStyle ?? this.defaultTitleStyle,
+    defaultSubtitleStyle: defaultSubtitleStyle ?? this.defaultSubtitleStyle,
+    cardColor: cardColor ?? this.cardColor,
+    shadowColor: shadowColor ?? this.shadowColor,
+    surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
+    elevation: elevation ?? this.elevation,
+    clipBehavior: clipBehavior ?? this.clipBehavior,
+    flexMedia: flexMedia ?? this.flexMedia,
+    flexContent: flexContent ?? this.flexContent,
+    responsiveBreakpoint: responsiveBreakpoint ?? this.responsiveBreakpoint,
+    shape: shape ?? this.shape,
+  );
 
   @override
   FluxCardThemeData lerp(FluxCardThemeData? other, double t) {
     if (other == null) return this;
     return FluxCardThemeData(
-      padding:
-          EdgeInsetsGeometry.lerp(padding, other.padding, t) ?? padding,
+      padding: EdgeInsetsGeometry.lerp(padding, other.padding, t) ?? padding,
       spacing: lerpDouble(spacing, other.spacing, t) ?? spacing,
-      borderRadius:
-          BorderRadiusGeometry.lerp(borderRadius, other.borderRadius, t) ??
-              borderRadius,
+      borderRadius: BorderRadiusGeometry.lerp(borderRadius, other.borderRadius, t) ?? borderRadius,
       borderSide: BorderSide.lerp(borderSide, other.borderSide, t),
       defaultShadows: t < 0.5 ? defaultShadows : other.defaultShadows,
-      defaultTitleStyle:
-          TextStyle.lerp(defaultTitleStyle, other.defaultTitleStyle, t),
-      defaultSubtitleStyle:
-          TextStyle.lerp(defaultSubtitleStyle, other.defaultSubtitleStyle, t),
+      defaultTitleStyle: TextStyle.lerp(defaultTitleStyle, other.defaultTitleStyle, t),
+      defaultSubtitleStyle: TextStyle.lerp(defaultSubtitleStyle, other.defaultSubtitleStyle, t),
       cardColor: Color.lerp(cardColor, other.cardColor, t),
       shadowColor: Color.lerp(shadowColor, other.shadowColor, t),
-      surfaceTintColor:
-          Color.lerp(surfaceTintColor, other.surfaceTintColor, t),
+      surfaceTintColor: Color.lerp(surfaceTintColor, other.surfaceTintColor, t),
       elevation: lerpDouble(elevation, other.elevation, t) ?? elevation,
       clipBehavior: t < 0.5 ? clipBehavior : other.clipBehavior,
       flexMedia: t < 0.5 ? flexMedia : other.flexMedia,
       flexContent: t < 0.5 ? flexContent : other.flexContent,
       responsiveBreakpoint:
-          lerpDouble(responsiveBreakpoint, other.responsiveBreakpoint, t) ??
-              responsiveBreakpoint,
+          lerpDouble(responsiveBreakpoint, other.responsiveBreakpoint, t) ?? responsiveBreakpoint,
       shape: ShapeBorder.lerp(shape, other.shape, t),
     );
   }
@@ -237,23 +221,23 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
 
   @override
   int get hashCode => Object.hash(
-        padding,
-        spacing,
-        borderRadius,
-        borderSide,
-        Object.hashAll(defaultShadows ?? const <BoxShadow>[]),
-        defaultTitleStyle,
-        defaultSubtitleStyle,
-        cardColor,
-        shadowColor,
-        surfaceTintColor,
-        elevation,
-        clipBehavior,
-        flexMedia,
-        flexContent,
-        responsiveBreakpoint,
-        shape,
-      );
+    padding,
+    spacing,
+    borderRadius,
+    borderSide,
+    Object.hashAll(defaultShadows ?? const <BoxShadow>[]),
+    defaultTitleStyle,
+    defaultSubtitleStyle,
+    cardColor,
+    shadowColor,
+    surfaceTintColor,
+    elevation,
+    clipBehavior,
+    flexMedia,
+    flexContent,
+    responsiveBreakpoint,
+    shape,
+  );
 }
 
 /// InheritedWidget for subtree-level [FluxCardThemeData] overrides.
@@ -261,17 +245,12 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
 /// Takes priority over [ThemeExtension] but is itself overridden by a
 /// per-card [FluxCard.theme].
 class FluxCardTheme extends InheritedTheme {
-  const FluxCardTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const FluxCardTheme({super.key, required this.data, required super.child});
 
   final FluxCardThemeData data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      FluxCardTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => FluxCardTheme(data: data, child: child);
 
   @override
   bool updateShouldNotify(FluxCardTheme oldWidget) => data != oldWidget.data;

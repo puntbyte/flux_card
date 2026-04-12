@@ -64,17 +64,11 @@ class FluxContent extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget result = child;
 
-    if (scrollable) {
-      result = SingleChildScrollView(child: result);
-    }
+    if (scrollable) result = SingleChildScrollView(child: result);
 
-    if (alignment != null) {
-      result = Align(alignment: alignment!, child: result);
-    }
+    if (alignment != null) result = Align(alignment: alignment!, child: result);
 
-    if (padding != null) {
-      result = Padding(padding: padding!, child: result);
-    }
+    if (padding != null) result = Padding(padding: padding!, child: result);
 
     if (minHeight != null || maxHeight != null) {
       result = ConstrainedBox(
@@ -86,12 +80,7 @@ class FluxContent extends StatelessWidget {
       );
     }
 
-    if (decoration != null) {
-      result = DecoratedBox(
-        decoration: decoration!,
-        child: result,
-      );
-    }
+    if (decoration != null) result = DecoratedBox(decoration: decoration!, child: result);
 
     return result;
   }
