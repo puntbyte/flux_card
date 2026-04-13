@@ -152,14 +152,14 @@ class _FluxCardSkeletonState extends State<FluxCardSkeleton>
       mediaPosition: widget.mediaPosition,
       theme: widget.theme,
       resolvedPadding: const EdgeInsets.all(8),
-      // No divider or boundary keys — skeleton has no boundaries to measure.
     ).build(
       media: mediaSlot,
       header: headerSlot,
       body: bodySlot,
       footer: footerSlot,
-      allBackgrounds: const [],
-      allOverlays: const [],
+      // Pass empty maps instead of empty lists
+      bgsByTarget: const {},
+      ovsByTarget: const {},
     );
   }
 

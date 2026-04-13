@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/enums.dart';
 import '../core/theme.dart';
 import '../divider/flux_divider.dart';
+import 'boundary_tracker.dart';
 import 'slot_resolver.dart';
 
 /// Stateless layout engine for [FluxCard].
@@ -13,7 +14,7 @@ class FluxCardLayout {
     required this.theme,
     required this.resolvedPadding,
     this.divider,
-    this.boundaryKeys,
+    this.boundaryTrackers,
   });
 
   final FluxLayoutMode mode;
@@ -24,16 +25,16 @@ class FluxCardLayout {
   /// Optional divider widgets for slot boundaries.
   final FluxDivider? divider;
 
-  /// Zero-height keyed markers at slot boundaries for post-layout measurement.
-  final Map<FluxSlotBoundary, GlobalKey>? boundaryKeys;
+  /// RenderBox trackers at slot boundaries for synchronous position measurement.
+  final Map<FluxSlotBoundary, BoundaryTracker>? boundaryTrackers;
 
   Widget build({
     Widget? media,
     Widget? header,
     Widget? body,
     Widget? footer,
-    required List<Widget> allBackgrounds,
-    required List<Widget> allOverlays,
+    required Map<FluxTarget, List<Widget>> bgsByTarget,
+    required Map<FluxTarget, List<Widget>> ovsByTarget,
   }) {
     assert(
     mode != FluxLayoutMode.responsive,
@@ -47,48 +48,49 @@ class FluxCardLayout {
     final mediaSlot = SlotResolver.wrapSlot(
       target: FluxTarget.media,
       child: media,
-      allBackgrounds: allBackgrounds,
-      allOverlays: allOverlays,
+      bgsByTarget: bgsByTarget,
+      ovsByTarget: ovsByTarget,
     );
 
     Widget? fullContentColumn() => SlotResolver.contentColumn(
-      entries: [(FluxTarget.header, header), (FluxTarget.body, body), (FluxTarget.footer, footer)],
-      allBackgrounds: allBackgrounds,
-      allOverlays: allOverlays,
+      entries:[(FluxTarget.header, header), (FluxTarget.body, body), (FluxTarget.footer, footer)],
+      bgsByTarget: bgsByTarget,
+      ovsByTarget: ovsByTarget,
       padding: p,
       spacing: s,
       divider: divider,
-      boundaryKeys: boundaryKeys,
+      boundaryTrackers: boundaryTrackers,
     );
 
     Widget? subColumn(List<(FluxTarget, Widget?)> entries) => SlotResolver.contentColumn(
       entries: entries,
-      allBackgrounds: allBackgrounds,
-      allOverlays: allOverlays,
+      bgsByTarget: bgsByTarget,
+      ovsByTarget: ovsByTarget,
       padding: p,
       spacing: s,
       divider: divider,
-      boundaryKeys: boundaryKeys,
+      boundaryTrackers: boundaryTrackers,
     );
 
-    // Zero-height keyed marker between the media slot and the content group.
+    // Marker between the media slot and the content group.
     Widget? afterMediaMarker() {
-      final key = boundaryKeys?[FluxSlotBoundary.afterMedia];
-      if (key == null) return null;
-      return SizedBox(key: key, height: 0, width: double.infinity);
+      final tracker = boundaryTrackers?[FluxSlotBoundary.afterMedia];
+      if (tracker == null) return null;
+      return BoundaryMarker(
+          tracker: tracker,
+          child: const SizedBox(height: 0, width: double.infinity)
+      );
     }
 
-    // Builds a vertical stack of [mediaSlot] and [content] with the afterMedia
-    // boundary marker and optional afterMedia divider widget between them.
     Widget buildColumnWithMedia(Widget? content) {
       final marker = afterMediaMarker();
       final mediaDivider = divider?.afterMedia;
 
       final List<Widget?> slots;
       if (mediaPosition == FluxMediaPosition.start) {
-        slots = [mediaSlot, marker, mediaDivider, content];
+        slots =[mediaSlot, marker, mediaDivider, content];
       } else {
-        slots = [content, marker, mediaDivider, mediaSlot];
+        slots =[content, marker, mediaDivider, mediaSlot];
       }
       return SlotResolver.verticalGroup(slots: slots, spacing: 0);
     }
@@ -102,42 +104,31 @@ class FluxCardLayout {
       case FluxLayoutMode.row:
         final content = fullContentColumn();
         if (mediaSlot == null) return content ?? const SizedBox.shrink();
-        // IntrinsicHeight allows crossAxisAlignment.stretch to work even when
-        // the parent provides unbounded height (e.g. inside a ScrollView).
         return IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: mediaPosition == FluxMediaPosition.start
-                ? [
+                ?[
               Flexible(flex: theme.flexMedia, child: mediaSlot),
-              Expanded(
-                flex: theme.flexContent,
-                child: content ?? const SizedBox.shrink(),
-              ),
+              Expanded(flex: theme.flexContent, child: content ?? const SizedBox.shrink()),
             ]
-                : [
-              Expanded(
-                flex: theme.flexContent,
-                child: content ?? const SizedBox.shrink(),
-              ),
+                :[
+              Expanded(flex: theme.flexContent, child: content ?? const SizedBox.shrink()),
               Flexible(flex: theme.flexMedia, child: mediaSlot),
             ],
           ),
         );
 
       case FluxLayoutMode.inline:
-      // Media is embedded inside the content column between two sub-columns.
-      // The afterMedia marker + divider sit between the before-media content
-      // and the media slot itself.
         final beforeEntries = mediaPosition == FluxMediaPosition.start
-            ? [(FluxTarget.header, header)]
+            ?[(FluxTarget.header, header)]
             : [(FluxTarget.header, header), (FluxTarget.body, body)];
         final afterEntries = mediaPosition == FluxMediaPosition.start
-            ? [(FluxTarget.body, body), (FluxTarget.footer, footer)]
+            ?[(FluxTarget.body, body), (FluxTarget.footer, footer)]
             : [(FluxTarget.footer, footer)];
 
         return SlotResolver.verticalGroup(
-          slots: [
+          slots:[
             subColumn(beforeEntries),
             afterMediaMarker(),
             divider?.afterMedia,
@@ -148,7 +139,6 @@ class FluxCardLayout {
         );
 
       case FluxLayoutMode.responsive:
-      // Should have been resolved before reaching here.
         return fullContentColumn() ?? const SizedBox.shrink();
     }
   }

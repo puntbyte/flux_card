@@ -6,50 +6,12 @@ import 'core/constraints.dart';
 import 'core/enums.dart';
 import 'core/theme.dart';
 import 'divider/flux_divider.dart';
+import 'layout/boundary_tracker.dart';
 import 'layout/flux_card_layout.dart';
 import 'loading/flux_card_skeleton.dart';
 import 'notch/flux_notch.dart';
 import 'shapes/flux_notch_shape.dart';
 
-/// A constraint-aware, domain-agnostic, composition-first card widget.
-///
-/// ## Slots
-/// [FluxCard] arranges content in up to four named slots: [media], [header],
-/// [body], and [footer].
-///
-/// ## Layout modes
-/// [FluxLayoutMode.responsive] switches between column and row layouts at
-/// [FluxCardThemeData.responsiveBreakpoint].
-///
-/// ## Backgrounds & overlays
-/// Both support [FluxTarget] scoping. [FluxOverlay] children are fully
-/// interactive and respect all [Alignment] values including bottom-edge.
-///
-/// ## Ripple
-/// The [InkWell] wraps the card's content [Stack] as a direct child of the
-/// card's [Material]. Child widgets (buttons, chips) still receive their own
-/// taps — the ripple only fires on empty card space — and [Ink.image] paints
-/// images on the Material ink layer so the ripple sweeps across them too.
-///
-/// ## Notch
-/// [notch] clips the card to a rounded-rectangle-with-semicircular-notches
-/// outline and optionally paints a border on top. Use [FluxNotch] (targeted)
-/// to snap the notch to a slot boundary, or [FluxNotch.free] for a fixed
-/// fractional position. When [notch] is set, [FluxCardThemeData.shape] is
-/// ignored but all other theme tokens (borderRadius, elevation, etc.) apply.
-///
-/// ## Divider
-/// [divider] places a widget at each named slot boundary. Use [FluxDivider]
-/// with any child widget; [FluxDashedDivider] is the built-in choice for
-/// notch-style perforated lines.
-///
-/// ## Decoration
-/// [decoration] paints a [BoxDecoration] (gradient, border, etc.) as a layer
-/// directly on the card surface, under all content.
-///
-/// ## Loading
-/// [loading] replaces the card with a built-in shimmer skeleton. Supply
-/// [loadingWrapper] to integrate an external shimmer package.
 class FluxCard extends StatefulWidget {
   const FluxCard({
     super.key,
@@ -76,57 +38,25 @@ class FluxCard extends StatefulWidget {
     this.loadingWrapper,
   });
 
-  // ── Layout ────────────────────────────────────────────────────────────────
-
   final FluxLayoutMode layout;
   final FluxMediaPosition mediaPosition;
-
-  // ── Slots ─────────────────────────────────────────────────────────────────
-
   final Widget? media;
   final Widget? header;
   final Widget? body;
   final Widget? footer;
-
-  // ── Decoration ────────────────────────────────────────────────────────────
-
   final List<Widget>? overlays;
   final List<Widget>? backgrounds;
   final Color? foregroundColor;
-
-  /// Optional [BoxDecoration] painted directly on the card surface, under all
-  /// slot content. Use for gradient fills, custom borders, or combined effects
-  /// without a custom [ShapeBorder].
   final BoxDecoration? decoration;
-
-  /// Notch geometry applied to the card — clips to a rounded-rectangle outline
-  /// with semicircular notches, and optionally paints a border on top.
-  ///
-  /// When set, [FluxCardThemeData.shape] is ignored. Use [FluxNotch] to target
-  /// a slot boundary, or [FluxNotch.free] for a fixed fractional position.
   final FluxNotch? notch;
-
-  /// Optional divider widget(s) inserted at named slot boundaries.
-  ///
-  /// Each [FluxDivider] property corresponds to one boundary. Use
-  /// [FluxDashedDivider] for the classic ticket perforated line.
   final FluxDivider? divider;
-
-  // ── Sizing ────────────────────────────────────────────────────────────────
-
   final double? width;
   final double? height;
   final bool fullWidth;
   final bool fullHeight;
-
-  // ── Theme & interaction ───────────────────────────────────────────────────
-
   final FluxCardThemeData? theme;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
-
-  // ── Loading ───────────────────────────────────────────────────────────────
-
   final bool loading;
   final Widget Function(BuildContext context, Widget skeleton)? loadingWrapper;
 
@@ -135,59 +65,26 @@ class FluxCard extends StatefulWidget {
 }
 
 class _FluxCardState extends State<FluxCard> {
-  // ── Boundary measurement keys ─────────────────────────────────────────────
-  // When notch.isTargeted, zero-height keyed SizedBoxes are inserted at
-  // boundary positions in the layout. Their Y offsets relative to the card
-  // give the measured notch fraction after the first frame.
+  // ── Boundary tracking (Zero-cost alternative to GlobalKey) ──────────────
+  final _cardTracker = BoundaryTracker();
+  final _afterMediaTracker = BoundaryTracker();
+  final _afterHeaderTracker = BoundaryTracker();
+  final _afterBodyTracker = BoundaryTracker();
 
-  final _cardKey = GlobalKey();
-  final _afterMediaKey = GlobalKey();
-  final _afterHeaderKey = GlobalKey();
-  final _afterBodyKey = GlobalKey();
-
-  // double? _measuredNotchFraction;
-
-  Map<FluxSlotBoundary, GlobalKey> get _boundaryKeys => {
-    FluxSlotBoundary.afterMedia: _afterMediaKey,
-    FluxSlotBoundary.afterHeader: _afterHeaderKey,
-    FluxSlotBoundary.afterBody: _afterBodyKey,
+  Map<FluxSlotBoundary, BoundaryTracker> get _trackers => {
+    FluxSlotBoundary.afterMedia: _afterMediaTracker,
+    FluxSlotBoundary.afterHeader: _afterHeaderTracker,
+    FluxSlotBoundary.afterBody: _afterBodyTracker,
   };
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _scheduleMeasurement();
-  // }
-
-  // @override
-  // void didUpdateWidget(FluxCard old) {
-  //   super.didUpdateWidget(old);
-  //   if (widget.notch?.boundary != old.notch?.boundary ||
-  //       widget.layout != old.layout ||
-  //       widget.mediaPosition != old.mediaPosition) {
-  //     _measuredNotchFraction = null;
-  //     _scheduleMeasurement();
-  //   }
-  // }
-
-  // void _scheduleMeasurement() {
-  //   if (widget.notch?.isTargeted != true) return;
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     if (mounted) _measureAndUpdate();
-  //   });
-  // }
-
+  /// Dynamically resolves the exact rendering pixel coordinates of the targeted
+  /// notch boundary during the paint phase without triggering a rebuild.
   double? _resolveNotchPosition(Rect cardRect) {
     final notch = widget.notch;
     if (notch == null || !notch.isTargeted) return null;
 
-    final markerKey = _boundaryKeys[notch.boundary!];
-    if (markerKey == null) return null;
-
-    final markerBox = markerKey.currentContext?.findRenderObject() as RenderBox?;
-    final cardBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
+    final markerBox = _trackers[notch.boundary!]?.renderBox;
+    final cardBox = _cardTracker.renderBox;
 
     if (markerBox == null || cardBox == null) return null;
 
@@ -199,36 +96,10 @@ class _FluxCardState extends State<FluxCard> {
         return ((offset.dx + notch.boundaryOffset) / cardRect.width).clamp(0.0, 1.0);
       }
     } catch (e) {
-      // If the render tree is momentarily detached, silently fail back to the default position.
+      // Graceful fallback if the tree is momentarily detached
       return null;
     }
   }
-
-  // void _measureAndUpdate() {
-  //   final notch = widget.notch;
-  //   if (notch == null || !notch.isTargeted) return;
-  //
-  //   final cardBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
-  //   if (cardBox == null || cardBox.size.height == 0 || cardBox.size.width == 0) return;
-  //
-  //   final markerKey = _boundaryKeys[notch.boundary!]!;
-  //   final markerBox = markerKey.currentContext?.findRenderObject() as RenderBox?;
-  //   if (markerBox == null) return;
-  //
-  //   try {
-  //     final offset = markerBox.localToGlobal(Offset.zero, ancestor: cardBox);
-  //
-  //     final fraction = notch.edge == FluxNotchEdge.vertical
-  //         ? ((offset.dy + notch.boundaryOffset) / cardBox.size.height).clamp(0.0, 1.0)
-  //         : ((offset.dx + notch.boundaryOffset) / cardBox.size.width).clamp(0.0, 1.0);
-  //
-  //     if ((fraction - (_measuredNotchFraction ?? -1)).abs() > 0.001) {
-  //       setState(() => _measuredNotchFraction = fraction);
-  //     }
-  //   } catch (e) {
-  //     // ignore
-  //   }
-  // }
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
@@ -252,8 +123,8 @@ class _FluxCardState extends State<FluxCard> {
 
           final resolvedLayout = widget.layout == FluxLayoutMode.responsive
               ? (cardConstraints.availableWidth >= effectiveTheme.responsiveBreakpoint
-                    ? FluxLayoutMode.row
-                    : FluxLayoutMode.column)
+              ? FluxLayoutMode.row
+              : FluxLayoutMode.column)
               : widget.layout;
 
           final cardColor = effectiveTheme.cardColor ?? Theme.of(context).colorScheme.surface;
@@ -264,22 +135,12 @@ class _FluxCardState extends State<FluxCard> {
 
           // ── Notch geometry ────────────────────────────────────────────────
           final notch = widget.notch;
-          final hasTargetedNotch = notch?.isTargeted == true;
-
-          // final resolvedNotchPos = notch == null
-          //     ? 0.5
-          //     : (hasTargetedNotch
-          //     ? (_measuredNotchFraction ?? notch.fallbackPosition)
-          //     : notch.fallbackPosition);
-
           final resolvedNotchPos = notch?.fallbackPosition ?? 0.5;
 
           final notchBR =
               notch?.borderRadius ?? effectiveTheme.borderRadius.resolve(td ?? TextDirection.ltr);
 
           // ── Shape ─────────────────────────────────────────────────────────
-          // When notch is set, build FluxNotchShape for clipping + shadow.
-          // theme.shape is used for other custom shapes; ignored when notch set.
           final ShapeBorder effectiveShape = notch != null
               ? FluxNotchShape(
             borderRadius: notchBR,
@@ -288,34 +149,25 @@ class _FluxCardState extends State<FluxCard> {
             notchPositionResolver: _resolveNotchPosition,
             notchEdge: notch.edge,
             notchSide: notch.notchSide,
-            // No border here — painted on a top layer instead.
           )
               : effectiveTheme.resolveShape(context);
 
           // ── Card content ──────────────────────────────────────────────────
           final Widget cardContent = widget.loading
               ? FluxCardSkeleton(
-                  layout: resolvedLayout,
-                  mediaPosition: widget.mediaPosition,
-                  theme: effectiveTheme,
-                  hasMedia: widget.media != null,
-                  hasHeader: widget.header != null,
-                  hasBody: widget.body != null,
-                  hasFooter: widget.footer != null,
-                  loadingWrapper: widget.loadingWrapper,
-                )
+            layout: resolvedLayout,
+            mediaPosition: widget.mediaPosition,
+            theme: effectiveTheme,
+            hasMedia: widget.media != null,
+            hasHeader: widget.header != null,
+            hasBody: widget.body != null,
+            hasFooter: widget.footer != null,
+            loadingWrapper: widget.loadingWrapper,
+          )
               : _buildLayers(resolvedLayout, effectiveTheme, resolvedPadding, td);
 
           // ── Stack layers ──────────────────────────────────────────────────
-          // Order (bottom to top):
-          //   1. Material  — background color, elevation shadow, clip
-          //   2. InkWell   — wraps the Stack; child widgets still handle taps
-          //   3. BoxDecoration surface layer (optional, under content)
-          //   4. Card content (slots, backgrounds, overlays)
-          //   5. Notch border painter (always topmost, so never occluded)
-
-          final List<Widget> stackLayers = [
-            // ── 4. Content ──────────────────────────────────────────────────
+          final List<Widget> stackLayers =[
             DefaultTextStyle.merge(
               style: TextStyle(color: widget.foregroundColor),
               child: IconTheme.merge(
@@ -323,8 +175,6 @@ class _FluxCardState extends State<FluxCard> {
                 child: cardContent,
               ),
             ),
-
-            // ── 5. Notch border ─────────────────────────────────────────────
             if (notch != null && notch.side != BorderSide.none)
               Positioned.fill(
                 child: IgnorePointer(
@@ -340,7 +190,6 @@ class _FluxCardState extends State<FluxCard> {
               ),
           ];
 
-          // Insert decoration layer (3) at the bottom when present.
           if (widget.decoration != null) {
             stackLayers.insert(
               0,
@@ -350,9 +199,6 @@ class _FluxCardState extends State<FluxCard> {
             );
           }
 
-          // ── 2. InkWell ────────────────────────────────────────────────────
-          // Sits inside the card Material as a direct child. The ripple fires
-          // on empty card areas; interactive children still receive their taps.
           Widget contentTree = Stack(fit: StackFit.passthrough, children: stackLayers);
           if (widget.onTap != null || widget.onLongPress != null) {
             contentTree = InkWell(
@@ -364,19 +210,21 @@ class _FluxCardState extends State<FluxCard> {
             );
           }
 
-          return SizedBox(
-            key: _cardKey,
-            width: cardConstraints.resolvedWidth,
-            height: cardConstraints.resolvedHeight,
-            // ── 1. Material ─────────────────────────────────────────────────
-            child: Material(
-              color: cardColor,
-              elevation: elevation,
-              shadowColor: shadowColor,
-              surfaceTintColor: effectiveTheme.surfaceTintColor,
-              shape: effectiveShape,
-              clipBehavior: effectiveTheme.clipBehavior,
-              child: contentTree,
+          // ── 1. BoundaryMarker wraps the sizing box to establish coordinates
+          return BoundaryMarker(
+            tracker: _cardTracker,
+            child: SizedBox(
+              width: cardConstraints.resolvedWidth,
+              height: cardConstraints.resolvedHeight,
+              child: Material(
+                color: cardColor,
+                elevation: elevation,
+                shadowColor: shadowColor,
+                surfaceTintColor: effectiveTheme.surfaceTintColor,
+                shape: effectiveShape,
+                clipBehavior: effectiveTheme.clipBehavior,
+                child: contentTree,
+              ),
             ),
           );
         },
@@ -384,52 +232,82 @@ class _FluxCardState extends State<FluxCard> {
     );
   }
 
-  // ── Layer assembly ────────────────────────────────────────────────────────
+  // ── Layer assembly (O(1) Slot Lookup Optimization) ──────────────────────
 
   Widget _buildLayers(
-    FluxLayoutMode resolvedLayout,
-    FluxCardThemeData theme,
-    EdgeInsets resolvedPadding,
-    TextDirection? td,
-  ) {
+      FluxLayoutMode resolvedLayout,
+      FluxCardThemeData theme,
+      EdgeInsets resolvedPadding,
+      TextDirection? td,
+      ) {
     final allBgs = widget.backgrounds ?? const [];
-    final allOvs = widget.overlays ?? const [];
+    final allOvs = widget.overlays ?? const[];
 
-    final globalBgs = allBgs.whereType<FluxBackground>().where((b) => b.isGlobal).toList();
-    final globalOvs = allOvs.whereType<FluxOverlay>().where((o) => o.isGlobal).toList()
-      ..sort((a, b) => a.zIndex.compareTo(b.zIndex));
+    // Pre-group targets so SlotResolver has O(1) lookup rather than O(N) filtering
+    final bgsByTarget = <FluxTarget, List<Widget>>{};
+    final ovsByTarget = <FluxTarget, List<Widget>>{};
+    final globalBgs = <Widget>[];
+    final globalOvs = <Widget>[];
 
-    final extraGlobalBgs = allBgs.where((w) => w is! FluxBackground).toList();
-    final extraGlobalOvs = allOvs.where((w) => w is! FluxOverlay).toList();
+    for (final bg in allBgs) {
+      if (bg is FluxBackground) {
+        if (bg.isGlobal) {
+          globalBgs.add(bg);
+        } else {
+          for (final t in bg.targets) {
+            (bgsByTarget[t] ??=[]).add(bg);
+          }
+        }
+      } else {
+        globalBgs.add(bg);
+      }
+    }
 
-    final mainContent =
-        FluxCardLayout(
-          mode: resolvedLayout,
-          mediaPosition: widget.mediaPosition,
-          theme: theme,
-          resolvedPadding: resolvedPadding,
-          divider: widget.divider,
-          boundaryKeys: widget.notch?.isTargeted == true ? _boundaryKeys : null,
-        ).build(
-          media: widget.media,
-          header: widget.header,
-          body: widget.body,
-          footer: widget.footer,
-          allBackgrounds: allBgs,
-          allOverlays: allOvs,
-        );
+    for (final ov in allOvs) {
+      if (ov is FluxOverlay) {
+        if (ov.isGlobal) {
+          globalOvs.add(ov);
+        } else {
+          for (final t in ov.targets) {
+            (ovsByTarget[t] ??=[]).add(ov);
+          }
+        }
+      } else {
+        globalOvs.add(ov);
+      }
+    }
 
-    final allGlobalBgs = [...extraGlobalBgs, ...globalBgs];
-    final allGlobalOvs = [...extraGlobalOvs, ...globalOvs];
+    int getZIndex(Widget w) => w is FluxOverlay ? w.zIndex : 0;
 
-    if (allGlobalBgs.isEmpty && allGlobalOvs.isEmpty) return mainContent;
+    globalOvs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
+    for (final list in ovsByTarget.values) {
+      list.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
+    }
+
+    final mainContent = FluxCardLayout(
+      mode: resolvedLayout,
+      mediaPosition: widget.mediaPosition,
+      theme: theme,
+      resolvedPadding: resolvedPadding,
+      divider: widget.divider,
+      boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
+    ).build(
+      media: widget.media,
+      header: widget.header,
+      body: widget.body,
+      footer: widget.footer,
+      bgsByTarget: bgsByTarget,
+      ovsByTarget: ovsByTarget,
+    );
+
+    if (globalBgs.isEmpty && globalOvs.isEmpty) return mainContent;
 
     return Stack(
       fit: StackFit.passthrough,
-      children: [
-        ...allGlobalBgs.map((bg) => Positioned.fill(child: bg)),
+      children:[
+        ...globalBgs.map((bg) => Positioned.fill(child: bg)),
         mainContent,
-        ...allGlobalOvs.map((ov) => Positioned.fill(child: ov)),
+        ...globalOvs.map((ov) => Positioned.fill(child: ov)),
       ],
     );
   }
