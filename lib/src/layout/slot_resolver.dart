@@ -6,7 +6,6 @@ import 'boundary_tracker.dart';
 
 /// Static helpers that compose individual card slots and content groups.
 abstract final class SlotResolver {
-
   static Widget? wrapSlot({
     required FluxTarget target,
     required Widget? child,
@@ -17,10 +16,9 @@ abstract final class SlotResolver {
     if (child == null) return null;
 
     final bgs = bgsByTarget[target] ?? const [];
-    final ovs = ovsByTarget[target] ?? const[];
+    final ovs = ovsByTarget[target] ?? const [];
 
-    final Widget paddedChild =
-    (contentPadding != null && contentPadding != EdgeInsets.zero)
+    final Widget paddedChild = (contentPadding != null && contentPadding != EdgeInsets.zero)
         ? Padding(padding: contentPadding, child: child)
         : child;
 
@@ -28,7 +26,7 @@ abstract final class SlotResolver {
 
     return Stack(
       fit: StackFit.passthrough,
-      children:[
+      children: [
         ...bgs.map((bg) => Positioned.fill(child: bg)),
         paddedChild,
         ...ovs.map((ov) => Positioned.fill(child: ov)),
@@ -36,10 +34,7 @@ abstract final class SlotResolver {
     );
   }
 
-  static Widget verticalGroup({
-    required List<Widget?> slots,
-    required double spacing,
-  }) {
+  static Widget verticalGroup({required List<Widget?> slots, required double spacing}) {
     final children = <Widget>[];
     for (final slot in slots) {
       if (slot == null) continue;
@@ -90,14 +85,16 @@ abstract final class SlotResolver {
       if (wrapped != null) children.add(wrapped);
 
       if (i < present.length - 1) {
-        final boundary = _boundaryBetween(present[i].$1, present[i + 1].$1);
+        final boundary = boundaryBetween(present[i].$1, present[i + 1].$1);
         if (boundary != null) {
           final tracker = boundaryTrackers?[boundary];
           if (tracker != null) {
-            children.add(BoundaryMarker(
+            children.add(
+              BoundaryMarker(
                 tracker: tracker,
-                child: const SizedBox(height: 0, width: double.infinity)
-            ));
+                child: const SizedBox(height: 0, width: double.infinity),
+              ),
+            );
           }
           final dividerWidget = divider?.widgetFor(boundary);
           if (dividerWidget != null) {
@@ -115,7 +112,8 @@ abstract final class SlotResolver {
     );
   }
 
-  static FluxSlotBoundary? _boundaryBetween(FluxTarget a, FluxTarget b) {
+  /// Exposed publicly so FluxCardLayout can use it for row grouping logic.
+  static FluxSlotBoundary? boundaryBetween(FluxTarget a, FluxTarget b) {
     if (a == FluxTarget.header && b == FluxTarget.body) {
       return FluxSlotBoundary.afterHeader;
     }

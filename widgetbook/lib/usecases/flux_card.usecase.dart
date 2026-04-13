@@ -20,6 +20,11 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
     options: FluxMediaPosition.values,
     labelBuilder: (m) => m.name,
   );
+  final mediaSpan = context.knobs.object.segmented<FluxMediaSpan>(
+    label: 'Media span (Row only)',
+    options: FluxMediaSpan.values,
+    labelBuilder: (m) => m.name,
+  );
   final useWideSurface = context.knobs.boolean(label: 'Wide surface');
   final showOverlay = context.knobs.boolean(label: 'Show overlay', initialValue: true);
   final showFooter = context.knobs.boolean(label: 'Show footer', initialValue: true);
@@ -32,13 +37,11 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
     FluxCard(
       layout: layout,
       mediaPosition: mediaPosition,
+      mediaSpan: mediaSpan,
       loading: loading,
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Ink.image(
-          image: NetworkImage(product.image),
-          fit: BoxFit.cover,
-        ),
+        child: Ink.image(image: NetworkImage(product.image), fit: BoxFit.cover),
       ),
       overlays: [
         if (showOverlay && product.hasDiscount)
@@ -66,18 +69,18 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
       body: Text(product.tags.join(' • ')),
       footer: showFooter
           ? FluxSection(
-        actions: [
-          Text(
-            product.priceLabel,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-          ),
-          IconButton(
-            onPressed: product.inStock ? () {} : null,
-            icon: const Icon(Icons.add_shopping_cart_outlined, size: 18),
-          ),
-        ],
-        padding: EdgeInsets.zero,
-      )
+              actions: [
+                Text(
+                  product.priceLabel,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                ),
+                IconButton(
+                  onPressed: product.inStock ? () {} : null,
+                  icon: const Icon(Icons.add_shopping_cart_outlined, size: 18),
+                ),
+              ],
+              padding: EdgeInsets.zero,
+            )
           : null,
       theme: FluxCardThemeData.elevated,
       onTap: () {},
@@ -86,10 +89,64 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
   );
 }
 
+@widgetbook.UseCase(name: 'Row Spanning', type: FluxCard, path: '[Flux Card]/Cards')
+Widget buildRowSpanningUseCase(BuildContext context) {
+  final mediaSpan = context.knobs.object.segmented<FluxMediaSpan>(
+    label: 'Media span',
+    options: FluxMediaSpan.values,
+    labelBuilder: (m) => m.name,
+  );
+  final mediaPosition = context.knobs.object.segmented<FluxMediaPosition>(
+    label: 'Media position',
+    options: FluxMediaPosition.values,
+    labelBuilder: (m) => m.name,
+  );
+
+  final post = demoPosts[1];
+
+  return previewSurface(
+    context,
+    FluxCard(
+      layout: FluxLayoutMode.row,
+      mediaPosition: mediaPosition,
+      mediaSpan: mediaSpan,
+      media: FluxMedia(
+        aspectRatio: 1.0,
+        child: Ink.image(image: NetworkImage(post.image), fit: BoxFit.cover),
+      ),
+      // Use the new semantic .header!
+      header: FluxSection.header(
+        title: Text(post.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(post.category),
+        padding: EdgeInsets.zero,
+      ),
+      body: const Text(
+        'Change the Media Span knob to see the image wrap specifically next to the header, body, '
+        'or footer, while the other slots seamlessly expand to full width.',
+        style: TextStyle(fontSize: 13),
+      ),
+      // Use the new semantic .footer with spaceBetween!
+      footer: FluxSection.footer(
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          Text(
+            '${post.author} • ${post.readTime}',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+          // Spacer() removed! spaceBetween handles the layout now.
+          IconButton(onPressed: () {}, icon: const Icon(Icons.bookmark_border, size: 20)),
+        ],
+        padding: EdgeInsets.zero,
+      ),
+      theme: FluxCardThemeData.elevated.copyWith(flexMedia: 1, flexContent: 2),
+      onTap: () {},
+    ),
+    maxWidth: 500,
+  );
+}
+
 @widgetbook.UseCase(name: 'Ripple over media', type: FluxCard, path: '[Flux Card]/Cards')
 Widget buildRippleOverMediaUseCase(BuildContext context) {
-  // Ink.image paints via the Material ink layer, so the card's ripple sweeps
-  // seamlessly across both the image and the text content below it.
   return previewSurface(
     context,
     Column(
@@ -105,10 +162,7 @@ Widget buildRippleOverMediaUseCase(BuildContext context) {
         FluxCard(
           media: FluxMedia(
             aspectRatio: 16 / 9,
-            child: Ink.image(
-              image: NetworkImage(demoDestinations.first.image),
-              fit: BoxFit.cover,
-            ),
+            child: Ink.image(image: NetworkImage(demoDestinations.first.image), fit: BoxFit.cover),
           ),
           header: const FluxSection(
             title: Text('Tap anywhere'),
@@ -138,29 +192,26 @@ Widget buildDecorationUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Ink.image(
-          image: NetworkImage(demoPosts.first.image),
-          fit: BoxFit.cover,
-        ),
+        child: Ink.image(image: NetworkImage(demoPosts.first.image), fit: BoxFit.cover),
       ),
       decoration: useGradient
           ? BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.primaryContainer,
-            Theme.of(context).colorScheme.secondaryContainer,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: useBorder
-            ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
-            : null,
-      )
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primaryContainer,
+                  Theme.of(context).colorScheme.secondaryContainer,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: useBorder
+                  ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
+                  : null,
+            )
           : useBorder
           ? BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1.5),
-      )
+              border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1.5),
+            )
           : null,
       header: const FluxSection(
         title: Text('Surface decoration'),
@@ -186,10 +237,7 @@ Widget buildColumnLayoutUseCase(BuildContext context) {
       layout: FluxLayoutMode.column,
       media: FluxMedia(
         aspectRatio: 1,
-        child: Ink.image(
-          image: NetworkImage(product.image),
-          fit: BoxFit.cover,
-        ),
+        child: Ink.image(image: NetworkImage(product.image), fit: BoxFit.cover),
       ),
       header: FluxSection(
         title: Text(product.name),
@@ -225,12 +273,8 @@ Widget buildRowLayoutUseCase(BuildContext context) {
     context,
     FluxCard(
       layout: FluxLayoutMode.row,
-      // No aspectRatio — image fills row slot height via BoxFit.cover
       media: FluxMedia(
-        child: Ink.image(
-          image: NetworkImage(destination.image),
-          fit: BoxFit.cover,
-        ),
+        child: Ink.image(image: NetworkImage(destination.image), fit: BoxFit.cover),
       ),
       header: FluxSection(
         title: Text(destination.title),
@@ -265,13 +309,9 @@ Widget buildInlineLayoutUseCase(BuildContext context) {
     FluxCard(
       layout: FluxLayoutMode.inline,
       mediaPosition: mediaPosition,
-      // aspectRatio drives media size; media is embedded between header and body.
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Ink.image(
-          image: NetworkImage(post.image),
-          fit: BoxFit.cover,
-        ),
+        child: Ink.image(image: NetworkImage(post.image), fit: BoxFit.cover),
       ),
       header: FluxSection(
         title: Text(post.title),
@@ -280,7 +320,7 @@ Widget buildInlineLayoutUseCase(BuildContext context) {
       ),
       body: const Text(
         'inline places media inside the content column — between header and body '
-            'when position=start, or between body and footer when position=end.',
+        'when position=start, or between body and footer when position=end.',
       ),
       footer: FluxSection(
         actions: [TextButton(onPressed: () {}, child: const Text('Read more'))],
@@ -309,10 +349,7 @@ Widget buildResponsiveLayoutUseCase(BuildContext context) {
       layout: FluxLayoutMode.responsive,
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Ink.image(
-          image: NetworkImage(post.image),
-          fit: BoxFit.cover,
-        ),
+        child: Ink.image(image: NetworkImage(post.image), fit: BoxFit.cover),
       ),
       header: FluxSection(
         title: Text(post.title),

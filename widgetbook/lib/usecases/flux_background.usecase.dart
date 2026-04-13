@@ -3,18 +3,14 @@ import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../demo/demo_destination.dart';
 import '../shared/preview_surface.dart';
 
 @widgetbook.UseCase(name: 'Color', type: FluxBackground, path: '[Flux Card]/Backgrounds')
 Widget buildBackgroundColorUseCase(BuildContext context) {
   final color = context.knobs.object.segmented<Color>(
     label: 'Color',
-    options: const [
-      Color(0xFFE2E8F0),
-      Color(0xFFBFDBFE),
-      Color(0xFFFBCFE8),
-      Color(0xFFDDD6FE),
-    ],
+    options: const [Color(0xFFE2E8F0), Color(0xFFBFDBFE), Color(0xFFFBCFE8), Color(0xFFDDD6FE)],
     labelBuilder: (c) {
       if (c == const Color(0xFFE2E8F0)) return 'Slate';
       if (c == const Color(0xFFBFDBFE)) return 'Blue';
@@ -27,7 +23,7 @@ Widget buildBackgroundColorUseCase(BuildContext context) {
     context,
     FluxCard(
       backgrounds: [FluxBackground.color(color: color)],
-      header: const FluxSection(title: Text('Color background'), padding: EdgeInsets.zero),
+      header: const FluxSection.header(title: Text('Color background'), padding: EdgeInsets.zero),
       body: const Text('FluxTarget.card (default) paints the whole surface.'),
       theme: FluxCardThemeData.elevated,
       height: 160,
@@ -50,7 +46,7 @@ Widget buildBackgroundGradientUseCase(BuildContext context) {
         ),
       ],
       foregroundColor: Colors.white,
-      header: const FluxSection(
+      header: const FluxSection.header(
         title: Text('Gradient background'),
         subtitle: Text('Gradient alignment lives in the LinearGradient itself.'),
         padding: EdgeInsets.zero,
@@ -59,6 +55,62 @@ Widget buildBackgroundGradientUseCase(BuildContext context) {
       theme: FluxCardThemeData.elevated.copyWith(padding: const EdgeInsets.all(20)),
       height: 180,
     ),
+  );
+}
+
+@widgetbook.UseCase(name: 'Image', type: FluxBackground, path: '[Flux Card]/Backgrounds')
+Widget buildBackgroundImageUseCase(BuildContext context) {
+  final targetHeader = context.knobs.boolean(label: 'Target Header', initialValue: true);
+  final targetBody = context.knobs.boolean(label: 'Target Body', initialValue: true);
+  final targetFooter = context.knobs.boolean(label: 'Target Footer', initialValue: false);
+
+  final targets = <FluxTarget>{
+    if (targetHeader) FluxTarget.header,
+    if (targetBody) FluxTarget.body,
+    if (targetFooter) FluxTarget.footer,
+  };
+
+  return previewSurface(
+    context,
+    FluxCard(
+      backgrounds: [
+        FluxBackground.custom(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage(demoDestinations[0].image), // Santorini image
+              fit: BoxFit.cover,
+              colorFilter: const ColorFilter.mode(Colors.black54, BlendMode.darken),
+            ),
+          ),
+          targets: targets,
+        ),
+      ],
+      foregroundColor: Colors.white,
+      header: const FluxSection.header(
+        title: Text('Image background'),
+        subtitle: Text('Using FluxBackground.custom()'),
+        padding: EdgeInsets.zero,
+      ),
+      body: const Text(
+        'You can pass any BoxDecoration to custom(). Here we use a darkened DecorationImage so the white text stays readable over the photo.',
+      ),
+      footer: FluxSection.footer(
+        actionsAlignment: MainAxisAlignment.end,
+        actions: [
+          ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+            ),
+            child: const Text('Explore'),
+          ),
+        ],
+        padding: EdgeInsets.zero,
+      ),
+      theme: FluxCardThemeData.elevated.copyWith(padding: const EdgeInsets.all(24)),
+    ),
+    maxWidth: 380,
   );
 }
 
@@ -83,13 +135,64 @@ Widget buildBackgroundSlotTargetedUseCase(BuildContext context) {
           targets: {target},
         ),
       ],
-      header: const FluxSection(title: Text('Slot background'), padding: EdgeInsets.zero),
+      header: const FluxSection.header(title: Text('Slot background'), padding: EdgeInsets.zero),
       body: const Text('Only the selected slot gets the background tint.'),
-      footer: const FluxSection(
+      footer: const FluxSection.footer(
         actions: [Chip(label: Text('Action'))],
         padding: EdgeInsets.zero,
       ),
       theme: FluxCardThemeData.elevated,
+    ),
+  );
+}
+
+@widgetbook.UseCase(name: 'Multi-targeted', type: FluxBackground, path: '[Flux Card]/Backgrounds')
+Widget buildBackgroundMultiTargetedUseCase(BuildContext context) {
+  final targetHeader = context.knobs.boolean(label: 'Target Header', initialValue: true);
+  final targetBody = context.knobs.boolean(label: 'Target Body', initialValue: true);
+  final targetFooter = context.knobs.boolean(label: 'Target Footer', initialValue: false);
+
+  final targets = <FluxTarget>{
+    if (targetHeader) FluxTarget.header,
+    if (targetBody) FluxTarget.body,
+    if (targetFooter) FluxTarget.footer,
+  };
+
+  return previewSurface(
+    context,
+    FluxCard(
+      backgrounds: [
+        FluxBackground.gradient(
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer,
+              Theme.of(context).colorScheme.tertiaryContainer,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          // Fallback to card if the set is empty, otherwise apply to targeted slots
+          targets: targets.isEmpty ? {FluxTarget.card} : targets,
+        ),
+      ],
+      header: const FluxSection.header(
+        title: Text('Multi-targeted background'),
+        subtitle: Text('Spans exactly the selected slots'),
+        padding: EdgeInsets.all(20),
+      ),
+      body: const FluxContent(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Text(
+          'Passing multiple targets (like {header, body}) makes the background wrap those specific contiguous slots seamlessly while leaving the rest of the card blank. Try toggling the knobs!',
+        ),
+      ),
+      footer: const FluxSection.footer(
+        actions: [Chip(label: Text('Footer area (Transparent by default)'))],
+        padding: EdgeInsets.all(20),
+      ),
+      // Set the card padding to zero so the background hits the edges perfectly,
+      // and let the internal slots handle their own 20px padding.
+      theme: FluxCardThemeData.elevated.copyWith(padding: EdgeInsets.zero),
     ),
   );
 }

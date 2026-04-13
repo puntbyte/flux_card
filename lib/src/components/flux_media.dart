@@ -82,12 +82,12 @@ class FluxMedia extends StatelessWidget {
     // provides directly. In row mode (Row with crossAxisAlignment.stretch)
     // the child gets tight constraints and BoxFit.cover works correctly.
 
-    if (padding != EdgeInsets.zero) {
-      result = Padding(padding: padding, child: result);
-    }
-
     if (borderRadius != null) {
       result = ClipRRect(borderRadius: borderRadius!, clipBehavior: clipBehavior, child: result);
+    }
+
+    if (padding != EdgeInsets.zero) {
+      result = Padding(padding: padding, child: result);
     }
 
     return result;

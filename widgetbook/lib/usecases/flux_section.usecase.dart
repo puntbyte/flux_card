@@ -5,26 +5,60 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import '../shared/preview_surface.dart';
 
-@widgetbook.UseCase(name: 'Full anatomy', type: FluxSection, path: '[Flux Card]/Sections')
+@widgetbook.UseCase(name: 'Semantic .header', type: FluxSection, path: '[Flux Card]/Sections')
+Widget buildSectionHeaderUseCase(BuildContext context) {
+  return previewSurface(
+    context,
+    const Card(
+      child: FluxSection.header(
+        leading: CircleAvatar(child: Icon(Icons.person)),
+        title: Text('FluxSection.header'),
+        subtitle: Text('Clean autocomplete: no actions or child properties.'),
+        trailing: [Chip(label: Text('PRO'))],
+        padding: EdgeInsets.all(16),
+      ),
+    ),
+    maxWidth: 420,
+  );
+}
+
+@widgetbook.UseCase(name: 'Semantic .footer', type: FluxSection, path: '[Flux Card]/Sections')
+Widget buildSectionFooterUseCase(BuildContext context) {
+  final alignment = context.knobs.object.segmented<MainAxisAlignment>(
+    label: 'Alignment',
+    options: const [MainAxisAlignment.start, MainAxisAlignment.end, MainAxisAlignment.spaceBetween],
+    labelBuilder: (a) => a.name,
+  );
+
+  return previewSurface(
+    context,
+    Card(
+      child: FluxSection.footer(
+        actionsAlignment: alignment,
+        padding: const EdgeInsets.all(16),
+        actions: [
+          const Text('\$49.99', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ElevatedButton(onPressed: () {}, child: const Text('Checkout')),
+        ],
+      ),
+    ),
+    maxWidth: 420,
+  );
+}
+
+@widgetbook.UseCase(name: 'Agnostic (Omni-tool)', type: FluxSection, path: '[Flux Card]/Sections')
 Widget buildSectionAnatomyUseCase(BuildContext context) {
   final showLeading = context.knobs.boolean(label: 'Show leading', initialValue: true);
   final showTrailing = context.knobs.boolean(label: 'Show trailing', initialValue: true);
   final showChild = context.knobs.boolean(label: 'Show child', initialValue: true);
   final showActions = context.knobs.boolean(label: 'Show actions', initialValue: true);
-  final spacing = context.knobs.double.slider(
-    label: 'Spacing',
-    min: 4,
-    max: 24,
-    divisions: 10,
-    initialValue: 12,
-  );
 
   return previewSurface(
     context,
     FluxSection(
-      leading: showLeading ? const CircleAvatar(child: Icon(Icons.person)) : null,
-      title: const Text('FluxSection'),
-      subtitle: const Text('Header row + child + actions'),
+      leading: showLeading ? const CircleAvatar(child: Icon(Icons.widgets)) : null,
+      title: const Text('Agnostic FluxSection'),
+      subtitle: const Text('The default constructor allows everything.'),
       trailing: showTrailing ? const [Chip(label: Text('NEW'))] : null,
       actions: showActions
           ? [
@@ -32,7 +66,6 @@ Widget buildSectionAnatomyUseCase(BuildContext context) {
               OutlinedButton(onPressed: () {}, child: const Text('SECONDARY')),
             ]
           : null,
-      spacing: spacing,
       padding: const EdgeInsets.all(20),
       child: showChild
           ? const Text('Free-form body content placed between the header row and actions.')
@@ -55,7 +88,7 @@ Widget buildSectionDecorationUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      header: FluxSection(
+      header: FluxSection.header(
         title: const Text('Pro Plan'),
         subtitle: const Text('Everything you need at scale'),
         decoration: BoxDecoration(
@@ -74,8 +107,10 @@ Widget buildSectionDecorationUseCase(BuildContext context) {
         ),
         padding: const EdgeInsets.all(16),
       ),
-      body: const Text('Use decoration to create visually distinct header and footer zones within the same card.'),
-      footer: FluxSection(
+      body: const Text(
+        'Use decoration to create visually distinct header and footer zones within the same card.',
+      ),
+      footer: FluxSection.footer(
         decoration: BoxDecoration(
           color: Colors.black.withAlpha(12),
           borderRadius: BorderRadius.only(
@@ -83,31 +118,11 @@ Widget buildSectionDecorationUseCase(BuildContext context) {
             bottomRight: Radius.circular(radius),
           ),
         ),
-        actions: [
-          ElevatedButton(onPressed: () {}, child: const Text('Upgrade')),
-        ],
+        actionsAlignment: MainAxisAlignment.end,
+        actions: [ElevatedButton(onPressed: () {}, child: const Text('Upgrade'))],
         padding: const EdgeInsets.all(16),
       ),
       theme: FluxCardThemeData.elevated.copyWith(padding: EdgeInsets.zero),
-    ),
-    maxWidth: 420,
-  );
-}
-
-@widgetbook.UseCase(name: 'As standalone', type: FluxSection, path: '[Flux Card]/Sections')
-Widget buildSectionStandaloneUseCase(BuildContext context) {
-  return previewSurface(
-    context,
-    Card(
-      child: FluxSection(
-        leading: const Icon(Icons.notifications_outlined),
-        title: const Text('FluxSection outside FluxCard'),
-        subtitle: const Text('It works anywhere — not tied to FluxCard.'),
-        actions: [
-          TextButton(onPressed: () {}, child: const Text('Dismiss')),
-        ],
-        padding: const EdgeInsets.all(16),
-      ),
     ),
     maxWidth: 420,
   );

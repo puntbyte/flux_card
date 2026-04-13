@@ -36,7 +36,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     this.shadowColor,
     this.surfaceTintColor,
     this.elevation = 0.0,
-    this.clipBehavior = Clip.antiAlias,
+    this.clipBehavior = Clip.hardEdge,
     this.flexMedia = 2,
     this.flexContent = 3,
     this.responsiveBreakpoint = 600.0,

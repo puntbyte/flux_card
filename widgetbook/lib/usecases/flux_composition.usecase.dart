@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -353,16 +354,9 @@ Widget buildPricingCardUseCase(BuildContext context) {
                 children: [
                   Text(
                     '\$1300',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 22,
-                      color: footerText,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22, color: footerText),
                   ),
-                  Text(
-                    'Billed one time',
-                    style: TextStyle(fontSize: 12, color: footerMuted),
-                  ),
+                  Text('Billed one time', style: TextStyle(fontSize: 12, color: footerMuted)),
                 ],
               ),
               const Spacer(),
@@ -425,11 +419,12 @@ Widget buildFullBleedProductUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(
         aspectRatio: 0.82,
+        alignment: .topCenter,
         child: Ink.image(
           image: const NetworkImage(
-            'https://images.unsplash.com/photo-1553279768-865429fa0078?w=700',
+            'https://static.vecteezy.com/system/resources/thumbnails/033/151/970/small/mango-in-woven-basket-png.png',
           ),
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
         ),
       ),
       backgrounds: [
@@ -515,7 +510,10 @@ Widget buildFullBleedProductUseCase(BuildContext context) {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             elevation: 0,
           ),
-          child: const Text('Add to cart', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+          child: const Text(
+            'Add to cart',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
         ),
       ),
       theme: const FluxCardThemeData(
@@ -554,7 +552,7 @@ Widget buildPropertyListingUseCase(BuildContext context) {
       title: 'The Ubud Jungle Villa',
       location: 'Located in Ubud, Bali, Indonesia',
       description:
-      'Perched above the lush tropical rainforest, this open-air Balinese villa features thatched roofs, bamboo, and breathtaking panoramic views.',
+          'Perched above the lush tropical rainforest, this open-air Balinese villa features thatched roofs, bamboo, and breathtaking panoramic views.',
       price: 'From Rp3,200,000 / night',
       ctaLabel: 'Book Now',
     ),
@@ -565,7 +563,7 @@ Widget buildPropertyListingUseCase(BuildContext context) {
       title: 'The Sakura Garden Ryokan',
       location: 'Located in Kyoto, Japan',
       description:
-      'Experience timeless Japanese hospitality in this traditional ryokan surrounded by blooming sakura trees and peaceful zen gardens.',
+          'Experience timeless Japanese hospitality in this traditional ryokan surrounded by blooming sakura trees and peaceful zen gardens.',
       price: 'From ¥27,000 / night',
       ctaLabel: 'Reserve this place',
     ),
@@ -578,7 +576,21 @@ Widget buildPropertyListingUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(
         aspectRatio: 16 / 11,
-        child: Ink.image(image: NetworkImage(p.image), fit: BoxFit.cover),
+        borderRadius: BorderRadius.circular(16.0),
+        padding: EdgeInsets.all(8.0),
+        // child: CachedNetworkImage(
+        //   imageUrl: p.image,
+        //   placeholder: (context, url) => CircularProgressIndicator(),
+        //   errorWidget: (context, url, error) => Icon(Icons.error),
+        //   fit: BoxFit.cover,
+        // ),
+        child: Material(
+          color: Colors.transparent,
+          child: Ink.image(
+            image: CachedNetworkImageProvider(p.image),
+            fit: BoxFit.fill,
+          ),
+        ),
       ),
       overlays: [
         if (p.badge != null)
@@ -615,10 +627,7 @@ Widget buildPropertyListingUseCase(BuildContext context) {
         ),
       ],
       header: FluxSection(
-        title: Text(
-          p.title,
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-        ),
+        title: Text(p.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
         subtitle: Text(p.location, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         padding: EdgeInsets.zero,
       ),
@@ -736,9 +745,7 @@ Widget buildEventTicketUseCase(BuildContext context) {
         notchRadius: 14,
         side: BorderSide(width: 2, color: Colors.black),
       ),
-      divider: const FluxDivider(
-        afterHeader: FluxDashedDivider(indent: 14, endIndent: 14),
-      ),
+      divider: const FluxDivider(afterHeader: FluxDashedDivider(indent: 14, endIndent: 14)),
       theme: FluxCardThemeData.outlined.copyWith(
         borderSide: const BorderSide(width: 2, color: Colors.black),
         padding: const EdgeInsets.all(20),
@@ -756,6 +763,7 @@ Widget buildEventTicketUseCase(BuildContext context) {
 /// Small stat column used in the freelancer card footer.
 class _StatCol extends StatelessWidget {
   const _StatCol({required this.value, required this.label});
+
   final String value;
   final String label;
 
@@ -775,6 +783,7 @@ class _StatCol extends StatelessWidget {
 /// Stat column used in the creator profile media overlay (white text).
 class _CreatorStat extends StatelessWidget {
   const _CreatorStat({required this.value, required this.label});
+
   final String value;
   final String label;
 
@@ -797,6 +806,7 @@ class _CreatorStat extends StatelessWidget {
 /// Icon + text row for the pricing card feature list.
 class _PricingFeature extends StatelessWidget {
   const _PricingFeature({required this.icon, required this.text, required this.color});
+
   final IconData icon;
   final String text;
   final Color color;
@@ -816,6 +826,7 @@ class _PricingFeature extends StatelessWidget {
 /// Rounded pill badge — used across multiple cards.
 class _Pill extends StatelessWidget {
   const _Pill({required this.label, required this.bg, this.border, this.bold = false});
+
   final String label;
   final Color bg;
   final Color? border;
@@ -845,6 +856,7 @@ class _Pill extends StatelessWidget {
 /// Horizontal carousel dot indicator for the property listing card.
 class _CarouselDots extends StatelessWidget {
   const _CarouselDots({required this.count, required this.active});
+
   final int count;
   final int active;
 

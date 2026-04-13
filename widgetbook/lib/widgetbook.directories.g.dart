@@ -53,6 +53,16 @@ final directories = <_widgetbook.WidgetbookNode>[
                     .buildBackgroundGradientUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
+                name: 'Image',
+                builder: _flux_card_widgetbook_usecases_flux_background_usecase
+                    .buildBackgroundImageUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Multi-targeted',
+                builder: _flux_card_widgetbook_usecases_flux_background_usecase
+                    .buildBackgroundMultiTargetedUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
                 name: 'Slot-targeted',
                 builder: _flux_card_widgetbook_usecases_flux_background_usecase
                     .buildBackgroundSlotTargetedUseCase,
@@ -96,6 +106,11 @@ final directories = <_widgetbook.WidgetbookNode>[
                 name: 'Row',
                 builder: _flux_card_widgetbook_usecases_flux_card_usecase
                     .buildRowLayoutUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Row Spanning',
+                builder: _flux_card_widgetbook_usecases_flux_card_usecase
+                    .buildRowSpanningUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Surface decoration',
@@ -268,14 +283,19 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'FluxSection',
             useCases: [
               _widgetbook.WidgetbookUseCase(
-                name: 'As standalone',
-                builder: _flux_card_widgetbook_usecases_flux_section_usecase
-                    .buildSectionStandaloneUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Full anatomy',
+                name: 'Agnostic (Omni-tool)',
                 builder: _flux_card_widgetbook_usecases_flux_section_usecase
                     .buildSectionAnatomyUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Semantic .footer',
+                builder: _flux_card_widgetbook_usecases_flux_section_usecase
+                    .buildSectionFooterUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Semantic .header',
+                builder: _flux_card_widgetbook_usecases_flux_section_usecase
+                    .buildSectionHeaderUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'With decoration',

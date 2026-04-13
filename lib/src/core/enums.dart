@@ -25,6 +25,27 @@ enum FluxMediaPosition {
   end,
 }
 
+/// Defines which content slots the media sits side-by-side with in a row layout.
+enum FluxMediaSpan {
+  /// Media spans Header + Body + Footer (Current default)
+  all,
+
+  /// Media spans Header only
+  header,
+
+  /// Media spans Body only
+  body,
+
+  /// Media spans Footer only
+  footer,
+
+  /// Media spans Header + Body
+  headerAndBody,
+
+  /// Media spans Body + Footer
+  bodyAndFooter,
+}
+
 /// Identifies a named slot inside a [FluxCard].
 ///
 /// Used by [FluxBackground] and [FluxOverlay] to declare which part(s) of the

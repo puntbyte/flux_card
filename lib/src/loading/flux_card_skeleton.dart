@@ -37,6 +37,8 @@ class FluxCardSkeleton extends StatefulWidget {
     super.key,
     required this.layout,
     required this.mediaPosition,
+    this.mediaSpan = FluxMediaSpan.all,
+
     required this.theme,
     this.hasMedia = true,
     this.hasHeader = true,
@@ -47,6 +49,8 @@ class FluxCardSkeleton extends StatefulWidget {
 
   final FluxLayoutMode layout;
   final FluxMediaPosition mediaPosition;
+  final FluxMediaSpan mediaSpan;
+
   final FluxCardThemeData theme;
   final bool hasMedia;
   final bool hasHeader;
@@ -150,6 +154,7 @@ class _FluxCardSkeletonState extends State<FluxCardSkeleton>
           ? FluxLayoutMode.column
           : widget.layout,
       mediaPosition: widget.mediaPosition,
+      mediaSpan: widget.mediaSpan,
       theme: widget.theme,
       resolvedPadding: const EdgeInsets.all(8),
     ).build(
@@ -209,25 +214,28 @@ class _ShimmerLayer extends StatelessWidget {
     final base = Theme.of(context).colorScheme.surfaceContainerHighest;
     final highlight = Theme.of(context).colorScheme.surface;
 
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, _) {
-        final v = animation.value;
-        return ShaderMask(
-          blendMode: BlendMode.srcATop,
-          shaderCallback: (bounds) => LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [base, highlight, base],
-            stops: [
-              (v - 0.4).clamp(0.0, 1.0),
-              v.clamp(0.0, 1.0),
-              (v + 0.4).clamp(0.0, 1.0),
-            ],
-          ).createShader(bounds),
-          child: child,
-        );
-      },
+    // ADD RepaintBoundary here!
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, _) {
+          final v = animation.value;
+          return ShaderMask(
+            blendMode: BlendMode.srcATop,
+            shaderCallback: (bounds) => LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [base, highlight, base],
+              stops:[
+                (v - 0.4).clamp(0.0, 1.0),
+                v.clamp(0.0, 1.0),
+                (v + 0.4).clamp(0.0, 1.0),
+              ],
+            ).createShader(bounds),
+            child: child,
+          );
+        },
+      ),
     );
   }
 }
