@@ -113,9 +113,9 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'FluxCard',
             useCases: [
               _widgetbook.WidgetbookUseCase(
-                name: 'Blog card',
+                name: 'Creator profile',
                 builder: _flux_card_widgetbook_usecases_flux_composition_usecase
-                    .buildBlogCardUseCase,
+                    .buildCreatorProfileUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Event ticket',
@@ -123,19 +123,24 @@ final directories = <_widgetbook.WidgetbookNode>[
                     .buildEventTicketUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Product card',
+                name: 'Freelancer profile',
                 builder: _flux_card_widgetbook_usecases_flux_composition_usecase
-                    .buildProductCardUseCase,
+                    .buildFreelancerProfileUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Speak Card',
+                name: 'Pricing card',
                 builder: _flux_card_widgetbook_usecases_flux_composition_usecase
-                    .buildSpeakCardUseCase,
+                    .buildPricingCardUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Travel card',
+                name: 'Product card (full bleed)',
                 builder: _flux_card_widgetbook_usecases_flux_composition_usecase
-                    .buildTravelCardUseCase,
+                    .buildFullBleedProductUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Property listing',
+                builder: _flux_card_widgetbook_usecases_flux_composition_usecase
+                    .buildPropertyListingUseCase,
               ),
             ],
           ),
