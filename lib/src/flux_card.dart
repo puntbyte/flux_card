@@ -145,7 +145,7 @@ class _FluxCardState extends State<FluxCard> {
   final _afterHeaderKey = GlobalKey();
   final _afterBodyKey = GlobalKey();
 
-  double? _measuredNotchFraction;
+  // double? _measuredNotchFraction;
 
   Map<FluxSlotBoundary, GlobalKey> get _boundaryKeys => {
     FluxSlotBoundary.afterMedia: _afterMediaKey,
@@ -155,29 +155,29 @@ class _FluxCardState extends State<FluxCard> {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  @override
-  void initState() {
-    super.initState();
-    _scheduleMeasurement();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _scheduleMeasurement();
+  // }
 
-  @override
-  void didUpdateWidget(FluxCard old) {
-    super.didUpdateWidget(old);
-    if (widget.notch?.boundary != old.notch?.boundary ||
-        widget.layout != old.layout ||
-        widget.mediaPosition != old.mediaPosition) {
-      _measuredNotchFraction = null;
-      _scheduleMeasurement();
-    }
-  }
+  // @override
+  // void didUpdateWidget(FluxCard old) {
+  //   super.didUpdateWidget(old);
+  //   if (widget.notch?.boundary != old.notch?.boundary ||
+  //       widget.layout != old.layout ||
+  //       widget.mediaPosition != old.mediaPosition) {
+  //     _measuredNotchFraction = null;
+  //     _scheduleMeasurement();
+  //   }
+  // }
 
-  void _scheduleMeasurement() {
-    if (widget.notch?.isTargeted != true) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _measureAndUpdate();
-    });
-  }
+  // void _scheduleMeasurement() {
+  //   if (widget.notch?.isTargeted != true) return;
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     if (mounted) _measureAndUpdate();
+  //   });
+  // }
 
   double? _resolveNotchPosition(Rect cardRect) {
     final notch = widget.notch;
@@ -204,31 +204,31 @@ class _FluxCardState extends State<FluxCard> {
     }
   }
 
-  void _measureAndUpdate() {
-    final notch = widget.notch;
-    if (notch == null || !notch.isTargeted) return;
-
-    final cardBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
-    if (cardBox == null || cardBox.size.height == 0 || cardBox.size.width == 0) return;
-
-    final markerKey = _boundaryKeys[notch.boundary!]!;
-    final markerBox = markerKey.currentContext?.findRenderObject() as RenderBox?;
-    if (markerBox == null) return;
-
-    try {
-      final offset = markerBox.localToGlobal(Offset.zero, ancestor: cardBox);
-
-      final fraction = notch.edge == FluxNotchEdge.vertical
-          ? ((offset.dy + notch.boundaryOffset) / cardBox.size.height).clamp(0.0, 1.0)
-          : ((offset.dx + notch.boundaryOffset) / cardBox.size.width).clamp(0.0, 1.0);
-
-      if ((fraction - (_measuredNotchFraction ?? -1)).abs() > 0.001) {
-        setState(() => _measuredNotchFraction = fraction);
-      }
-    } catch (e) {
-      // ignore
-    }
-  }
+  // void _measureAndUpdate() {
+  //   final notch = widget.notch;
+  //   if (notch == null || !notch.isTargeted) return;
+  //
+  //   final cardBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
+  //   if (cardBox == null || cardBox.size.height == 0 || cardBox.size.width == 0) return;
+  //
+  //   final markerKey = _boundaryKeys[notch.boundary!]!;
+  //   final markerBox = markerKey.currentContext?.findRenderObject() as RenderBox?;
+  //   if (markerBox == null) return;
+  //
+  //   try {
+  //     final offset = markerBox.localToGlobal(Offset.zero, ancestor: cardBox);
+  //
+  //     final fraction = notch.edge == FluxNotchEdge.vertical
+  //         ? ((offset.dy + notch.boundaryOffset) / cardBox.size.height).clamp(0.0, 1.0)
+  //         : ((offset.dx + notch.boundaryOffset) / cardBox.size.width).clamp(0.0, 1.0);
+  //
+  //     if ((fraction - (_measuredNotchFraction ?? -1)).abs() > 0.001) {
+  //       setState(() => _measuredNotchFraction = fraction);
+  //     }
+  //   } catch (e) {
+  //     // ignore
+  //   }
+  // }
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
@@ -266,11 +266,13 @@ class _FluxCardState extends State<FluxCard> {
           final notch = widget.notch;
           final hasTargetedNotch = notch?.isTargeted == true;
 
-          final resolvedNotchPos = notch == null
-              ? 0.5
-              : (hasTargetedNotch
-              ? (_measuredNotchFraction ?? notch.fallbackPosition)
-              : notch.fallbackPosition);
+          // final resolvedNotchPos = notch == null
+          //     ? 0.5
+          //     : (hasTargetedNotch
+          //     ? (_measuredNotchFraction ?? notch.fallbackPosition)
+          //     : notch.fallbackPosition);
+
+          final resolvedNotchPos = notch?.fallbackPosition ?? 0.5;
 
           final notchBR =
               notch?.borderRadius ?? effectiveTheme.borderRadius.resolve(td ?? TextDirection.ltr);
