@@ -28,7 +28,7 @@ import 'shapes/flux_notch_shape.dart';
 /// ## Ripple
 /// The [InkWell] wraps the card's content [Stack] as a direct child of the
 /// card's [Material]. Child widgets (buttons, chips) still receive their own
-/// taps — the ripple only fires on empty card space — and `Ink.image` paints
+/// taps — the ripple only fires on empty card space — and [Ink.image] paints
 /// images on the Material ink layer so the ripple sweeps across them too.
 ///
 /// ## Notch
@@ -167,6 +167,7 @@ class _FluxCardState extends State<FluxCard> {
     if (widget.notch?.boundary != old.notch?.boundary ||
         widget.layout != old.layout ||
         widget.mediaPosition != old.mediaPosition) {
+      _measuredNotchFraction = null;
       _scheduleMeasurement();
     }
   }
@@ -220,58 +221,56 @@ class _FluxCardState extends State<FluxCard> {
 
           final resolvedLayout = widget.layout == FluxLayoutMode.responsive
               ? (cardConstraints.availableWidth >= effectiveTheme.responsiveBreakpoint
-              ? FluxLayoutMode.row
-              : FluxLayoutMode.column)
+                    ? FluxLayoutMode.row
+                    : FluxLayoutMode.column)
               : widget.layout;
 
-          final cardColor =
-              effectiveTheme.cardColor ?? Theme.of(context).colorScheme.surface;
-          final shadowColor =
-              effectiveTheme.shadowColor ?? Theme.of(context).shadowColor;
+          final cardColor = effectiveTheme.cardColor ?? Theme.of(context).colorScheme.surface;
+          final shadowColor = effectiveTheme.shadowColor ?? Theme.of(context).shadowColor;
           final elevation = effectiveTheme.elevation > 0
               ? effectiveTheme.elevation
               : (effectiveTheme.defaultShadows?.isNotEmpty == true ? 4.0 : 0.0);
 
           // ── Notch geometry ────────────────────────────────────────────────
           final notch = widget.notch;
+          final hasTargetedNotch = notch?.isTargeted == true;
+          final notchReady = notch == null || !hasTargetedNotch || _measuredNotchFraction != null;
 
-          // Resolved notch position: measured (targeted) or free/fallback.
           final resolvedNotchPos = notch == null
               ? 0.5
-              : (notch.isTargeted
-              ? (_measuredNotchFraction ?? notch.fallbackPosition)
-              : notch.fallbackPosition);
+              : (hasTargetedNotch
+                    ? (_measuredNotchFraction ?? notch.fallbackPosition)
+                    : notch.fallbackPosition);
 
-          // notch.borderRadius falls back to the theme's borderRadius.
-          final notchBR = notch?.borderRadius ??
-              effectiveTheme.borderRadius.resolve(td ?? TextDirection.ltr);
+          final notchBR =
+              notch?.borderRadius ?? effectiveTheme.borderRadius.resolve(td ?? TextDirection.ltr);
 
           // ── Shape ─────────────────────────────────────────────────────────
           // When notch is set, build FluxNotchShape for clipping + shadow.
           // theme.shape is used for other custom shapes; ignored when notch set.
-          final ShapeBorder effectiveShape = notch != null
+          final ShapeBorder effectiveShape = notch != null && notchReady
               ? FluxNotchShape(
-            borderRadius: notchBR,
-            notchRadius: notch.notchRadius,
-            notchPosition: resolvedNotchPos,
-            notchEdge: notch.edge,
-            notchSide: notch.notchSide,
-            // No border here — painted on a top layer instead.
-          )
+                  borderRadius: notchBR,
+                  notchRadius: notch.notchRadius,
+                  notchPosition: resolvedNotchPos,
+                  notchEdge: notch.edge,
+                  notchSide: notch.notchSide,
+                  // No border here — painted on a top layer instead.
+                )
               : effectiveTheme.resolveShape(context);
 
           // ── Card content ──────────────────────────────────────────────────
           final Widget cardContent = widget.loading
               ? FluxCardSkeleton(
-            layout: resolvedLayout,
-            mediaPosition: widget.mediaPosition,
-            theme: effectiveTheme,
-            hasMedia: widget.media != null,
-            hasHeader: widget.header != null,
-            hasBody: widget.body != null,
-            hasFooter: widget.footer != null,
-            loadingWrapper: widget.loadingWrapper,
-          )
+                  layout: resolvedLayout,
+                  mediaPosition: widget.mediaPosition,
+                  theme: effectiveTheme,
+                  hasMedia: widget.media != null,
+                  hasHeader: widget.header != null,
+                  hasBody: widget.body != null,
+                  hasFooter: widget.footer != null,
+                  loadingWrapper: widget.loadingWrapper,
+                )
               : _buildLayers(resolvedLayout, effectiveTheme, resolvedPadding, td);
 
           // ── Stack layers ──────────────────────────────────────────────────
@@ -293,7 +292,7 @@ class _FluxCardState extends State<FluxCard> {
             ),
 
             // ── 5. Notch border ─────────────────────────────────────────────
-            if (notch != null && notch.side != BorderSide.none)
+            if (notch != null && notchReady && notch.side != BorderSide.none)
               Positioned.fill(
                 child: IgnorePointer(
                   child: CustomPaint(
@@ -308,9 +307,7 @@ class _FluxCardState extends State<FluxCard> {
             stackLayers.insert(
               0,
               Positioned.fill(
-                child: IgnorePointer(
-                  child: DecoratedBox(decoration: widget.decoration!),
-                ),
+                child: IgnorePointer(child: DecoratedBox(decoration: widget.decoration!)),
               ),
             );
           }
@@ -352,11 +349,11 @@ class _FluxCardState extends State<FluxCard> {
   // ── Layer assembly ────────────────────────────────────────────────────────
 
   Widget _buildLayers(
-      FluxLayoutMode resolvedLayout,
-      FluxCardThemeData theme,
-      EdgeInsets resolvedPadding,
-      TextDirection? td,
-      ) {
+    FluxLayoutMode resolvedLayout,
+    FluxCardThemeData theme,
+    EdgeInsets resolvedPadding,
+    TextDirection? td,
+  ) {
     final allBgs = widget.backgrounds ?? const [];
     final allOvs = widget.overlays ?? const [];
 
@@ -367,21 +364,22 @@ class _FluxCardState extends State<FluxCard> {
     final extraGlobalBgs = allBgs.where((w) => w is! FluxBackground).toList();
     final extraGlobalOvs = allOvs.where((w) => w is! FluxOverlay).toList();
 
-    final mainContent = FluxCardLayout(
-      mode: resolvedLayout,
-      mediaPosition: widget.mediaPosition,
-      theme: theme,
-      resolvedPadding: resolvedPadding,
-      divider: widget.divider,
-      boundaryKeys: widget.notch?.isTargeted == true ? _boundaryKeys : null,
-    ).build(
-      media: widget.media,
-      header: widget.header,
-      body: widget.body,
-      footer: widget.footer,
-      allBackgrounds: allBgs,
-      allOverlays: allOvs,
-    );
+    final mainContent =
+        FluxCardLayout(
+          mode: resolvedLayout,
+          mediaPosition: widget.mediaPosition,
+          theme: theme,
+          resolvedPadding: resolvedPadding,
+          divider: widget.divider,
+          boundaryKeys: widget.notch?.isTargeted == true ? _boundaryKeys : null,
+        ).build(
+          media: widget.media,
+          header: widget.header,
+          body: widget.body,
+          footer: widget.footer,
+          allBackgrounds: allBgs,
+          allOverlays: allOvs,
+        );
 
     final allGlobalBgs = [...extraGlobalBgs, ...globalBgs];
     final allGlobalOvs = [...extraGlobalOvs, ...globalOvs];

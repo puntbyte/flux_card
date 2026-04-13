@@ -44,15 +44,15 @@ class FluxNotch {
     BorderRadius? borderRadius,
     BorderSide side = BorderSide.none,
   }) : this._(
-    boundary: boundary,
-    fallbackPosition: fallbackPosition,
-    boundaryOffset: boundaryOffset,
-    notchRadius: notchRadius,
-    edge: edge,
-    notchSide: notchSide,
-    borderRadius: borderRadius,
-    side: side,
-  );
+         boundary: boundary,
+         fallbackPosition: fallbackPosition,
+         boundaryOffset: boundaryOffset,
+         notchRadius: notchRadius,
+         edge: edge,
+         notchSide: notchSide,
+         borderRadius: borderRadius,
+         side: side,
+       );
 
   /// Free-position constructor — places the notch at a fixed fraction of the
   /// card edge, with no post-layout measurement.
@@ -67,15 +67,15 @@ class FluxNotch {
     BorderRadius? borderRadius,
     BorderSide side = BorderSide.none,
   }) : this._(
-    boundary: null,
-    fallbackPosition: position,
-    boundaryOffset: 0.0,
-    notchRadius: notchRadius,
-    edge: edge,
-    notchSide: notchSide,
-    borderRadius: borderRadius,
-    side: side,
-  );
+         boundary: null,
+         fallbackPosition: position,
+         boundaryOffset: 0.0,
+         notchRadius: notchRadius,
+         edge: edge,
+         notchSide: notchSide,
+         borderRadius: borderRadius,
+         side: side,
+       );
 
   // Private canonical constructor — holds all fields.
   const FluxNotch._({
@@ -137,10 +137,10 @@ class FluxNotch {
   ///
   /// [resolvedBorderRadius] must already incorporate the theme fallback.
   CustomPainter buildBorderPainter(
-      double position,
-      BorderRadius resolvedBorderRadius,
-      TextDirection? td,
-      ) => _FluxNotchBorderPainter(
+    double position,
+    BorderRadius resolvedBorderRadius,
+    TextDirection? td,
+  ) => _FluxNotchBorderPainter(
     notchPosition: position,
     notchRadius: notchRadius,
     notchEdge: edge,
@@ -151,7 +151,7 @@ class FluxNotch {
   );
 }
 
-// ── Internal border painter ───────────────────────────────────────────────────
+// ── Internal border painter ─────────────────────────────────────────────────
 
 class _FluxNotchBorderPainter extends CustomPainter {
   const _FluxNotchBorderPainter({
@@ -190,9 +190,10 @@ class _FluxNotchBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(_FluxNotchBorderPainter old) =>
       old.notchPosition != notchPosition ||
-          old.notchRadius != notchRadius ||
-          old.notchEdge != notchEdge ||
-          old.notchSide != notchSide ||
-          old.borderRadius != borderRadius ||
-          old.side != side;
+      old.notchRadius != notchRadius ||
+      old.notchEdge != notchEdge ||
+      old.notchSide != notchSide ||
+      old.borderRadius != borderRadius ||
+      old.side != side ||
+      old.textDirection != textDirection;
 }
