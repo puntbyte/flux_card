@@ -4,18 +4,22 @@ import 'package:flutter/material.dart';
 
 import '../core/enums.dart';
 
-/// A [ShapeBorder] that draws a rounded rectangle with semicircular notches,
+/// Callback to dynamically resolve the notch position during the paint phase.
+typedef NotchPositionResolver = double? Function(Rect rect);
+
+/// A[ShapeBorder] that draws a rounded rectangle with semicircular notches,
 /// producing a ticket or coupon silhouette.
 ///
 /// For full [FluxCard] integration — slot-boundary targeting, border painting
 /// above content, and post-layout notch positioning — prefer [FluxNotch] on
-/// [FluxCard.notch]. Use [FluxNotchShape] when you need a raw [ShapeBorder]
-/// (e.g. for [FluxCardThemeData.shape] or animation with [ShapeBorder.lerp]).
+/// [FluxCard.notch]. Use[FluxNotchShape] when you need a raw [ShapeBorder]
+/// (e.g. for[FluxCardThemeData.shape] or animation with [ShapeBorder.lerp]).
 class FluxNotchShape extends ShapeBorder {
   const FluxNotchShape({
     this.borderRadius = const BorderRadius.all(Radius.circular(16)),
     this.notchRadius = 12.0,
     this.notchPosition = 0.5,
+    this.notchPositionResolver,
     this.notchEdge = FluxNotchEdge.vertical,
     this.notchSide = FluxNotchSide.both,
     this.side = BorderSide.none,
@@ -26,9 +30,21 @@ class FluxNotchShape extends ShapeBorder {
 
   /// Notch position as a 0.0–1.0 fraction of the edge length.
   final double notchPosition;
+
+  /// Dynamic resolver allowing position calculation post-layout.
+  final NotchPositionResolver? notchPositionResolver;
+
   final FluxNotchEdge notchEdge;
   final FluxNotchSide notchSide;
   final BorderSide side;
+
+  double _resolvePosition(Rect rect) {
+    if (notchPositionResolver != null) {
+      final resolved = notchPositionResolver!(rect);
+      if (resolved != null) return resolved;
+    }
+    return notchPosition;
+  }
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
@@ -41,7 +57,7 @@ class FluxNotchShape extends ShapeBorder {
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) => NotchPathBuilder.build(
     rect: rect,
     borderRadius: borderRadius,
-    notchPosition: notchPosition,
+    notchPosition: _resolvePosition(rect),
     notchRadius: notchRadius,
     notchEdge: notchEdge,
     notchSide: notchSide,
@@ -59,6 +75,7 @@ class FluxNotchShape extends ShapeBorder {
     borderRadius: borderRadius * t,
     notchRadius: notchRadius * t,
     notchPosition: notchPosition,
+    notchPositionResolver: notchPositionResolver,
     notchEdge: notchEdge,
     notchSide: notchSide,
     side: side.scale(t),
@@ -80,11 +97,15 @@ class FluxNotchShape extends ShapeBorder {
     borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t) ?? a.borderRadius,
     notchRadius: lerpDouble(a.notchRadius, b.notchRadius, t) ?? a.notchRadius,
     notchPosition: lerpDouble(a.notchPosition, b.notchPosition, t) ?? a.notchPosition,
+    notchPositionResolver: t < 0.5 ? a.notchPositionResolver : b.notchPositionResolver,
     notchEdge: t < 0.5 ? a.notchEdge : b.notchEdge,
     notchSide: t < 0.5 ? a.notchSide : b.notchSide,
     side: BorderSide.lerp(a.side, b.side, t),
   );
 }
+
+// ── Shared path builder ───────────────────────────────────────────────────────
+//[Keep the existing NotchPathBuilder.build logic exactly as is]
 
 // ── Shared path builder ───────────────────────────────────────────────────────
 

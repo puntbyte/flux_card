@@ -179,23 +179,54 @@ class _FluxCardState extends State<FluxCard> {
     });
   }
 
+  double? _resolveNotchPosition(Rect cardRect) {
+    final notch = widget.notch;
+    if (notch == null || !notch.isTargeted) return null;
+
+    final markerKey = _boundaryKeys[notch.boundary!];
+    if (markerKey == null) return null;
+
+    final markerBox = markerKey.currentContext?.findRenderObject() as RenderBox?;
+    final cardBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (markerBox == null || cardBox == null) return null;
+
+    try {
+      final offset = markerBox.localToGlobal(Offset.zero, ancestor: cardBox);
+      if (notch.edge == FluxNotchEdge.vertical) {
+        return ((offset.dy + notch.boundaryOffset) / cardRect.height).clamp(0.0, 1.0);
+      } else {
+        return ((offset.dx + notch.boundaryOffset) / cardRect.width).clamp(0.0, 1.0);
+      }
+    } catch (e) {
+      // If the render tree is momentarily detached, silently fail back to the default position.
+      return null;
+    }
+  }
+
   void _measureAndUpdate() {
     final notch = widget.notch;
     if (notch == null || !notch.isTargeted) return;
 
     final cardBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
-    if (cardBox == null || cardBox.size.height == 0) return;
+    if (cardBox == null || cardBox.size.height == 0 || cardBox.size.width == 0) return;
 
     final markerKey = _boundaryKeys[notch.boundary!]!;
     final markerBox = markerKey.currentContext?.findRenderObject() as RenderBox?;
     if (markerBox == null) return;
 
-    final markerY = markerBox.localToGlobal(Offset.zero, ancestor: cardBox).dy;
-    final offset = notch.boundaryOffset;
-    final fraction = ((markerY + offset) / cardBox.size.height).clamp(0.0, 1.0);
+    try {
+      final offset = markerBox.localToGlobal(Offset.zero, ancestor: cardBox);
 
-    if ((fraction - (_measuredNotchFraction ?? -1)).abs() > 0.001) {
-      setState(() => _measuredNotchFraction = fraction);
+      final fraction = notch.edge == FluxNotchEdge.vertical
+          ? ((offset.dy + notch.boundaryOffset) / cardBox.size.height).clamp(0.0, 1.0)
+          : ((offset.dx + notch.boundaryOffset) / cardBox.size.width).clamp(0.0, 1.0);
+
+      if ((fraction - (_measuredNotchFraction ?? -1)).abs() > 0.001) {
+        setState(() => _measuredNotchFraction = fraction);
+      }
+    } catch (e) {
+      // ignore
     }
   }
 
@@ -234,13 +265,12 @@ class _FluxCardState extends State<FluxCard> {
           // ── Notch geometry ────────────────────────────────────────────────
           final notch = widget.notch;
           final hasTargetedNotch = notch?.isTargeted == true;
-          final notchReady = notch == null || !hasTargetedNotch || _measuredNotchFraction != null;
 
           final resolvedNotchPos = notch == null
               ? 0.5
               : (hasTargetedNotch
-                    ? (_measuredNotchFraction ?? notch.fallbackPosition)
-                    : notch.fallbackPosition);
+              ? (_measuredNotchFraction ?? notch.fallbackPosition)
+              : notch.fallbackPosition);
 
           final notchBR =
               notch?.borderRadius ?? effectiveTheme.borderRadius.resolve(td ?? TextDirection.ltr);
@@ -248,15 +278,16 @@ class _FluxCardState extends State<FluxCard> {
           // ── Shape ─────────────────────────────────────────────────────────
           // When notch is set, build FluxNotchShape for clipping + shadow.
           // theme.shape is used for other custom shapes; ignored when notch set.
-          final ShapeBorder effectiveShape = notch != null && notchReady
+          final ShapeBorder effectiveShape = notch != null
               ? FluxNotchShape(
-                  borderRadius: notchBR,
-                  notchRadius: notch.notchRadius,
-                  notchPosition: resolvedNotchPos,
-                  notchEdge: notch.edge,
-                  notchSide: notch.notchSide,
-                  // No border here — painted on a top layer instead.
-                )
+            borderRadius: notchBR,
+            notchRadius: notch.notchRadius,
+            notchPosition: resolvedNotchPos,
+            notchPositionResolver: _resolveNotchPosition,
+            notchEdge: notch.edge,
+            notchSide: notch.notchSide,
+            // No border here — painted on a top layer instead.
+          )
               : effectiveTheme.resolveShape(context);
 
           // ── Card content ──────────────────────────────────────────────────
@@ -292,11 +323,16 @@ class _FluxCardState extends State<FluxCard> {
             ),
 
             // ── 5. Notch border ─────────────────────────────────────────────
-            if (notch != null && notchReady && notch.side != BorderSide.none)
+            if (notch != null && notch.side != BorderSide.none)
               Positioned.fill(
                 child: IgnorePointer(
                   child: CustomPaint(
-                    painter: notch.buildBorderPainter(resolvedNotchPos, notchBR, td),
+                    painter: notch.buildBorderPainter(
+                      resolvedNotchPos,
+                      notchBR,
+                      td,
+                      notchPositionResolver: _resolveNotchPosition,
+                    ),
                   ),
                 ),
               ),

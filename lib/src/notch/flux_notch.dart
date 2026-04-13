@@ -136,12 +136,15 @@ class FluxNotch {
   /// Builds the [CustomPainter] that draws [side] on top of the card content.
   ///
   /// [resolvedBorderRadius] must already incorporate the theme fallback.
+  // Inside class FluxNotch:
   CustomPainter buildBorderPainter(
-    double position,
-    BorderRadius resolvedBorderRadius,
-    TextDirection? td,
-  ) => _FluxNotchBorderPainter(
+      double position,
+      BorderRadius resolvedBorderRadius,
+      TextDirection? td, {
+        NotchPositionResolver? notchPositionResolver,
+      }) => _FluxNotchBorderPainter(
     notchPosition: position,
+    notchPositionResolver: notchPositionResolver,
     notchRadius: notchRadius,
     notchEdge: edge,
     notchSide: notchSide,
@@ -156,6 +159,7 @@ class FluxNotch {
 class _FluxNotchBorderPainter extends CustomPainter {
   const _FluxNotchBorderPainter({
     required this.notchPosition,
+    this.notchPositionResolver,
     required this.notchRadius,
     required this.notchEdge,
     required this.notchSide,
@@ -165,6 +169,7 @@ class _FluxNotchBorderPainter extends CustomPainter {
   });
 
   final double notchPosition;
+  final NotchPositionResolver? notchPositionResolver;
   final double notchRadius;
   final FluxNotchEdge notchEdge;
   final FluxNotchSide notchSide;
@@ -172,13 +177,21 @@ class _FluxNotchBorderPainter extends CustomPainter {
   final BorderSide side;
   final TextDirection? textDirection;
 
+  double _resolvePosition(Size size) {
+    if (notchPositionResolver != null) {
+      final resolved = notchPositionResolver!(Offset.zero & size);
+      if (resolved != null) return resolved;
+    }
+    return notchPosition;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     if (side == BorderSide.none || side.width == 0) return;
     final path = NotchPathBuilder.build(
       rect: Offset.zero & size,
       borderRadius: borderRadius,
-      notchPosition: notchPosition,
+      notchPosition: _resolvePosition(size),
       notchRadius: notchRadius,
       notchEdge: notchEdge,
       notchSide: notchSide,
@@ -190,10 +203,11 @@ class _FluxNotchBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(_FluxNotchBorderPainter old) =>
       old.notchPosition != notchPosition ||
-      old.notchRadius != notchRadius ||
-      old.notchEdge != notchEdge ||
-      old.notchSide != notchSide ||
-      old.borderRadius != borderRadius ||
-      old.side != side ||
-      old.textDirection != textDirection;
+          old.notchPositionResolver != notchPositionResolver ||
+          old.notchRadius != notchRadius ||
+          old.notchEdge != notchEdge ||
+          old.notchSide != notchSide ||
+          old.borderRadius != borderRadius ||
+          old.side != side ||
+          old.textDirection != textDirection;
 }
