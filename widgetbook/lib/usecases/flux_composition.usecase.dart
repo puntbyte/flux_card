@@ -586,10 +586,7 @@ Widget buildPropertyListingUseCase(BuildContext context) {
         // ),
         child: Material(
           color: Colors.transparent,
-          child: Ink.image(
-            image: CachedNetworkImageProvider(p.image),
-            fit: BoxFit.fill,
-          ),
+          child: Ink.image(image: CachedNetworkImageProvider(p.image), fit: BoxFit.fill),
         ),
       ),
       overlays: [
@@ -697,8 +694,11 @@ Widget buildEventTicketUseCase(BuildContext context) {
     context,
     FluxCard(
       loading: loading,
+
+      decoration: BoxDecoration(),
+
       media: FluxMedia(
-        aspectRatio: 16 / 7,
+        aspectRatio: 16 / 8,
         child: Ink.image(
           image: const NetworkImage(
             'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
@@ -715,44 +715,56 @@ Widget buildEventTicketUseCase(BuildContext context) {
           ),
         ),
       ),
+
       overlays: [
         FluxOverlay(
           targets: const {FluxTarget.media},
           alignment: Alignment.bottomLeft,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: _Pill(label: 'LIVE', bg: Colors.red),
-            ),
-          ],
+          children: [_Pill(label: 'LIVE', bg: Colors.red)],
         ),
       ],
+
+      backgrounds: [
+        FluxBackground.color(color: Colors.green, targets: {.header}),
+        FluxBackground.color(color: Colors.red, targets: {.footer}),
+      ],
+
+      // divider: FluxDivider(
+      //   afterHeader: FluxDashedDivider()
+      // ),
+
       header: const FluxSection(
         title: Text('Flutter Dev Summit 2026', style: TextStyle(fontWeight: FontWeight.w800)),
         subtitle: Text('San Francisco Convention Center'),
+        decoration: BoxDecoration(color: Colors.amber),
         padding: EdgeInsets.zero,
       ),
+
       footer: const FluxSection(
         actions: [
           Text('Sat 18 Apr 2026 • 9:00 AM', style: TextStyle(fontWeight: FontWeight.w600)),
           Chip(label: Text('General Admission')),
           Text('Gate C4'),
         ],
+        decoration: BoxDecoration(color: Colors.amber),
         padding: EdgeInsets.zero,
       ),
+
       notch: const FluxNotch(
         boundary: FluxSlotBoundary.afterHeader,
-        notchRadius: 14,
+        notchRadius: 8,
         side: BorderSide(width: 2, color: Colors.black),
       ),
-      divider: const FluxDivider(afterHeader: FluxDashedDivider(indent: 14, endIndent: 14)),
+
+      //divider: const FluxDivider(afterHeader: FluxDashedDivider()),
+
       theme: FluxCardThemeData.outlined.copyWith(
         borderSide: const BorderSide(width: 2, color: Colors.black),
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(64),
       ),
+
       onTap: () {},
     ),
-    maxWidth: 400,
   );
 }
 

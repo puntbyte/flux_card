@@ -35,6 +35,8 @@ class FluxCardLayout {
     Widget? footer,
     required Map<FluxTarget, List<Widget>> bgsByTarget,
     required Map<FluxTarget, List<Widget>> ovsByTarget,
+    required List<Widget> multiBgs,
+    required List<Widget> multiOvs,
   }) {
     assert(
       mode != FluxLayoutMode.responsive,
@@ -52,24 +54,33 @@ class FluxCardLayout {
     );
 
     Widget? fullContentColumn() => SlotResolver.contentColumn(
-      entries: [(FluxTarget.header, header), (FluxTarget.body, body), (FluxTarget.footer, footer)],
+      entries:[
+        (FluxTarget.header, header),
+        (FluxTarget.body, body),
+        (FluxTarget.footer, footer)
+      ],
       bgsByTarget: bgsByTarget,
       ovsByTarget: ovsByTarget,
+      multiBgs: multiBgs,
+      multiOvs: multiOvs,
       padding: p,
       spacing: s,
       divider: divider,
       boundaryTrackers: boundaryTrackers,
     );
 
-    Widget? subColumn(List<(FluxTarget, Widget?)> entries) => SlotResolver.contentColumn(
-      entries: entries,
-      bgsByTarget: bgsByTarget,
-      ovsByTarget: ovsByTarget,
-      padding: p,
-      spacing: s,
-      divider: divider,
-      boundaryTrackers: boundaryTrackers,
-    );
+    Widget? subColumn(List<(FluxTarget, Widget?)> entries) =>
+        SlotResolver.contentColumn(
+          entries: entries,
+          bgsByTarget: bgsByTarget,
+          ovsByTarget: ovsByTarget,
+          multiBgs: multiBgs,
+          multiOvs: multiOvs,
+          padding: p,
+          spacing: s,
+          divider: divider,
+          boundaryTrackers: boundaryTrackers,
+        );
 
     Widget? afterMediaMarker() {
       final tracker = boundaryTrackers?[FluxSlotBoundary.afterMedia];

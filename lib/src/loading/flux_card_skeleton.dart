@@ -164,7 +164,7 @@ class _FluxCardSkeletonState extends State<FluxCardSkeleton>
       footer: footerSlot,
       // Pass empty maps instead of empty lists
       bgsByTarget: const {},
-      ovsByTarget: const {},
+      ovsByTarget: const {}, multiBgs: [], multiOvs: [],
     );
   }
 

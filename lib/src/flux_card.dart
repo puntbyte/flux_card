@@ -243,18 +243,19 @@ class _FluxCardState extends State<FluxCard> {
   // ── Layer assembly (O(1) Slot Lookup Optimization) ──────────────────────
 
   Widget _buildLayers(
-    FluxLayoutMode resolvedLayout,
-    FluxCardThemeData theme,
-    EdgeInsets resolvedPadding,
-    TextDirection? td,
-    BoxConstraints? parentConstraints, // ADDED THIS
-  ) {
+      FluxLayoutMode resolvedLayout,
+      FluxCardThemeData theme,
+      EdgeInsets resolvedPadding,
+      TextDirection? td,
+      BoxConstraints? parentConstraints,
+      ) {
     final allBgs = widget.backgrounds ?? const [];
-    final allOvs = widget.overlays ?? const [];
+    final allOvs = widget.overlays ?? const[];
 
-    // Pre-group targets so SlotResolver has O(1) lookup rather than O(N) filtering
     final bgsByTarget = <FluxTarget, List<Widget>>{};
     final ovsByTarget = <FluxTarget, List<Widget>>{};
+    final multiBgs = <Widget>[];
+    final multiOvs = <Widget>[];
     final globalBgs = <Widget>[];
     final globalOvs = <Widget>[];
 
@@ -262,10 +263,10 @@ class _FluxCardState extends State<FluxCard> {
       if (bg is FluxBackground) {
         if (bg.isGlobal) {
           globalBgs.add(bg);
+        } else if (bg.targets.length == 1) {
+          (bgsByTarget[bg.targets.first] ??=[]).add(bg);
         } else {
-          for (final t in bg.targets) {
-            (bgsByTarget[t] ??= []).add(bg);
-          }
+          multiBgs.add(bg); // Caught for grouping
         }
       } else {
         globalBgs.add(bg);
@@ -276,10 +277,10 @@ class _FluxCardState extends State<FluxCard> {
       if (ov is FluxOverlay) {
         if (ov.isGlobal) {
           globalOvs.add(ov);
+        } else if (ov.targets.length == 1) {
+          (ovsByTarget[ov.targets.first] ??=[]).add(ov);
         } else {
-          for (final t in ov.targets) {
-            (ovsByTarget[t] ??= []).add(ov);
-          }
+          multiOvs.add(ov); // Caught for grouping
         }
       } else {
         globalOvs.add(ov);
@@ -289,34 +290,36 @@ class _FluxCardState extends State<FluxCard> {
     int getZIndex(Widget w) => w is FluxOverlay ? w.zIndex : 0;
 
     globalOvs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
+    multiOvs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     for (final list in ovsByTarget.values) {
       list.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     }
 
-    final mainContent =
-        FluxCardLayout(
-          mode: resolvedLayout,
-          mediaPosition: widget.mediaPosition,
-          mediaSpan: widget.mediaSpan,
-          theme: theme,
-          resolvedPadding: resolvedPadding,
-          divider: widget.divider,
-          boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
-          parentConstraints: parentConstraints,
-        ).build(
-          media: widget.media,
-          header: widget.header,
-          body: widget.body,
-          footer: widget.footer,
-          bgsByTarget: bgsByTarget,
-          ovsByTarget: ovsByTarget,
-        );
+    final mainContent = FluxCardLayout(
+      mode: resolvedLayout,
+      mediaPosition: widget.mediaPosition,
+      mediaSpan: widget.mediaSpan,
+      theme: theme,
+      resolvedPadding: resolvedPadding,
+      divider: widget.divider,
+      boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
+      parentConstraints: parentConstraints,
+    ).build(
+      media: widget.media,
+      header: widget.header,
+      body: widget.body,
+      footer: widget.footer,
+      bgsByTarget: bgsByTarget,
+      ovsByTarget: ovsByTarget,
+      multiBgs: multiBgs, // Passed down
+      multiOvs: multiOvs, // Passed down
+    );
 
     if (globalBgs.isEmpty && globalOvs.isEmpty) return mainContent;
 
     return Stack(
       fit: StackFit.passthrough,
-      children: [
+      children:[
         ...globalBgs.map((bg) => Positioned.fill(child: bg)),
         mainContent,
         ...globalOvs.map((ov) => Positioned.fill(child: ov)),

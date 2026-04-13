@@ -53,14 +53,9 @@ final directories = <_widgetbook.WidgetbookNode>[
                     .buildBackgroundGradientUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Image',
+                name: 'Multi-Target Image',
                 builder: _flux_card_widgetbook_usecases_flux_background_usecase
                     .buildBackgroundImageUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Multi-targeted',
-                builder: _flux_card_widgetbook_usecases_flux_background_usecase
-                    .buildBackgroundMultiTargetedUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Slot-targeted',

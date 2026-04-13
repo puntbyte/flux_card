@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../components/flux_background.dart';
+import '../components/flux_overlay.dart';
 import '../core/enums.dart';
 import '../divider/flux_divider.dart';
 import 'boundary_tracker.dart';
 
-/// Static helpers that compose individual card slots and content groups.
+class _SlotBlock {
+  final Set<FluxTarget> targets;
+  final Widget widget;
+
+  _SlotBlock(this.targets, this.widget);
+}
+
 abstract final class SlotResolver {
   static Widget? wrapSlot({
     required FluxTarget target,
@@ -51,10 +59,66 @@ abstract final class SlotResolver {
     );
   }
 
+  /// Groups contiguous blocks and wraps them with multi-target decorations.
+  static List<_SlotBlock> groupAndWrap(
+    List<_SlotBlock> blocks,
+    List<Widget> multiBgs,
+    List<Widget> multiOvs,
+  ) {
+    var currentBlocks = List<_SlotBlock>.from(blocks);
+
+    void applyDecoration(Widget decoration, Set<FluxTarget> targets, bool isBg) {
+      int startIdx = -1;
+      int endIdx = -1;
+
+      // Find the start and end indices of the contiguous span
+      for (int i = 0; i < currentBlocks.length; i++) {
+        if (currentBlocks[i].targets.intersection(targets).isNotEmpty) {
+          if (startIdx == -1) startIdx = i;
+          endIdx = i;
+        }
+      }
+
+      // If a span was found, wrap the sublist into a single Stack
+      if (startIdx != -1 && endIdx != -1) {
+        final sublist = currentBlocks.sublist(startIdx, endIdx + 1);
+        final combinedTargets = sublist.expand((b) => b.targets).toSet();
+
+        final column = Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: sublist.map((b) => b.widget).toList(),
+        );
+
+        final stacked = Stack(
+          fit: StackFit.passthrough,
+          children: [
+            if (isBg) Positioned.fill(child: decoration),
+            column,
+            if (!isBg) Positioned.fill(child: decoration),
+          ],
+        );
+
+        currentBlocks.replaceRange(startIdx, endIdx + 1, [_SlotBlock(combinedTargets, stacked)]);
+      }
+    }
+
+    for (final bg in multiBgs) {
+      applyDecoration(bg, (bg as FluxBackground).targets, true);
+    }
+    for (final ov in multiOvs) {
+      applyDecoration(ov, (ov as FluxOverlay).targets, false);
+    }
+
+    return currentBlocks;
+  }
+
   static Widget? contentColumn({
     required List<(FluxTarget, Widget?)> entries,
     required Map<FluxTarget, List<Widget>> bgsByTarget,
     required Map<FluxTarget, List<Widget>> ovsByTarget,
+    required List<Widget> multiBgs,
+    required List<Widget> multiOvs,
     required EdgeInsets padding,
     required double spacing,
     FluxDivider? divider,
@@ -63,10 +127,10 @@ abstract final class SlotResolver {
     final present = entries.where((e) => e.$2 != null).toList();
     if (present.isEmpty) return null;
 
-    final children = <Widget>[];
+    final blocks = <_SlotBlock>[];
 
     for (int i = 0; i < present.length; i++) {
-      final (target, child) = present[i];
+      final target = present[i].$1;
 
       final slotPad = EdgeInsets.only(
         left: padding.left,
@@ -77,52 +141,54 @@ abstract final class SlotResolver {
 
       final wrapped = wrapSlot(
         target: target,
-        child: child,
+        child: present[i].$2,
         bgsByTarget: bgsByTarget,
         ovsByTarget: ovsByTarget,
         contentPadding: slotPad,
-      );
-      if (wrapped != null) children.add(wrapped);
+      )!;
 
-      if (i < present.length - 1) {
-        final boundary = boundaryBetween(present[i].$1, present[i + 1].$1);
+      // Group boundary markers and dividers with the gap so they are wrapped cleanly
+      if (i > 0) {
+        final prevTarget = present[i - 1].$1;
+        final boundary = boundaryBetween(prevTarget, target);
         if (boundary != null) {
           final tracker = boundaryTrackers?[boundary];
-          if (tracker != null) {
-            children.add(
-              BoundaryMarker(
-                tracker: tracker,
-                child: const SizedBox(height: 0, width: double.infinity),
-              ),
+          final div = divider?.widgetFor(boundary);
+          if (tracker != null || div != null) {
+            final boundaryWidget = Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (tracker != null)
+                  BoundaryMarker(
+                    tracker: tracker,
+                    child: const SizedBox(height: 0, width: double.infinity),
+                  ),
+                if (div != null) div,
+              ],
             );
-          }
-          final dividerWidget = divider?.widgetFor(boundary);
-          if (dividerWidget != null) {
-            children.add(dividerWidget);
+            blocks.add(_SlotBlock({prevTarget, target}, boundaryWidget));
           }
         }
       }
+
+      blocks.add(_SlotBlock({target}, wrapped));
     }
 
-    if (children.isEmpty) return null;
+    // Apply the grouping algorithm!
+    final groupedBlocks = groupAndWrap(blocks, multiBgs, multiOvs);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
-      children: children,
+      children: groupedBlocks.map((b) => b.widget).toList(),
     );
   }
 
-  /// Exposed publicly so FluxCardLayout can use it for row grouping logic.
   static FluxSlotBoundary? boundaryBetween(FluxTarget a, FluxTarget b) {
-    if (a == FluxTarget.header && b == FluxTarget.body) {
-      return FluxSlotBoundary.afterHeader;
-    }
-    if (a == FluxTarget.body && b == FluxTarget.footer) {
-      return FluxSlotBoundary.afterBody;
-    }
-    if (a == FluxTarget.header && b == FluxTarget.footer) {
-      return FluxSlotBoundary.afterHeader;
-    }
+    if (a == FluxTarget.header && b == FluxTarget.body) return FluxSlotBoundary.afterHeader;
+    if (a == FluxTarget.body && b == FluxTarget.footer) return FluxSlotBoundary.afterBody;
+    if (a == FluxTarget.header && b == FluxTarget.footer) return FluxSlotBoundary.afterHeader;
     return null;
   }
 }
