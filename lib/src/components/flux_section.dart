@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../layout/slot_resolver.dart';
 
-/// A structured content section used as the [FluxCard] header, footer, or
+/// A structured content section used as the[FluxCard] header, footer, or
 /// any slot that needs a title/subtitle/leading/trailing/actions layout.
 class FluxSection extends StatelessWidget implements FluxSlotWrapper {
   const FluxSection({
@@ -86,20 +86,10 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
   final BoxDecoration? decoration;
   final double spacing;
   final double runSpacing;
-
-  /// Aligns the entire header row (leading, text column, trailing) vertically.
-  /// Use [CrossAxisAlignment.center] to perfectly center text next to a large avatar.
   final CrossAxisAlignment headerCrossAxisAlignment;
-
-  /// Aligns the text column (title, subtitle, description) horizontally.
   final CrossAxisAlignment textCrossAxisAlignment;
-
-  /// Aligns the text column (title, subtitle, description) vertically.
-  /// Useful if the section has a forced height and you want to space out the texts.
   final MainAxisAlignment textMainAxisAlignment;
-
   final MainAxisAlignment actionsAlignment;
-
   final TextStyle? titleStyle;
   final TextStyle? subtitleStyle;
   final TextStyle? descriptionStyle;
@@ -123,25 +113,11 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
     final theme = FluxCardThemeData.of(context);
     final textTheme = Theme.of(context).textTheme;
 
-    final resolvedTitleStyle =
-        titleStyle ??
-            theme.defaultTitleStyle ??
-            textTheme.titleMedium ??
-            const TextStyle(fontWeight: FontWeight.w700);
+    final resolvedTitleStyle = titleStyle ?? theme.defaultTitleStyle ?? textTheme.titleMedium ?? const TextStyle(fontWeight: FontWeight.w700);
+    final resolvedSubtitleStyle = subtitleStyle ?? theme.defaultSubtitleStyle ?? textTheme.bodyMedium ?? const TextStyle();
+    final resolvedDescriptionStyle = descriptionStyle ?? theme.defaultDescriptionStyle ?? textTheme.bodySmall ?? const TextStyle();
 
-    final resolvedSubtitleStyle =
-        subtitleStyle ?? theme.defaultSubtitleStyle ?? textTheme.bodyMedium ?? const TextStyle();
-
-    final resolvedDescriptionStyle =
-        descriptionStyle ?? theme.defaultDescriptionStyle ?? textTheme.bodySmall ?? const TextStyle();
-
-    final hasHeader =
-        leading != null ||
-            title != null ||
-            subtitle != null ||
-            description != null ||
-            (trailing != null && trailing!.isNotEmpty);
-
+    final hasHeader = leading != null || title != null || subtitle != null || description != null || (trailing != null && trailing!.isNotEmpty);
     final hasActions = actions != null && actions!.isNotEmpty;
     final hasChild = child != null;
 
@@ -149,26 +125,25 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
       return const SizedBox.shrink();
     }
 
-    final parts = <Widget>[];
+    // OPTIMIZATION 1.B: Using Dart Collection Literals instead of successive .add() calls
+    final textChildren = <Widget>[
+      if (title != null) DefaultTextStyle.merge(style: resolvedTitleStyle, child: title!),
+      if (subtitle != null) DefaultTextStyle.merge(style: resolvedSubtitleStyle, child: subtitle!),
+      if (description != null) DefaultTextStyle.merge(style: resolvedDescriptionStyle, child: description!),
+    ];
 
-    if (hasHeader) {
-      final textChildren = <Widget>[];
-      if (title != null) textChildren.add(DefaultTextStyle.merge(style: resolvedTitleStyle, child: title!));
-      if (subtitle != null) textChildren.add(DefaultTextStyle.merge(style: resolvedSubtitleStyle, child: subtitle!));
-      if (description != null) textChildren.add(DefaultTextStyle.merge(style: resolvedDescriptionStyle, child: description!));
+    final spacedTextChildren = <Widget>[
+      for (int i = 0; i < textChildren.length; i++) ...[
+        if (i > 0) SizedBox(height: spacing / 2),
+        textChildren[i],
+      ],
+    ];
 
-      final spacedTextChildren = <Widget>[];
-      for (int i = 0; i < textChildren.length; i++) {
-        spacedTextChildren.add(textChildren[i]);
-        if (i < textChildren.length - 1) {
-          spacedTextChildren.add(SizedBox(height: spacing / 2));
-        }
-      }
-
-      parts.add(
+    final parts = <Widget>[
+      if (hasHeader)
         Row(
           crossAxisAlignment: headerCrossAxisAlignment,
-          children:[
+          children: [
             if (leading != null) ...[leading!, SizedBox(width: spacing)],
             if (spacedTextChildren.isNotEmpty)
               Expanded(
@@ -191,25 +166,20 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
             ],
           ],
         ),
-      );
-    }
-
-    if (hasChild) {
-      if (parts.isNotEmpty) parts.add(SizedBox(height: spacing));
-      parts.add(child!);
-    }
-
-    if (hasActions) {
-      if (parts.isNotEmpty) parts.add(SizedBox(height: spacing));
-      parts.add(
+      if (hasChild) ...[
+        if (hasHeader) SizedBox(height: spacing),
+        child!,
+      ],
+      if (hasActions) ...[
+        if (hasHeader || hasChild) SizedBox(height: spacing),
         Wrap(
           alignment: _wrapAlignment(actionsAlignment),
           spacing: spacing,
           runSpacing: runSpacing,
           children: actions!,
         ),
-      );
-    }
+      ],
+    ];
 
     final column = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

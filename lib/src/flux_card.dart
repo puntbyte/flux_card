@@ -23,7 +23,7 @@ class FluxCard extends StatefulWidget {
     this.body,
     this.footer,
     this.overlays,
-    this.underlay,
+    this.underlays,
     this.foregroundColor,
     this.decoration,
     this.notch,
@@ -49,7 +49,7 @@ class FluxCard extends StatefulWidget {
   final Widget? body;
   final Widget? footer;
   final List<Widget>? overlays;
-  final List<Widget>? underlay;
+  final List<Widget>? underlays;
   final Color? foregroundColor;
   final BoxDecoration? decoration;
   final FluxNotch? notch;
@@ -267,33 +267,33 @@ class _FluxCardState extends State<FluxCard> {
   }
 
   Widget _buildLayers(
-    FluxLayoutMode resolvedLayout,
-    FluxCardThemeData theme,
-    EdgeInsets resolvedPadding,
-    TextDirection? td,
-    BoxConstraints? parentConstraints,
-  ) {
-    final allBgs = widget.underlay ?? const [];
-    final allOvs = widget.overlays ?? const [];
+      FluxLayoutMode resolvedLayout,
+      FluxCardThemeData theme,
+      EdgeInsets resolvedPadding,
+      TextDirection? td,
+      BoxConstraints? parentConstraints,
+      ) {
+    final allUnderlays = widget.underlays ?? const[];
+    final allOvs = widget.overlays ?? const[];
 
-    final bgsByTarget = <FluxTarget, List<Widget>>{};
+    final underlaysByTarget = <FluxTarget, List<Widget>>{};
     final ovsByTarget = <FluxTarget, List<Widget>>{};
-    final multiBgs = <Widget>[];
+    final multiUnderlays = <Widget>[];
     final multiOvs = <Widget>[];
-    final globalBgs = <Widget>[];
+    final globalUnderlays = <Widget>[];
     final globalOvs = <Widget>[];
 
-    for (final bg in allBgs) {
-      if (bg is FluxUnderlay) {
-        if (bg.isGlobal) {
-          globalBgs.add(bg);
-        } else if (bg.targets.length == 1) {
-          (bgsByTarget[bg.targets.first] ??= []).add(bg);
+    for (final und in allUnderlays) {
+      if (und is FluxUnderlay) {
+        if (und.isGlobal) {
+          globalUnderlays.add(und);
+        } else if (und.targets.length == 1) {
+          (underlaysByTarget[und.targets.first] ??=[]).add(und);
         } else {
-          multiBgs.add(bg);
+          multiUnderlays.add(und);
         }
       } else {
-        globalBgs.add(bg);
+        globalUnderlays.add(und);
       }
     }
 
@@ -302,7 +302,7 @@ class _FluxCardState extends State<FluxCard> {
         if (ov.isGlobal) {
           globalOvs.add(ov);
         } else if (ov.targets.length == 1) {
-          (ovsByTarget[ov.targets.first] ??= []).add(ov);
+          (ovsByTarget[ov.targets.first] ??=[]).add(ov);
         } else {
           multiOvs.add(ov);
         }
@@ -311,59 +311,55 @@ class _FluxCardState extends State<FluxCard> {
       }
     }
 
-    // New helper to read zIndex from both Overlays and Backgrounds
     int getZIndex(Widget w) {
       if (w is FluxOverlay) return w.zIndex;
       if (w is FluxUnderlay) return w.zIndex;
       return 0;
     }
 
-    // Sort Overlays (Ascending: 0, 1, 2 -> later paints on top)
+    // Sort Overlays
     globalOvs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     multiOvs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     for (final list in ovsByTarget.values) {
       list.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     }
 
-    // Sort Backgrounds
-    // Global & Single-target use Ascending (painted directly in a single Stack)
-    globalBgs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
-    for (final list in bgsByTarget.values) {
+    // Sort Underlays
+    globalUnderlays.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
+    for (final list in underlaysByTarget.values) {
       list.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     }
-    // Multi-target must use Descending! Because the layout engine wraps them iteratively,
-    // processing higher zIndex *first* pushes it deeper, meaning it paints *after* the lower ones.
-    multiBgs.sort((a, b) => getZIndex(b).compareTo(getZIndex(a)));
+    multiUnderlays.sort((a, b) => getZIndex(b).compareTo(getZIndex(a)));
 
-    final mainContent =
-        FluxCardLayout(
-          mode: resolvedLayout,
-          mediaPosition: widget.mediaPosition,
-          mediaSpan: widget.mediaSpan,
-          theme: theme,
-          resolvedPadding: resolvedPadding,
-          divider: widget.divider,
-          boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
-          parentConstraints: parentConstraints,
-        ).build(
-          context,
-          media: widget.media,
-          header: widget.header,
-          body: widget.body,
-          footer: widget.footer,
-          bgsByTarget: bgsByTarget,
-          ovsByTarget: ovsByTarget,
-          multiBgs: multiBgs,
-          multiOvs: multiOvs,
-        );
+    final mainContent = FluxCardLayout(
+      mode: resolvedLayout,
+      mediaPosition: widget.mediaPosition,
+      mediaSpan: widget.mediaSpan,
+      theme: theme,
+      resolvedPadding: resolvedPadding,
+      divider: widget.divider,
+      boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
+      parentConstraints: parentConstraints,
+    ).build(
+      context,
+      media: widget.media,
+      header: widget.header,
+      body: widget.body,
+      footer: widget.footer,
+      // FIX: Passing the correct underlay variables instead of bgs
+      underlaysByTarget: underlaysByTarget,
+      ovsByTarget: ovsByTarget,
+      multiUnderlays: multiUnderlays,
+      multiOvs: multiOvs,
+    );
 
-    if (globalBgs.isEmpty && globalOvs.isEmpty) return mainContent;
+    if (globalUnderlays.isEmpty && globalOvs.isEmpty) return mainContent;
 
     return Stack(
       fit: StackFit.passthrough,
       clipBehavior: Clip.none,
-      children: [
-        ...globalBgs.map((bg) => FluxUnderlay.buildPositioned(context, bg)),
+      children:[
+        ...globalUnderlays.map((und) => FluxUnderlay.buildPositioned(context, und)),
         mainContent,
         ...globalOvs.map((ov) => Positioned.fill(child: ov)),
       ],

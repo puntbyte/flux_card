@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../components/flux_underlay.dart';
+import '../components/flux_underlay.dart'; // Ensure it's imported as underlay!
 import '../components/flux_overlay.dart';
 import '../core/enums.dart';
 import '../divider/flux_divider.dart';
@@ -21,61 +21,61 @@ class _SlotBlock {
 
 abstract final class SlotResolver {
   static Widget? wrapSlot(
-    BuildContext context, {
-    required FluxTarget target,
-    required Widget? child,
-    required Map<FluxTarget, List<Widget>> bgsByTarget,
-    required Map<FluxTarget, List<Widget>> ovsByTarget,
-    EdgeInsetsGeometry? contentPadding,
-  }) {
+      BuildContext context, {
+        required FluxTarget target,
+        required Widget? child,
+        required Map<FluxTarget, List<Widget>> underlaysByTarget,
+        required Map<FluxTarget, List<Widget>> ovsByTarget,
+        EdgeInsetsGeometry? contentPadding,
+      }) {
     if (child == null) return null;
 
-    final bgs = bgsByTarget[target] ?? const [];
-    final ovs = ovsByTarget[target] ?? const [];
+    final underlays = underlaysByTarget[target] ?? const [];
+    final ovs = ovsByTarget[target] ?? const[];
 
     final Widget paddedChild = (contentPadding != null && contentPadding != EdgeInsets.zero)
         ? Padding(padding: contentPadding, child: child)
         : child;
 
-    if (bgs.isEmpty && ovs.isEmpty) return paddedChild;
+    if (underlays.isEmpty && ovs.isEmpty) return paddedChild;
 
     return Stack(
       fit: StackFit.passthrough,
       clipBehavior: Clip.none,
-      children: [
-        ...bgs.map((bg) => FluxUnderlay.buildPositioned(context, bg)),
+      children:[
+        ...underlays.map((und) => FluxUnderlay.buildPositioned(context, und)),
         paddedChild,
         ...ovs.map((ov) => Positioned.fill(child: ov)),
       ],
     );
   }
 
+  // OPTIMIZATION 1.B: Collection iterables over repetitive array insertion
   static Widget verticalGroup({required List<Widget?> slots, required double spacing}) {
-    final children = <Widget>[];
-    for (final slot in slots) {
-      if (slot == null) continue;
-      if (children.isNotEmpty && spacing > 0) {
-        children.add(SizedBox(height: spacing));
-      }
-      children.add(slot);
-    }
-    if (children.isEmpty) return const SizedBox.shrink();
+    final validSlots = slots.whereType<Widget>().toList();
+    if (validSlots.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
-      children: children,
+      children:[
+        for (int i = 0; i < validSlots.length; i++) ...[
+          if (i > 0 && spacing > 0) SizedBox(height: spacing),
+          validSlots[i],
+        ],
+      ],
     );
   }
 
   static List<_SlotBlock> groupAndWrap(
-    BuildContext context,
-    List<_SlotBlock> blocks,
-    List<Widget> multiBgs,
-    List<Widget> multiOvs,
-  ) {
+      BuildContext context,
+      List<_SlotBlock> blocks,
+      List<Widget> multiUnderlays,
+      List<Widget> multiOvs,
+      ) {
     var currentBlocks = List<_SlotBlock>.from(blocks);
 
-    void applyDecoration(Widget layerWidget, Set<FluxTarget> targets, bool isBg) {
+    void applyDecoration(Widget layerWidget, Set<FluxTarget> targets, bool isUnderlay) {
       int startIdx = -1;
       int endIdx = -1;
 
@@ -99,10 +99,10 @@ abstract final class SlotResolver {
         final stacked = Stack(
           fit: StackFit.passthrough,
           clipBehavior: Clip.none,
-          children: [
-            if (isBg) FluxUnderlay.buildPositioned(context, layerWidget),
+          children:[
+            if (isUnderlay) FluxUnderlay.buildPositioned(context, layerWidget),
             column,
-            if (!isBg) Positioned.fill(child: layerWidget),
+            if (!isUnderlay) Positioned.fill(child: layerWidget),
           ],
         );
 
@@ -110,8 +110,8 @@ abstract final class SlotResolver {
       }
     }
 
-    for (final bg in multiBgs) {
-      applyDecoration(bg, (bg as FluxUnderlay).targets, true);
+    for (final und in multiUnderlays) {
+      applyDecoration(und, (und as FluxUnderlay).targets, true);
     }
     for (final ov in multiOvs) {
       applyDecoration(ov, (ov as FluxOverlay).targets, false);
@@ -121,17 +121,17 @@ abstract final class SlotResolver {
   }
 
   static Widget? contentColumn(
-    BuildContext context, {
-    required List<(FluxTarget, Widget?)> entries,
-    required Map<FluxTarget, List<Widget>> bgsByTarget,
-    required Map<FluxTarget, List<Widget>> ovsByTarget,
-    required List<Widget> multiBgs,
-    required List<Widget> multiOvs,
-    required EdgeInsets padding,
-    required double spacing,
-    FluxDivider? divider,
-    Map<FluxSlotBoundary, BoundaryTracker>? boundaryTrackers,
-  }) {
+      BuildContext context, {
+        required List<(FluxTarget, Widget?)> entries,
+        required Map<FluxTarget, List<Widget>> underlaysByTarget,
+        required Map<FluxTarget, List<Widget>> ovsByTarget,
+        required List<Widget> multiUnderlays,
+        required List<Widget> multiOvs,
+        required EdgeInsets padding,
+        required double spacing,
+        FluxDivider? divider,
+        Map<FluxSlotBoundary, BoundaryTracker>? boundaryTrackers,
+      }) {
     final present = entries.where((e) => e.$2 != null).toList();
     if (present.isEmpty) return null;
 
@@ -141,7 +141,6 @@ abstract final class SlotResolver {
       final target = present[i].$1;
       final child = present[i].$2!;
 
-      // 1. Insert structural layout gaps between slots
       if (i > 0) {
         final prevTarget = present[i - 1].$1;
         final boundary = boundaryBetween(prevTarget, target);
@@ -155,7 +154,6 @@ abstract final class SlotResolver {
 
         Widget gapWidget;
         if (tracker != null || div != null) {
-          // Make sure the tracker wraps the divider so it inherits its thickness
           Widget centerWidget = div ?? const SizedBox(height: 0, width: double.infinity);
           if (tracker != null) {
             centerWidget = BoundaryMarker(tracker: tracker, child: centerWidget);
@@ -176,28 +174,23 @@ abstract final class SlotResolver {
         blocks.add(_SlotBlock({prevTarget, target}, gapWidget));
       }
 
-      // 2. Check if the slot child wants to override the card-level padding
       EdgeInsetsGeometry? overridePad;
-      // --- FIX #1: Explicitly cast to FluxSlotWrapper to access the property ---
       if (child is FluxSlotWrapper) {
         overridePad = (child as FluxSlotWrapper).externalPaddingOverride;
       }
 
-      // 3. Apply override, otherwise fall back to card padding
-      final slotPad =
-          overridePad ??
-          EdgeInsets.only(
-            left: padding.left,
-            right: padding.right,
-            top: i == 0 ? padding.top : 0.0,
-            bottom: i == present.length - 1 ? padding.bottom : 0.0,
-          );
+      final slotPad = overridePad ?? EdgeInsets.only(
+        left: padding.left,
+        right: padding.right,
+        top: i == 0 ? padding.top : 0.0,
+        bottom: i == present.length - 1 ? padding.bottom : 0.0,
+      );
 
       final wrapped = wrapSlot(
         context,
         target: target,
         child: child,
-        bgsByTarget: bgsByTarget,
+        underlaysByTarget: underlaysByTarget,
         ovsByTarget: ovsByTarget,
         contentPadding: slotPad,
       )!;
@@ -205,7 +198,7 @@ abstract final class SlotResolver {
       blocks.add(_SlotBlock({target}, wrapped));
     }
 
-    final groupedBlocks = groupAndWrap(context, blocks, multiBgs, multiOvs);
+    final groupedBlocks = groupAndWrap(context, blocks, multiUnderlays, multiOvs);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

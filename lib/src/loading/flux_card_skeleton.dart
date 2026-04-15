@@ -65,21 +65,19 @@ class FluxCardSkeleton extends StatefulWidget {
   State<FluxCardSkeleton> createState() => _FluxCardSkeletonState();
 }
 
-class _FluxCardSkeletonState extends State<FluxCardSkeleton>
-    with SingleTickerProviderStateMixin {
+class _FluxCardSkeletonState extends State<FluxCardSkeleton> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat();
-    _animation = Tween<double>(begin: -1.5, end: 2.5).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
+      ..repeat();
+    _animation = Tween<double>(
+      begin: -1.5,
+      end: 2.5,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -130,22 +128,48 @@ class _FluxCardSkeletonState extends State<FluxCardSkeleton>
         : null;
 
     final footerSlot = widget.hasFooter
-        ? Row(
-      children: [
-        _SkeletonBox(
-          height: 32,
-          widthFraction: 0.35,
-          borderRadius: 8,
-          color: _baseColor(context),
-        ),
-        SizedBox(width: widget.theme.spacing),
-        _SkeletonBox(
-          height: 32,
-          widthFraction: 0.25,
-          borderRadius: 8,
-          color: _baseColor(context),
-        ),
-      ],
+        ? LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0;
+
+        final firstWidth = availableWidth > 0 ? availableWidth * 0.35 : null;
+        final secondWidth = availableWidth > 0 ? availableWidth * 0.25 : null;
+
+        Widget footerChip({
+          required double height,
+          required double borderRadius,
+          required Color color,
+          required double? width,
+        }) {
+          final box = _SkeletonBox(
+            height: height,
+            borderRadius: borderRadius,
+            color: color,
+          );
+
+          return width == null
+              ? Expanded(child: box)
+              : SizedBox(width: width, child: box);
+        }
+
+        return Row(
+          children: [
+            footerChip(
+              height: 32,
+              borderRadius: 8,
+              color: _baseColor(context),
+              width: firstWidth,
+            ),
+            SizedBox(width: widget.theme.spacing),
+            footerChip(
+              height: 32,
+              borderRadius: 8,
+              color: _baseColor(context),
+              width: secondWidth,
+            ),
+          ],
+        );
+      },
     )
         : null;
 
@@ -163,14 +187,14 @@ class _FluxCardSkeletonState extends State<FluxCardSkeleton>
       header: headerSlot,
       body: bodySlot,
       footer: footerSlot,
-      // Pass empty maps instead of empty lists
-      bgsByTarget: const {},
-      ovsByTarget: const {}, multiBgs: [], multiOvs: [],
+      underlaysByTarget: const {},
+      ovsByTarget: const {},
+      multiUnderlays: const [],
+      multiOvs: [],
     );
   }
 
-  Color _baseColor(BuildContext context) =>
-      Theme.of(context).colorScheme.surfaceContainerHighest;
+  Color _baseColor(BuildContext context) => Theme.of(context).colorScheme.surfaceContainerHighest;
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -192,10 +216,7 @@ class _SkeletonBox extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget box = Container(
       height: height,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(borderRadius)),
     );
     if (widthFraction != null) {
       box = FractionallySizedBox(widthFactor: widthFraction, child: box);
@@ -227,11 +248,7 @@ class _ShimmerLayer extends StatelessWidget {
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
               colors: [base, highlight, base],
-              stops:[
-                (v - 0.4).clamp(0.0, 1.0),
-                v.clamp(0.0, 1.0),
-                (v + 0.4).clamp(0.0, 1.0),
-              ],
+              stops: [(v - 0.4).clamp(0.0, 1.0), v.clamp(0.0, 1.0), (v + 0.4).clamp(0.0, 1.0)],
             ).createShader(bounds),
             child: child,
           );
