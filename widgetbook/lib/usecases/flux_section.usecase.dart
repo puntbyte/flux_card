@@ -169,3 +169,74 @@ Widget buildSectionFullBleedUseCase(BuildContext context) {
     maxWidth: 420,
   );
 }
+
+@widgetbook.UseCase(name: 'Text & Row Alignments', type: FluxSection, path: '[Flux Card]/Sections')
+Widget buildSectionAlignmentUseCase(BuildContext context) {
+  final headerCrossAlign = context.knobs.object.segmented<CrossAxisAlignment>(
+    label: 'Header Row (Y)',
+    options: const [CrossAxisAlignment.start, CrossAxisAlignment.center, CrossAxisAlignment.end],
+    labelBuilder: (a) => a.name,
+  );
+
+  final textCrossAlign = context.knobs.object.segmented<CrossAxisAlignment>(
+    label: 'Text Block (X)',
+    options: const [CrossAxisAlignment.start, CrossAxisAlignment.center, CrossAxisAlignment.end],
+    labelBuilder: (a) => a.name,
+  );
+
+  final textMainAlign = context.knobs.object.segmented<MainAxisAlignment>(
+    label: 'Text Block (Y inside forced height)',
+    options: const [
+      MainAxisAlignment.start,
+      MainAxisAlignment.center,
+      MainAxisAlignment.end,
+      MainAxisAlignment.spaceBetween,
+    ],
+    labelBuilder: (a) => a.name,
+  );
+
+  final showLeading = context.knobs.boolean(label: 'Show tall leading icon', initialValue: true);
+
+  return previewSurface(
+    context,
+    FluxCard(
+      header: FluxSection.header(
+        leading: showLeading
+            ? Container(
+                width: 80,
+                height: 120,
+                color: Colors.blue.shade100,
+                child: const Icon(Icons.person, size: 40),
+              )
+            : null,
+        // The new alignment APIs:
+        headerCrossAxisAlignment: headerCrossAlign,
+        textCrossAxisAlignment: textCrossAlign,
+        textMainAxisAlignment: textMainAlign,
+
+        title: const Text('Alexander Hamilton', textAlign: TextAlign.center),
+        subtitle: const Text('Secretary of the Treasury', textAlign: TextAlign.center),
+        description: const Text(
+          'A three-line header! Perfect for profiles where you need a name, a role, and a small '
+              'bio snippet, all neatly aligned.',
+          textAlign: TextAlign.center,
+        ),
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+        ),
+      ),
+      body: FluxContent(
+        child: const Text(
+          'Play with the knobs above:\n\n'
+          '1. Header Row (Y) controls where the text sits next to the tall leading image.\n'
+          '2. Text Block (X) controls the text horizontal alignment.\n'
+          '3. If you force a height on the text block, Text Block (Y) distributes it.',
+        ),
+      ),
+      theme: FluxCardThemeData.elevated.copyWith(padding: const EdgeInsets.all(20)),
+    ),
+    maxWidth: 420,
+  );
+}

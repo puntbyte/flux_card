@@ -99,11 +99,20 @@ class _FluxCardState extends State<FluxCard> {
     if (markerBox == null || cardBox == null) return null;
 
     try {
-      final offset = markerBox.localToGlobal(Offset.zero, ancestor: cardBox);
+      final td = Directionality.maybeOf(context) ?? TextDirection.ltr;
+      final resolvedAlignment = notch.boundaryAlignment.resolve(td);
+
+      // Calculate the point within the boundary marker's local bounds
+      // (e.g., if it wraps a thick divider, find the exact center of it).
+      final pointInMarker = resolvedAlignment.alongSize(markerBox.size);
+
+      // Translate that exact point to the card's coordinate space
+      final globalPoint = markerBox.localToGlobal(pointInMarker, ancestor: cardBox);
+
       if (notch.edge == FluxNotchEdge.vertical) {
-        return ((offset.dy + notch.boundaryOffset) / cardRect.height).clamp(0.0, 1.0);
+        return ((globalPoint.dy + notch.boundaryOffset) / cardRect.height).clamp(0.0, 1.0);
       } else {
-        return ((offset.dx + notch.boundaryOffset) / cardRect.width).clamp(0.0, 1.0);
+        return ((globalPoint.dx + notch.boundaryOffset) / cardRect.width).clamp(0.0, 1.0);
       }
     } catch (e) {
       return null;
@@ -256,8 +265,6 @@ class _FluxCardState extends State<FluxCard> {
           : buildCard(null),
     );
   }
-
-  // ...[Keep everything else exactly the same, scroll down to _buildLayers] ...
 
   Widget _buildLayers(
     FluxLayoutMode resolvedLayout,

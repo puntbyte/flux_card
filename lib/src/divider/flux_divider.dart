@@ -2,50 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../core/enums.dart';
 
-/// Declares which widget to render at each slot boundary inside a [FluxCard].
-///
-/// Pass one [FluxDivider] to [FluxCard.divider]. Each property corresponds to
-/// one named slot boundary; set only the boundaries you need.
-///
-/// The divider widget is rendered between the half-padding of the slot above
-/// and the half-padding of the slot below, so it sits centred in the gap.
-///
-/// ```dart
-/// // Standard Divider between body and footer:
-/// FluxCard(
-///   divider: const FluxDivider(afterBody: Divider()),
-/// )
-///
-/// // Perforated line aligned with a notch (indent = notchRadius):
-/// FluxCard(
-///   notch: FluxNotch(boundary: FluxSlotBoundary.afterHeader, notchRadius: 14),
-///   divider: FluxDivider(
-///     afterHeader: FluxDashedDivider(indent: 14, endIndent: 14),
-///   ),
-/// )
-///
-/// // Any widget works — custom branded separator:
-/// FluxCard(
-///   divider: const FluxDivider(afterBody: MyBrandedSeparator()),
-/// )
-/// ```
 class FluxDivider {
-  const FluxDivider({
-    this.afterMedia,
-    this.afterHeader,
-    this.afterBody,
-  });
+  const FluxDivider({this.afterMedia, this.afterHeader, this.afterBody});
 
-  /// Widget rendered between the media slot and the content group.
   final Widget? afterMedia;
-
-  /// Widget rendered between the header and body slots.
   final Widget? afterHeader;
-
-  /// Widget rendered between the body and footer slots.
   final Widget? afterBody;
 
-  /// Returns the widget configured for [boundary], or `null` if none is set.
   Widget? widgetFor(FluxSlotBoundary boundary) => switch (boundary) {
     FluxSlotBoundary.afterMedia => afterMedia,
     FluxSlotBoundary.afterHeader => afterHeader,
@@ -53,18 +16,8 @@ class FluxDivider {
   };
 }
 
-// ── FluxDashedDivider ─────────────────────────────────────────────────────────
-
 /// A horizontal dashed (perforated) line — the canonical divider for
 /// notch-style cards.
-///
-/// Set [indent] and [endIndent] to the notch radius so the dashes start and
-/// end exactly where the notch semicircles begin, creating a continuous
-/// perforated tear-line illusion.
-///
-/// ```dart
-/// FluxDashedDivider(indent: 14, endIndent: 14)
-/// ```
 class FluxDashedDivider extends StatelessWidget {
   const FluxDashedDivider({
     super.key,
@@ -74,25 +27,21 @@ class FluxDashedDivider extends StatelessWidget {
     this.endIndent = 0.0,
     this.dashWidth = 5.0,
     this.gapWidth = 4.0,
+    this.alignment = MainAxisAlignment.center,
   });
 
-  /// Dash colour. Defaults to [ThemeData.dividerColor].
   final Color? color;
-
-  /// Height of the dash stroke in logical pixels.
   final double thickness;
-
-  /// Leading inset from the left edge.
   final double indent;
-
-  /// Trailing inset from the right edge.
   final double endIndent;
-
-  /// Width of each dash segment.
   final double dashWidth;
-
-  /// Width of each gap between segments.
   final double gapWidth;
+
+  /// Controls how the dashed line is aligned within the available space.
+  ///
+  /// Defaults to[MainAxisAlignment.center], which ensures the dashes are
+  /// perfectly symmetrical on both the left and right edges.
+  final MainAxisAlignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +55,7 @@ class FluxDashedDivider extends StatelessWidget {
           endIndent: endIndent,
           dashWidth: dashWidth,
           gapWidth: gapWidth,
+          alignment: alignment,
         ),
       ),
     );
@@ -120,6 +70,7 @@ class _DashedLinePainter extends CustomPainter {
     required this.endIndent,
     required this.dashWidth,
     required this.gapWidth,
+    required this.alignment,
   });
 
   final Color color;
@@ -128,6 +79,7 @@ class _DashedLinePainter extends CustomPainter {
   final double endIndent;
   final double dashWidth;
   final double gapWidth;
+  final MainAxisAlignment alignment;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -137,22 +89,62 @@ class _DashedLinePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final y = size.height / 2;
-    double x = indent;
-    final endX = size.width - endIndent;
+    final availableWidth = size.width - indent - endIndent;
+    if (availableWidth <= 0) return;
 
-    while (x < endX) {
-      final dashEnd = (x + dashWidth).clamp(x, endX);
-      canvas.drawLine(Offset(x, y), Offset(dashEnd, y), paint);
-      x += dashWidth + gapWidth;
+    final cycleLength = dashWidth + gapWidth;
+    final dashCount = ((availableWidth + gapWidth) / cycleLength).floor();
+    if (dashCount <= 0) return;
+
+    final drawnWidth = (dashCount * dashWidth) + ((dashCount - 1) * gapWidth);
+    final remainingSpace = availableWidth - drawnWidth;
+
+    double x = indent;
+    double actualGap = gapWidth;
+
+    // Distribute the remaining asymmetrical space based on alignment
+    switch (alignment) {
+      case MainAxisAlignment.center:
+        x += remainingSpace / 2;
+        break;
+      case MainAxisAlignment.end:
+        x += remainingSpace;
+        break;
+      case MainAxisAlignment.spaceBetween:
+        if (dashCount > 1) {
+          actualGap = (availableWidth - (dashCount * dashWidth)) / (dashCount - 1);
+        }
+        break;
+      case MainAxisAlignment.spaceAround:
+        if (dashCount > 0) {
+          actualGap = (availableWidth - (dashCount * dashWidth)) / dashCount;
+          x += actualGap / 2;
+        }
+        break;
+      case MainAxisAlignment.spaceEvenly:
+        if (dashCount > 0) {
+          actualGap = (availableWidth - (dashCount * dashWidth)) / (dashCount + 1);
+          x += actualGap;
+        }
+        break;
+      case MainAxisAlignment.start:
+      default:
+        break;
+    }
+
+    for (int i = 0; i < dashCount; i++) {
+      canvas.drawLine(Offset(x, y), Offset(x + dashWidth, y), paint);
+      x += dashWidth + actualGap;
     }
   }
 
   @override
   bool shouldRepaint(_DashedLinePainter old) =>
       old.color != color ||
-          old.thickness != thickness ||
-          old.indent != indent ||
-          old.endIndent != endIndent ||
-          old.dashWidth != dashWidth ||
-          old.gapWidth != gapWidth;
+      old.thickness != thickness ||
+      old.indent != indent ||
+      old.endIndent != endIndent ||
+      old.dashWidth != dashWidth ||
+      old.gapWidth != gapWidth ||
+      old.alignment != alignment;
 }

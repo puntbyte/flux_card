@@ -146,7 +146,6 @@ abstract final class SlotResolver {
         final prevTarget = present[i - 1].$1;
         final boundary = boundaryBetween(prevTarget, target);
 
-        // --- FIX #2: Make logic more explicit to avoid analyzer confusion ---
         BoundaryTracker? tracker;
         Widget? div;
         if (boundary != null) {
@@ -156,13 +155,18 @@ abstract final class SlotResolver {
 
         Widget gapWidget;
         if (tracker != null || div != null) {
+          // Make sure the tracker wraps the divider so it inherits its thickness
+          Widget centerWidget = div ?? const SizedBox(height: 0, width: double.infinity);
+          if (tracker != null) {
+            centerWidget = BoundaryMarker(tracker: tracker, child: centerWidget);
+          }
+
           gapWidget = Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+            children:[
               SizedBox(height: spacing / 2),
-              if (tracker != null) BoundaryMarker(tracker: tracker, child: const SizedBox.shrink()),
-              if (div != null) div,
+              centerWidget,
               SizedBox(height: spacing / 2),
             ],
           );

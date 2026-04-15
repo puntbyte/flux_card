@@ -113,21 +113,12 @@ Widget buildRowSpanningUseCase(BuildContext context) {
       mediaPosition: mediaPosition,
       mediaSpan: mediaSpan,
 
-      media: FluxMedia(
+      media: FluxMedia.image(
         padding: EdgeInsets.all(8),
         aspectRatio: 1.0,
+        image: CachedNetworkImageProvider(post.image),
         borderRadius: BorderRadius.all(Radius.circular(16.0)),
-        
-        child: Ink(
-          decoration: BoxDecoration(
-            //borderRadius: BorderRadius.all(Radius.circular(16.0)),
-            image: DecorationImage(
-              image: CachedNetworkImageProvider(post.image),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        // child: Ink.image(image: CachedNetworkImageProvider(post.image), fit: BoxFit.cover),
+        fit: BoxFit.cover,
       ),
 
       // Use the new semantic .header!
@@ -401,20 +392,15 @@ Widget buildHeroAnimationUseCase(BuildContext context) {
       builder: (innerContext) => FluxCard(
         // Set to Clip.none to ensure the Hero doesn't get abruptly cut off during the flight.
         clipBehavior: Clip.none,
-        media: FluxMedia(
-          aspectRatio: 16 / 9,
-          // Wrap the inner image in the Hero.
-          child: Hero(
-            tag: 'hero-product-image',
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Ink.image(
-                image: CachedNetworkImageProvider(
-                  'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
-                ),
-                fit: BoxFit.cover,
-              ),
+        media: Hero(
+          tag: 'hero-product-image',
+          child: FluxMedia.image(
+            aspectRatio: 16 / 9,
+            image: CachedNetworkImageProvider(
+              'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
             ),
+            fit: BoxFit.cover,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
         ),
         header: const FluxSection(

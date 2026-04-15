@@ -10,11 +10,7 @@ import '../demo/demo_product.dart';
 Widget _buildPostCard(DemoPost post) {
   return FluxCard(
     layout: FluxLayoutMode.row,
-    media: FluxMedia.image(
-      aspectRatio: 1.0,
-      image: NetworkImage(post.image),
-      fit: BoxFit.cover,
-    ),
+    media: FluxMedia.image(aspectRatio: 1.0, image: NetworkImage(post.image), fit: BoxFit.cover),
     header: FluxSection.header(
       title: Text(post.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Text(post.category),
@@ -22,7 +18,7 @@ Widget _buildPostCard(DemoPost post) {
     ),
     footer: FluxSection.footer(
       actionsAlignment: MainAxisAlignment.spaceBetween,
-      actions:[
+      actions: [
         Text('${post.author} • ${post.readTime}', style: const TextStyle(fontSize: 12)),
         const Icon(Icons.bookmark_border, size: 18),
       ],
@@ -36,25 +32,22 @@ Widget _buildPostCard(DemoPost post) {
 Widget _buildProductCard(DemoProduct product) {
   return FluxCard(
     layout: FluxLayoutMode.column,
-    media: FluxMedia.image(
-      aspectRatio: 1.0,
-      image: NetworkImage(product.image),
-      fit: BoxFit.cover,
-    ),
+    media: FluxMedia.image(aspectRatio: 1.0, image: NetworkImage(product.image), fit: BoxFit.cover),
     header: FluxSection.header(
       title: Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(product.brand, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       padding: EdgeInsets.zero,
+      spacing: 0,
     ),
+
     footer: FluxSection.footer(
       actionsAlignment: MainAxisAlignment.spaceBetween,
-      actions:[
+      actions: [
         Text(product.priceLabel, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
         const Icon(Icons.add_shopping_cart, size: 20),
       ],
-      padding: EdgeInsets.zero,
     ),
-    theme: FluxCardThemeData.elevated,
+    theme: FluxCardThemeData.elevated.copyWith(spacing: 4),
     onTap: () {},
   );
 }
@@ -82,11 +75,11 @@ Widget buildGridViewUseCase(BuildContext context) {
     appBar: AppBar(title: const Text('GridView.builder')),
     body: GridView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 200,
         crossAxisSpacing: 16,
-        childAspectRatio: 0.68, // Adjust based on your typography sizes
+        mainAxisExtent: 300,
+        mainAxisSpacing: 16,
       ),
       itemCount: demoProducts.length,
       itemBuilder: (context, index) => _buildProductCard(demoProducts[index]),
@@ -94,32 +87,31 @@ Widget buildGridViewUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'SliverList', type: CustomScrollView, path: '[Flux Card]/Views (Scrollables)')
+@widgetbook.UseCase(
+  name: 'SliverList',
+  type: CustomScrollView,
+  path: '[Flux Card]/Views (Scrollables)',
+)
 Widget buildSliverListUseCase(BuildContext context) {
   return Scaffold(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: CustomScrollView(
-      slivers:[
+      slivers: [
         const SliverAppBar(
           title: Text('SliverList'),
           pinned: true,
           expandedHeight: 120,
-          flexibleSpace: FlexibleSpaceBar(
-            background: ColoredBox(color: Colors.blue),
-          ),
+          flexibleSpace: FlexibleSpaceBar(background: ColoredBox(color: Colors.blue)),
         ),
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _buildPostCard(demoPosts[index]),
-                );
-              },
-              childCount: demoPosts.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildPostCard(demoPosts[index]),
+              );
+            }, childCount: demoPosts.length),
           ),
         ),
       ],
@@ -127,12 +119,16 @@ Widget buildSliverListUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'SliverGrid', type: CustomScrollView, path: '[Flux Card]/Views (Scrollables)')
+@widgetbook.UseCase(
+  name: 'SliverGrid',
+  type: CustomScrollView,
+  path: '[Flux Card]/Views (Scrollables)',
+)
 Widget buildSliverGridUseCase(BuildContext context) {
   return Scaffold(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: CustomScrollView(
-      slivers:[
+      slivers: [
         SliverAppBar(
           title: const Text('SliverGrid'),
           pinned: true,
@@ -155,7 +151,7 @@ Widget buildSliverGridUseCase(BuildContext context) {
               childAspectRatio: 0.68,
             ),
             delegate: SliverChildBuilderDelegate(
-                  (context, index) => _buildProductCard(demoProducts[index]),
+              (context, index) => _buildProductCard(demoProducts[index]),
               childCount: demoProducts.length,
             ),
           ),

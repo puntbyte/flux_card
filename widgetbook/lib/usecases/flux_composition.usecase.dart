@@ -446,7 +446,6 @@ Widget buildFullBleedProductUseCase(BuildContext context) {
       media: FluxMedia(
         aspectRatio: 1.0,
         alignment: Alignment.bottomCenter, // Fixed syntax here too
-
         // Scrim moved natively to the media slot
         child: Ink.image(
           image: const CachedNetworkImageProvider(
@@ -705,9 +704,6 @@ Widget buildEventTicketUseCase(BuildContext context) {
     context,
     FluxCard(
       loading: loading,
-
-      //decoration: BoxDecoration(),
-
       media: FluxMedia(
         aspectRatio: 16 / 8,
         child: Ink.image(
@@ -735,13 +731,19 @@ Widget buildEventTicketUseCase(BuildContext context) {
         ),
       ],
 
-      // backgrounds: [
-      //   FluxBackground.color(color: Colors.green, targets: {.header}),
-      //   FluxBackground.color(color: Colors.red, targets: {.footer}),
-      // ],
-
       divider: FluxDivider(
-        afterHeader: FluxDashedDivider(color: Theme.of(context).disabledColor)
+        afterHeader: FluxDashedDivider(
+          color: Theme.of(context).disabledColor,
+          indent: 12,
+          endIndent: 12,
+          dashWidth: 6,
+        ),
+      ),
+
+      notch: FluxNotch(
+        boundary: FluxSlotBoundary.afterHeader,
+        notchRadius: 8,
+        side: BorderSide(width: 2, color: Theme.of(context).disabledColor),
       ),
 
       header: const FluxSection(
@@ -758,16 +760,7 @@ Widget buildEventTicketUseCase(BuildContext context) {
         ],
       ),
 
-      notch: FluxNotch(
-        boundary: FluxSlotBoundary.afterHeader,
-        notchRadius: 8,
-        side: BorderSide(width: 2, color: Theme.of(context).disabledColor),
-      ),
-
-      theme: FluxCardThemeData.outlined.copyWith(
-        padding: EdgeInsets.all(16),
-        spacing: 32
-      ),
+      theme: FluxCardThemeData.outlined.copyWith(padding: EdgeInsets.all(16), spacing: 32),
 
       onTap: () {},
     ),

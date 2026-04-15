@@ -32,6 +32,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     this.defaultShadows,
     this.defaultTitleStyle,
     this.defaultSubtitleStyle,
+    this.defaultDescriptionStyle,
     this.cardColor,
     this.shadowColor,
     this.surfaceTintColor,
@@ -57,6 +58,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
   final List<BoxShadow>? defaultShadows;
   final TextStyle? defaultTitleStyle;
   final TextStyle? defaultSubtitleStyle;
+  final TextStyle? defaultDescriptionStyle;
   final Color? cardColor;
   final Color? shadowColor;
   final Color? surfaceTintColor;
@@ -147,6 +149,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     List<BoxShadow>? defaultShadows,
     TextStyle? defaultTitleStyle,
     TextStyle? defaultSubtitleStyle,
+    TextStyle? defaultDescriptionStyle, // Added
     Color? cardColor,
     Color? shadowColor,
     Color? surfaceTintColor,
@@ -164,6 +167,8 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     defaultShadows: defaultShadows ?? this.defaultShadows,
     defaultTitleStyle: defaultTitleStyle ?? this.defaultTitleStyle,
     defaultSubtitleStyle: defaultSubtitleStyle ?? this.defaultSubtitleStyle,
+    defaultDescriptionStyle: defaultDescriptionStyle ?? this.defaultDescriptionStyle,
+    // Added
     cardColor: cardColor ?? this.cardColor,
     shadowColor: shadowColor ?? this.shadowColor,
     surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
@@ -186,6 +191,12 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
       defaultShadows: t < 0.5 ? defaultShadows : other.defaultShadows,
       defaultTitleStyle: TextStyle.lerp(defaultTitleStyle, other.defaultTitleStyle, t),
       defaultSubtitleStyle: TextStyle.lerp(defaultSubtitleStyle, other.defaultSubtitleStyle, t),
+      defaultDescriptionStyle: TextStyle.lerp(
+        defaultDescriptionStyle,
+        other.defaultDescriptionStyle,
+        t,
+      ),
+      // Added
       cardColor: Color.lerp(cardColor, other.cardColor, t),
       shadowColor: Color.lerp(shadowColor, other.shadowColor, t),
       surfaceTintColor: Color.lerp(surfaceTintColor, other.surfaceTintColor, t),
@@ -209,6 +220,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
       listEquals(other.defaultShadows, defaultShadows) &&
       other.defaultTitleStyle == defaultTitleStyle &&
       other.defaultSubtitleStyle == defaultSubtitleStyle &&
+      other.defaultDescriptionStyle == defaultDescriptionStyle && // Added
       other.cardColor == cardColor &&
       other.shadowColor == shadowColor &&
       other.surfaceTintColor == surfaceTintColor &&
@@ -228,6 +240,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     Object.hashAll(defaultShadows ?? const <BoxShadow>[]),
     defaultTitleStyle,
     defaultSubtitleStyle,
+    defaultDescriptionStyle,
     cardColor,
     shadowColor,
     surfaceTintColor,

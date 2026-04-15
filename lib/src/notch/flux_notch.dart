@@ -29,36 +29,28 @@ import '../shapes/flux_notch_shape.dart';
 /// )
 /// ```
 class FluxNotch {
-  /// Targeted constructor — snaps the notch to a named slot boundary.
-  ///
-  /// [FluxCard] measures the rendered Y position of [boundary] after the first
-  /// frame and updates the clip and border painter automatically. Until
-  /// measurement is available, [fallbackPosition] is used.
   const FluxNotch({
     required FluxSlotBoundary boundary,
     double fallbackPosition = 0.5,
     double boundaryOffset = 0.0,
+    AlignmentGeometry boundaryAlignment = Alignment.center,
     double notchRadius = 12.0,
     FluxNotchEdge edge = FluxNotchEdge.vertical,
     FluxNotchSide notchSide = FluxNotchSide.both,
     BorderRadius? borderRadius,
     BorderSide side = BorderSide.none,
   }) : this._(
-         boundary: boundary,
-         fallbackPosition: fallbackPosition,
-         boundaryOffset: boundaryOffset,
-         notchRadius: notchRadius,
-         edge: edge,
-         notchSide: notchSide,
-         borderRadius: borderRadius,
-         side: side,
-       );
+    boundary: boundary,
+    fallbackPosition: fallbackPosition,
+    boundaryOffset: boundaryOffset,
+    boundaryAlignment: boundaryAlignment,
+    notchRadius: notchRadius,
+    edge: edge,
+    notchSide: notchSide,
+    borderRadius: borderRadius,
+    side: side,
+  );
 
-  /// Free-position constructor — places the notch at a fixed fraction of the
-  /// card edge, with no post-layout measurement.
-  ///
-  /// [position] is a 0.0–1.0 fraction along the card's height (for vertical
-  /// edges) or width (for horizontal edges).
   const FluxNotch.free({
     double position = 0.5,
     double notchRadius = 12.0,
@@ -67,21 +59,22 @@ class FluxNotch {
     BorderRadius? borderRadius,
     BorderSide side = BorderSide.none,
   }) : this._(
-         boundary: null,
-         fallbackPosition: position,
-         boundaryOffset: 0.0,
-         notchRadius: notchRadius,
-         edge: edge,
-         notchSide: notchSide,
-         borderRadius: borderRadius,
-         side: side,
-       );
+    boundary: null,
+    fallbackPosition: position,
+    boundaryOffset: 0.0,
+    boundaryAlignment: Alignment.center,
+    notchRadius: notchRadius,
+    edge: edge,
+    notchSide: notchSide,
+    borderRadius: borderRadius,
+    side: side,
+  );
 
-  // Private canonical constructor — holds all fields.
   const FluxNotch._({
     this.boundary,
     required this.fallbackPosition,
     required this.boundaryOffset,
+    required this.boundaryAlignment,
     required this.notchRadius,
     required this.edge,
     required this.notchSide,
@@ -89,54 +82,25 @@ class FluxNotch {
     required this.side,
   });
 
-  // ── Fields ─────────────────────────────────────────────────────────────────
-
-  /// Slot boundary to snap the notch to. `null` when using [FluxNotch.free].
   final FluxSlotBoundary? boundary;
-
-  /// Notch position used before boundary measurement completes, or as the
-  /// sole position for [FluxNotch.free].
   final double fallbackPosition;
 
-  /// Pixel offset applied to the measured boundary Y position.
+  /// Controls where the notch aligns relative to the measured bounds of the
+  /// tracked boundary widget (e.g. the divider).
   ///
-  /// Positive values move the notch downward. Useful when a [FluxDivider]
-  /// widget adds visual height at the boundary and the notch should align with
-  /// the widget's centre rather than its top edge.
+  /// Defaults to [Alignment.center], meaning if the divider has a thickness
+  /// of 10px, the notch will point to exactly 5px deep into the divider.
+  final AlignmentGeometry boundaryAlignment;
+
   final double boundaryOffset;
-
-  /// Radius of the semicircular notch, in logical pixels.
   final double notchRadius;
-
-  /// Which edges of the card receive notches.
   final FluxNotchEdge edge;
-
-  /// Which side(s) of the chosen [edge] are notched.
   final FluxNotchSide notchSide;
-
-  /// Corner radius of the card shape.
-  ///
-  /// When null, [FluxCard] inherits [FluxCardThemeData.borderRadius]
-  /// automatically.
   final BorderRadius? borderRadius;
-
-  /// Border drawn around the notch outline.
-  ///
-  /// Rendered as a `CustomPaint` layer above all card content so it is never
-  /// occluded by backgrounds, media, or overlays.
   final BorderSide side;
 
-  // ── Derived ────────────────────────────────────────────────────────────────
-
-  /// Whether this notch uses post-layout boundary measurement.
   bool get isTargeted => boundary != null;
 
-  // ── Internal factory helpers ───────────────────────────────────────────────
-
-  /// Builds the [CustomPainter] that draws [side] on top of the card content.
-  ///
-  /// [resolvedBorderRadius] must already incorporate the theme fallback.
-  // Inside class FluxNotch:
   CustomPainter buildBorderPainter(
       double position,
       BorderRadius resolvedBorderRadius,

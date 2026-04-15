@@ -379,13 +379,18 @@ class FluxCardLayout {
       final div = divider?.widgetFor(boundary);
 
       if (tracker != null || div != null) {
+        // Wrap the tracker around the divider here as well
+        Widget centerWidget = div ?? const SizedBox(height: 0, width: double.infinity);
+        if (tracker != null) {
+          centerWidget = BoundaryMarker(tracker: tracker, child: centerWidget);
+        }
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+          children:[
             SizedBox(height: theme.spacing / 2),
-            if (tracker != null) BoundaryMarker(tracker: tracker, child: const SizedBox.shrink()),
-            if (div != null) div,
+            centerWidget,
             SizedBox(height: theme.spacing / 2),
           ],
         );
