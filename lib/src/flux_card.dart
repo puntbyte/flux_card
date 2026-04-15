@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'components/flux_background.dart';
+import 'components/flux_underlay.dart';
 import 'components/flux_overlay.dart';
 import 'core/constraints.dart';
 import 'core/enums.dart';
@@ -23,7 +23,7 @@ class FluxCard extends StatefulWidget {
     this.body,
     this.footer,
     this.overlays,
-    this.backgrounds,
+    this.underlay,
     this.foregroundColor,
     this.decoration,
     this.notch,
@@ -33,6 +33,8 @@ class FluxCard extends StatefulWidget {
     this.fullWidth = false,
     this.fullHeight = false,
     this.theme,
+    this.clipBehavior,
+    this.semanticLabel,
     this.onTap,
     this.onLongPress,
     this.loading = false,
@@ -47,7 +49,7 @@ class FluxCard extends StatefulWidget {
   final Widget? body;
   final Widget? footer;
   final List<Widget>? overlays;
-  final List<Widget>? backgrounds;
+  final List<Widget>? underlay;
   final Color? foregroundColor;
   final BoxDecoration? decoration;
   final FluxNotch? notch;
@@ -57,6 +59,15 @@ class FluxCard extends StatefulWidget {
   final bool fullWidth;
   final bool fullHeight;
   final FluxCardThemeData? theme;
+
+  /// Overrides the [FluxCardThemeData.clipBehavior].
+  /// Set to [Clip.none] to allow [FluxOverlay] badges to break out of the card bounds.
+  final Clip? clipBehavior;
+
+  /// Semantic label for accessibility.
+  /// Wraps the entire card in a [Semantics] node.
+  final String? semanticLabel;
+
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final bool loading;
@@ -67,7 +78,6 @@ class FluxCard extends StatefulWidget {
 }
 
 class _FluxCardState extends State<FluxCard> {
-  // ── Boundary tracking (Zero-cost alternative to GlobalKey) ──────────────
   final _cardTracker = BoundaryTracker();
   final _afterMediaTracker = BoundaryTracker();
   final _afterHeaderTracker = BoundaryTracker();
@@ -79,8 +89,6 @@ class _FluxCardState extends State<FluxCard> {
     FluxSlotBoundary.afterBody: _afterBodyTracker,
   };
 
-  /// Dynamically resolves the exact rendering pixel coordinates of the targeted
-  /// notch boundary during the paint phase without triggering a rebuild.
   double? _resolveNotchPosition(Rect cardRect) {
     final notch = widget.notch;
     if (notch == null || !notch.isTargeted) return null;
@@ -98,12 +106,9 @@ class _FluxCardState extends State<FluxCard> {
         return ((offset.dx + notch.boundaryOffset) / cardRect.width).clamp(0.0, 1.0);
       }
     } catch (e) {
-      // Graceful fallback if the tree is momentarily detached
       return null;
     }
   }
-
-  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +116,6 @@ class _FluxCardState extends State<FluxCard> {
     final td = Directionality.maybeOf(context);
     final resolvedPadding = effectiveTheme.padding.resolve(td);
 
-    // Helper method to build the actual card
     Widget buildCard(BoxConstraints? parentConstraints) {
       final cardConstraints = FluxCardConstraints(
         parentConstraints: parentConstraints ?? const BoxConstraints(),
@@ -127,7 +131,6 @@ class _FluxCardState extends State<FluxCard> {
                 : FluxLayoutMode.column)
           : widget.layout;
 
-      // ── Notch & Shape ──────────────────────────────────────────
       final notch = widget.notch;
       final resolvedNotchPos = notch?.fallbackPosition ?? 0.5;
       final notchBR =
@@ -144,7 +147,6 @@ class _FluxCardState extends State<FluxCard> {
             )
           : effectiveTheme.resolveShape(context);
 
-      // ── Card content ───────────────────────────────────────────
       final Widget cardContent = widget.loading
           ? FluxCardSkeleton(
               layout: resolvedLayout,
@@ -159,7 +161,6 @@ class _FluxCardState extends State<FluxCard> {
             )
           : _buildLayers(resolvedLayout, effectiveTheme, resolvedPadding, td, parentConstraints);
 
-      // ── Stack layers ───────────────────────────────────────────
       final List<Widget> stackLayers = [
         DefaultTextStyle.merge(
           style: TextStyle(color: widget.foregroundColor),
@@ -187,12 +188,18 @@ class _FluxCardState extends State<FluxCard> {
         stackLayers.insert(
           0,
           Positioned.fill(
-            child: IgnorePointer(child: DecoratedBox(decoration: widget.decoration!)),
+            // Changed DecoratedBox to Ink to protect the ripple on the entire card's background
+            child: IgnorePointer(child: Ink(decoration: widget.decoration!)),
           ),
         );
       }
 
-      Widget contentTree = Stack(fit: StackFit.passthrough, children: stackLayers);
+      Widget contentTree = Stack(
+        fit: StackFit.passthrough,
+        clipBehavior: Clip.none,
+        children: stackLayers,
+      );
+
       if (widget.onTap != null || widget.onLongPress != null) {
         contentTree = InkWell(
           onTap: widget.onTap,
@@ -209,26 +216,36 @@ class _FluxCardState extends State<FluxCard> {
           ? effectiveTheme.elevation
           : (effectiveTheme.defaultShadows?.isNotEmpty == true ? 4.0 : 0.0);
 
+      Widget cardWidget = Material(
+        color: cardColor,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        surfaceTintColor: effectiveTheme.surfaceTintColor,
+        shape: effectiveShape,
+        clipBehavior: widget.clipBehavior ?? effectiveTheme.clipBehavior,
+        child: contentTree,
+      );
+
+      // Semantic Accessibility Wrapper
+      if (widget.semanticLabel != null) {
+        cardWidget = Semantics(
+          container: true,
+          button: widget.onTap != null || widget.onLongPress != null,
+          label: widget.semanticLabel,
+          child: cardWidget,
+        );
+      }
+
       return BoundaryMarker(
         tracker: _cardTracker,
         child: SizedBox(
           width: cardConstraints.resolvedWidth,
           height: cardConstraints.resolvedHeight,
-          child: Material(
-            color: cardColor,
-            elevation: elevation,
-            shadowColor: shadowColor,
-            surfaceTintColor: effectiveTheme.surfaceTintColor,
-            shape: effectiveShape,
-            clipBehavior: effectiveTheme.clipBehavior,
-            child: contentTree,
-          ),
+          child: cardWidget,
         ),
       );
     }
 
-    // OPTIMIZATION: Only use LayoutBuilder if we absolutely need to measure the parent.
-    // If it's a fixed layout and not expanding to parent bounds, bypass LayoutBuilder entirely!
     final needsLayoutBuilder =
         widget.layout == FluxLayoutMode.responsive || widget.fullWidth || widget.fullHeight;
 
@@ -240,17 +257,17 @@ class _FluxCardState extends State<FluxCard> {
     );
   }
 
-  // ── Layer assembly (O(1) Slot Lookup Optimization) ──────────────────────
+  // ...[Keep everything else exactly the same, scroll down to _buildLayers] ...
 
   Widget _buildLayers(
-      FluxLayoutMode resolvedLayout,
-      FluxCardThemeData theme,
-      EdgeInsets resolvedPadding,
-      TextDirection? td,
-      BoxConstraints? parentConstraints,
-      ) {
-    final allBgs = widget.backgrounds ?? const [];
-    final allOvs = widget.overlays ?? const[];
+    FluxLayoutMode resolvedLayout,
+    FluxCardThemeData theme,
+    EdgeInsets resolvedPadding,
+    TextDirection? td,
+    BoxConstraints? parentConstraints,
+  ) {
+    final allBgs = widget.underlay ?? const [];
+    final allOvs = widget.overlays ?? const [];
 
     final bgsByTarget = <FluxTarget, List<Widget>>{};
     final ovsByTarget = <FluxTarget, List<Widget>>{};
@@ -260,13 +277,13 @@ class _FluxCardState extends State<FluxCard> {
     final globalOvs = <Widget>[];
 
     for (final bg in allBgs) {
-      if (bg is FluxBackground) {
+      if (bg is FluxUnderlay) {
         if (bg.isGlobal) {
           globalBgs.add(bg);
         } else if (bg.targets.length == 1) {
-          (bgsByTarget[bg.targets.first] ??=[]).add(bg);
+          (bgsByTarget[bg.targets.first] ??= []).add(bg);
         } else {
-          multiBgs.add(bg); // Caught for grouping
+          multiBgs.add(bg);
         }
       } else {
         globalBgs.add(bg);
@@ -278,49 +295,68 @@ class _FluxCardState extends State<FluxCard> {
         if (ov.isGlobal) {
           globalOvs.add(ov);
         } else if (ov.targets.length == 1) {
-          (ovsByTarget[ov.targets.first] ??=[]).add(ov);
+          (ovsByTarget[ov.targets.first] ??= []).add(ov);
         } else {
-          multiOvs.add(ov); // Caught for grouping
+          multiOvs.add(ov);
         }
       } else {
         globalOvs.add(ov);
       }
     }
 
-    int getZIndex(Widget w) => w is FluxOverlay ? w.zIndex : 0;
+    // New helper to read zIndex from both Overlays and Backgrounds
+    int getZIndex(Widget w) {
+      if (w is FluxOverlay) return w.zIndex;
+      if (w is FluxUnderlay) return w.zIndex;
+      return 0;
+    }
 
+    // Sort Overlays (Ascending: 0, 1, 2 -> later paints on top)
     globalOvs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     multiOvs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     for (final list in ovsByTarget.values) {
       list.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
     }
 
-    final mainContent = FluxCardLayout(
-      mode: resolvedLayout,
-      mediaPosition: widget.mediaPosition,
-      mediaSpan: widget.mediaSpan,
-      theme: theme,
-      resolvedPadding: resolvedPadding,
-      divider: widget.divider,
-      boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
-      parentConstraints: parentConstraints,
-    ).build(
-      media: widget.media,
-      header: widget.header,
-      body: widget.body,
-      footer: widget.footer,
-      bgsByTarget: bgsByTarget,
-      ovsByTarget: ovsByTarget,
-      multiBgs: multiBgs, // Passed down
-      multiOvs: multiOvs, // Passed down
-    );
+    // Sort Backgrounds
+    // Global & Single-target use Ascending (painted directly in a single Stack)
+    globalBgs.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
+    for (final list in bgsByTarget.values) {
+      list.sort((a, b) => getZIndex(a).compareTo(getZIndex(b)));
+    }
+    // Multi-target must use Descending! Because the layout engine wraps them iteratively,
+    // processing higher zIndex *first* pushes it deeper, meaning it paints *after* the lower ones.
+    multiBgs.sort((a, b) => getZIndex(b).compareTo(getZIndex(a)));
+
+    final mainContent =
+        FluxCardLayout(
+          mode: resolvedLayout,
+          mediaPosition: widget.mediaPosition,
+          mediaSpan: widget.mediaSpan,
+          theme: theme,
+          resolvedPadding: resolvedPadding,
+          divider: widget.divider,
+          boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
+          parentConstraints: parentConstraints,
+        ).build(
+          context,
+          media: widget.media,
+          header: widget.header,
+          body: widget.body,
+          footer: widget.footer,
+          bgsByTarget: bgsByTarget,
+          ovsByTarget: ovsByTarget,
+          multiBgs: multiBgs,
+          multiOvs: multiOvs,
+        );
 
     if (globalBgs.isEmpty && globalOvs.isEmpty) return mainContent;
 
     return Stack(
       fit: StackFit.passthrough,
-      children:[
-        ...globalBgs.map((bg) => Positioned.fill(child: bg)),
+      clipBehavior: Clip.none,
+      children: [
+        ...globalBgs.map((bg) => FluxUnderlay.buildPositioned(context, bg)),
         mainContent,
         ...globalOvs.map((ov) => Positioned.fill(child: ov)),
       ],

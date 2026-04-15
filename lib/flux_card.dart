@@ -15,7 +15,7 @@ export 'src/notch/flux_notch.dart' show FluxNotch;
 export 'src/divider/flux_divider.dart';
 
 // Components
-export 'src/components/flux_background.dart';
+export 'src/components/flux_underlay.dart';
 export 'src/components/flux_content.dart';
 export 'src/components/flux_media.dart';
 export 'src/components/flux_overlay.dart';

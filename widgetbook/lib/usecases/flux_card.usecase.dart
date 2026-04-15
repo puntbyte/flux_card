@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -41,7 +42,7 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
       loading: loading,
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Ink.image(image: NetworkImage(product.image), fit: BoxFit.cover),
+        child: Ink.image(image: CachedNetworkImageProvider(product.image), fit: BoxFit.cover),
       ),
       overlays: [
         if (showOverlay && product.hasDiscount)
@@ -96,6 +97,7 @@ Widget buildRowSpanningUseCase(BuildContext context) {
     options: FluxMediaSpan.values,
     labelBuilder: (m) => m.name,
   );
+
   final mediaPosition = context.knobs.object.segmented<FluxMediaPosition>(
     label: 'Media position',
     options: FluxMediaPosition.values,
@@ -110,21 +112,37 @@ Widget buildRowSpanningUseCase(BuildContext context) {
       layout: FluxLayoutMode.row,
       mediaPosition: mediaPosition,
       mediaSpan: mediaSpan,
+
       media: FluxMedia(
+        padding: EdgeInsets.all(8),
         aspectRatio: 1.0,
-        child: Ink.image(image: NetworkImage(post.image), fit: BoxFit.cover),
+        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+        
+        child: Ink(
+          decoration: BoxDecoration(
+            //borderRadius: BorderRadius.all(Radius.circular(16.0)),
+            image: DecorationImage(
+              image: CachedNetworkImageProvider(post.image),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        // child: Ink.image(image: CachedNetworkImageProvider(post.image), fit: BoxFit.cover),
       ),
+
       // Use the new semantic .header!
       header: FluxSection.header(
         title: Text(post.title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(post.category),
         padding: EdgeInsets.zero,
       ),
+
       body: const Text(
         'Change the Media Span knob to see the image wrap specifically next to the header, body, '
         'or footer, while the other slots seamlessly expand to full width.',
         style: TextStyle(fontSize: 13),
       ),
+
       // Use the new semantic .footer with spaceBetween!
       footer: FluxSection.footer(
         actionsAlignment: MainAxisAlignment.spaceBetween,
@@ -162,7 +180,10 @@ Widget buildRippleOverMediaUseCase(BuildContext context) {
         FluxCard(
           media: FluxMedia(
             aspectRatio: 16 / 9,
-            child: Ink.image(image: NetworkImage(demoDestinations.first.image), fit: BoxFit.cover),
+            child: Ink.image(
+              image: CachedNetworkImageProvider(demoDestinations.first.image),
+              fit: BoxFit.cover,
+            ),
           ),
           header: const FluxSection(
             title: Text('Tap anywhere'),
@@ -192,7 +213,10 @@ Widget buildDecorationUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Ink.image(image: NetworkImage(demoPosts.first.image), fit: BoxFit.cover),
+        child: Ink.image(
+          image: CachedNetworkImageProvider(demoPosts.first.image),
+          fit: BoxFit.cover,
+        ),
       ),
       decoration: useGradient
           ? BoxDecoration(
@@ -204,6 +228,7 @@ Widget buildDecorationUseCase(BuildContext context) {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
+              borderRadius: BorderRadius.circular(20),
               border: useBorder
                   ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
                   : null,
@@ -237,7 +262,7 @@ Widget buildColumnLayoutUseCase(BuildContext context) {
       layout: FluxLayoutMode.column,
       media: FluxMedia(
         aspectRatio: 1,
-        child: Ink.image(image: NetworkImage(product.image), fit: BoxFit.cover),
+        child: Ink.image(image: CachedNetworkImageProvider(product.image), fit: BoxFit.cover),
       ),
       header: FluxSection(
         title: Text(product.name),
@@ -274,7 +299,7 @@ Widget buildRowLayoutUseCase(BuildContext context) {
     FluxCard(
       layout: FluxLayoutMode.row,
       media: FluxMedia(
-        child: Ink.image(image: NetworkImage(destination.image), fit: BoxFit.cover),
+        child: Ink.image(image: CachedNetworkImageProvider(destination.image), fit: BoxFit.cover),
       ),
       header: FluxSection(
         title: Text(destination.title),
@@ -311,7 +336,7 @@ Widget buildInlineLayoutUseCase(BuildContext context) {
       mediaPosition: mediaPosition,
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Ink.image(image: NetworkImage(post.image), fit: BoxFit.cover),
+        child: Ink.image(image: CachedNetworkImageProvider(post.image), fit: BoxFit.cover),
       ),
       header: FluxSection(
         title: Text(post.title),
@@ -349,7 +374,7 @@ Widget buildResponsiveLayoutUseCase(BuildContext context) {
       layout: FluxLayoutMode.responsive,
       media: FluxMedia(
         aspectRatio: 16 / 9,
-        child: Ink.image(image: NetworkImage(post.image), fit: BoxFit.cover),
+        child: Ink.image(image: CachedNetworkImageProvider(post.image), fit: BoxFit.cover),
       ),
       header: FluxSection(
         title: Text(post.title),
@@ -365,5 +390,75 @@ Widget buildResponsiveLayoutUseCase(BuildContext context) {
       onTap: () {},
     ),
     maxWidth: 720,
+  );
+}
+
+@widgetbook.UseCase(name: 'Hero Animation', type: FluxCard, path: '[Flux Card]/Cards')
+Widget buildHeroAnimationUseCase(BuildContext context) {
+  return previewSurface(
+    context,
+    Builder(
+      builder: (innerContext) => FluxCard(
+        // Set to Clip.none to ensure the Hero doesn't get abruptly cut off during the flight.
+        clipBehavior: Clip.none,
+        media: FluxMedia(
+          aspectRatio: 16 / 9,
+          // Wrap the inner image in the Hero.
+          child: Hero(
+            tag: 'hero-product-image',
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              child: Ink.image(
+                image: CachedNetworkImageProvider(
+                  'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
+                ),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+        header: const FluxSection(
+          title: Text('Hero Animation Ready'),
+          subtitle: Text('Tap to see the flight transition.'),
+          padding: EdgeInsets.zero,
+        ),
+        theme: FluxCardThemeData.elevated,
+        onTap: () {
+          // Push a detail page to demonstrate the Hero transition
+          Navigator.of(innerContext).push(
+            MaterialPageRoute(
+              builder: (context) => Scaffold(
+                appBar: AppBar(title: const Text('Detail Page')),
+                body: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Hero(
+                      tag: 'hero-product-image',
+                      child: Ink.image(
+                        image: CachedNetworkImageProvider(
+                          'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
+                        ),
+                        fit: BoxFit.cover,
+                        height: 300,
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text(
+                        'Because FluxMedia delegates the clipping behavior, '
+                        'Hero widgets placed inside it animate perfectly across routes '
+                        'without getting prematurely masked by layout bounds.',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ),
+    maxWidth: 320,
   );
 }

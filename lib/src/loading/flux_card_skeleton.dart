@@ -158,6 +158,7 @@ class _FluxCardSkeletonState extends State<FluxCardSkeleton>
       theme: widget.theme,
       resolvedPadding: const EdgeInsets.all(8),
     ).build(
+      context,
       media: mediaSlot,
       header: headerSlot,
       body: bodySlot,
