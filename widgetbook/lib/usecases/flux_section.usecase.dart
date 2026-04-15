@@ -127,3 +127,45 @@ Widget buildSectionDecorationUseCase(BuildContext context) {
     maxWidth: 420,
   );
 }
+
+@widgetbook.UseCase(name: 'Full Bleed Override', type: FluxSection, path: '[Flux Card]/Sections')
+Widget buildSectionFullBleedUseCase(BuildContext context) {
+  return previewSurface(
+    context,
+    FluxCard(
+      // The card provides a global 20px padding
+      theme: FluxCardThemeData.elevated.copyWith(padding: const EdgeInsets.all(20)),
+
+      header: FluxSection.header(
+        // Override the card padding to make this slot hit the edges
+        margin: EdgeInsets.zero,
+        // Re-apply 20px padding internally so the text stays aligned
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        title: const Text('Full Bleed Header'),
+        subtitle: const Text('margin: EdgeInsets.zero overrides the card padding!'),
+      ),
+
+      body: const Text(
+        'This standard Text widget is automatically padded by the card\'s default 20px padding '
+        'because it doesn\'t provide an externalPaddingOverride. The gap above and below '
+        'is purely controlled by the card\'s spacing property.',
+      ),
+
+      footer: FluxSection.footer(
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+        ),
+        actionsAlignment: MainAxisAlignment.end,
+        actions: [ElevatedButton(onPressed: () {}, child: const Text('Accept'))],
+      ),
+    ),
+    maxWidth: 420,
+  );
+}

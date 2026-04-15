@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -38,10 +39,7 @@ Widget buildMediaAspectRatioUseCase(BuildContext context) {
     context,
     FluxMedia(
       aspectRatio: ratio,
-      child: Ink.image(
-        image: NetworkImage(demoProducts.first.image),
-        fit: BoxFit.cover,
-      ),
+      child: Ink.image(image: NetworkImage(demoProducts.first.image), fit: BoxFit.cover),
     ),
     label: 'Aspect ratio ${ratio.toStringAsFixed(2)}',
   );
@@ -62,10 +60,7 @@ Widget buildMediaRowBoxFitUseCase(BuildContext context) {
       // No aspectRatio or height — child fills the row slot height.
       // BoxFit is applied to the full slot area, not a fixed-size sub-region.
       media: FluxMedia(
-        child: Ink.image(
-          image: NetworkImage(demoProducts[1].image),
-          fit: fit,
-        ),
+        child: Ink.image(image: CachedNetworkImageProvider(demoProducts[1].image), fit: fit),
       ),
       header: const FluxSection(
         title: Text('Row — no explicit size'),
@@ -98,7 +93,7 @@ Widget buildMediaFixedSizeUseCase(BuildContext context) {
         height: size,
         borderRadius: BorderRadius.circular(size / 4),
         child: Ink.image(
-          image: NetworkImage(demoProducts.first.image),
+          image: CachedNetworkImageProvider(demoProducts.first.image),
           fit: BoxFit.cover,
         ),
       ),
@@ -130,7 +125,7 @@ Widget buildMediaRoundedUseCase(BuildContext context) {
       aspectRatio: 16 / 9,
       borderRadius: BorderRadius.circular(radius),
       child: Ink.image(
-        image: NetworkImage(demoDestinations.first.image),
+        image: CachedNetworkImageProvider(demoDestinations.first.image),
         fit: BoxFit.cover,
       ),
     ),
@@ -157,5 +152,66 @@ Widget buildMediaCustomWidgetUseCase(BuildContext context) {
       ),
     ),
     label: 'Any widget works',
+  );
+}
+
+@widgetbook.UseCase(name: 'Gradients & Scrims', type: FluxMedia, path: '[Flux Card]/Media')
+Widget buildMediaGradientsUseCase(BuildContext context) {
+  final useBackground = context.knobs.boolean(label: 'Background Gradient', initialValue: false);
+  final useForeground = context.knobs.boolean(label: 'Foreground Scrim', initialValue: true);
+
+  return previewSurface(
+    context,
+    FluxCard(
+      media: FluxMedia(
+        aspectRatio: 16 / 9,
+        gradient: useBackground
+            ? const LinearGradient(
+                colors: [Colors.purple, Colors.orange],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        foregroundGradient: useForeground
+            ? const LinearGradient(
+                colors: [Colors.transparent, Colors.black87],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.4, 1.0],
+              )
+            : null,
+        // Using a semi-transparent image to show the background gradient if active
+        child: Ink.image(
+          image: const NetworkImage(
+            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600',
+          ),
+          fit: BoxFit.cover,
+          colorFilter: useBackground
+              ? ColorFilter.mode(Colors.white.withOpacity(0.5), BlendMode.dstIn)
+              : null,
+        ),
+      ),
+      overlays: [
+        if (useForeground)
+          const FluxOverlay(
+            targets: {FluxTarget.media},
+            alignment: Alignment.bottomLeft,
+            children: [
+              Text(
+                'Gradient Scrims',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+      ],
+      header: const FluxSection(
+        title: Text('Media Gradients'),
+        subtitle: Text('Add gradients directly to FluxMedia without breaking the ripple effect.'),
+        padding: EdgeInsets.zero,
+      ),
+      theme: FluxCardThemeData.elevated,
+      onTap: () {},
+    ),
+    maxWidth: 380,
   );
 }

@@ -3,6 +3,7 @@ import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../demo/demo_product.dart';
 import '../shared/preview_surface.dart';
 
 const _loremLong =
@@ -23,16 +24,12 @@ Widget buildContentScrollableUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      header: const FluxSection(
+      header: const FluxSection.header(
         title: Text('Scrollable body'),
         subtitle: Text('FluxContent with scrollable: true'),
         padding: EdgeInsets.zero,
       ),
-      body: FluxContent(
-        scrollable: true,
-        maxHeight: maxHeight,
-        child: const Text(_loremLong),
-      ),
+      body: FluxContent(scrollable: true, maxHeight: maxHeight, child: const Text(_loremLong)),
       theme: FluxCardThemeData.elevated,
     ),
     maxWidth: 380,
@@ -52,10 +49,7 @@ Widget buildContentDecorationUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      header: const FluxSection(
-        title: Text('Decorated body'),
-        padding: EdgeInsets.zero,
-      ),
+      header: const FluxSection.header(title: Text('Decorated body'), padding: EdgeInsets.zero),
       body: FluxContent(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -70,7 +64,7 @@ Widget buildContentDecorationUseCase(BuildContext context) {
             const Expanded(
               child: Text(
                 'Use decoration to create callout boxes, code blocks, or highlighted sections.',
-                style: TextStyle(fontSize: 13),
+                style: TextStyle(fontSize: 13, color: Colors.black87),
               ),
             ),
           ],
@@ -96,14 +90,142 @@ Widget buildContentConstraintsUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      header: const FluxSection(
-        title: Text('Min/max height'),
-        padding: EdgeInsets.zero,
-      ),
+      header: const FluxSection.header(title: Text('Min/max height'), padding: EdgeInsets.zero),
       body: FluxContent(
         minHeight: minHeight,
         alignment: Alignment.topLeft,
         child: Text(useShortText ? 'Short.' : _loremLong),
+      ),
+      theme: FluxCardThemeData.elevated,
+    ),
+    maxWidth: 380,
+  );
+}
+
+@widgetbook.UseCase(name: '.column (Auto-spacing)', type: FluxContent, path: '[Flux Card]/Content')
+Widget buildContentColumnUseCase(BuildContext context) {
+  final spacing = context.knobs.double.slider(
+    label: 'Spacing',
+    min: 0,
+    max: 32,
+    divisions: 16,
+    initialValue: 12,
+  );
+
+  return previewSurface(
+    context,
+    FluxCard(
+      header: const FluxSection.header(
+        title: Text('FluxContent.column'),
+        subtitle: Text('Automatically injects spacing between children'),
+        padding: EdgeInsets.zero,
+      ),
+      body: FluxContent.column(
+        spacing: spacing,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text('Item 1'),
+          ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text('Item 2'),
+          ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text('Item 3'),
+          ),
+        ],
+      ),
+      theme: FluxCardThemeData.elevated,
+    ),
+    maxWidth: 380,
+  );
+}
+
+@widgetbook.UseCase(name: '.row (Auto-spacing)', type: FluxContent, path: '[Flux Card]/Content')
+Widget buildContentRowUseCase(BuildContext context) {
+  final spacing = context.knobs.double.slider(
+    label: 'Spacing',
+    min: 0,
+    max: 32,
+    divisions: 16,
+    initialValue: 16,
+  );
+
+  return previewSurface(
+    context,
+    FluxCard(
+      header: const FluxSection.header(title: Text('FluxContent.row'), padding: EdgeInsets.zero),
+      body: FluxContent.row(
+        spacing: spacing,
+        children: [
+          const Icon(Icons.check_circle, color: Colors.green),
+          const Expanded(
+            child: Text(
+              'Instead of manually adding SizedBoxes, .row handles the horizontal gaps automatically.',
+            ),
+          ),
+        ],
+      ),
+      theme: FluxCardThemeData.elevated,
+    ),
+    maxWidth: 380,
+  );
+}
+
+@widgetbook.UseCase(name: '.wrap (Tags & Chips)', type: FluxContent, path: '[Flux Card]/Content')
+Widget buildContentWrapUseCase(BuildContext context) {
+  final spacing = context.knobs.double.slider(
+    label: 'Spacing',
+    min: 0,
+    max: 20,
+    divisions: 10,
+    initialValue: 8,
+  );
+  final runSpacing = context.knobs.double.slider(
+    label: 'Run Spacing',
+    min: 0,
+    max: 20,
+    divisions: 10,
+    initialValue: 8,
+  );
+
+  final tags = demoProducts[1].tags;
+
+  return previewSurface(
+    context,
+    FluxCard(
+      header: const FluxSection.header(
+        title: Text('FluxContent.wrap'),
+        subtitle: Text('Perfect for tags and chips'),
+        padding: EdgeInsets.zero,
+      ),
+      body: FluxContent.wrap(
+        spacing: spacing,
+        runSpacing: runSpacing,
+        children: [
+          for (final tag in tags)
+            Chip(
+              label: Text(tag),
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          const Chip(label: Text('electronics'), visualDensity: VisualDensity.compact),
+          const Chip(label: Text('wireless'), visualDensity: VisualDensity.compact),
+        ],
       ),
       theme: FluxCardThemeData.elevated,
     ),

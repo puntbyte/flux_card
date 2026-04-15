@@ -1,30 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../layout/slot_resolver.dart';
+
 /// A body-slot container for free-form [FluxCard] content.
-///
-/// [FluxContent] wraps arbitrary content in the card's body area and provides
-/// scroll behaviour, height constraints, alignment, and optional decoration —
-/// things that [FluxSection] (which is structured around title/actions) does
-/// not handle.
-///
-/// ```dart
-/// FluxCard(
-///   body: FluxContent(
-///     minHeight: 80,
-///     scrollable: true,
-///     decoration: BoxDecoration(
-///       color: Colors.grey.shade100,
-///       borderRadius: BorderRadius.circular(8),
-///     ),
-///     padding: const EdgeInsets.all(12),
-///     child: Text(longDescription),
-///   ),
-/// )
-/// ```
-class FluxContent extends StatelessWidget {
+class FluxContent extends StatelessWidget implements FluxSlotWrapper {
+  /// Base constructor for custom or `const` content layouts.
   const FluxContent({
     super.key,
     required this.child,
+    this.margin,
     this.padding,
     this.decoration,
     this.scrollable = false,
@@ -33,32 +17,103 @@ class FluxContent extends StatelessWidget {
     this.alignment,
   });
 
+  /// Convenience constructor for a vertical list of children with automatic spacing.
+  FluxContent.column({
+    super.key,
+    required List<Widget> children,
+    double spacing = 8.0,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+    this.margin,
+    this.padding,
+    this.decoration,
+    this.scrollable = false,
+    this.minHeight,
+    this.maxHeight,
+    this.alignment,
+  }) : child = Column(
+         mainAxisSize: MainAxisSize.min,
+         mainAxisAlignment: mainAxisAlignment,
+         crossAxisAlignment: crossAxisAlignment,
+         children: spacing > 0 ? _withSpacing(children, spacing, true) : children,
+       );
+
+  /// Convenience constructor for a horizontal list of children with automatic spacing.
+  FluxContent.row({
+    super.key,
+    required List<Widget> children,
+    double spacing = 8.0,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    this.margin,
+    this.padding,
+    this.decoration,
+    this.scrollable = false,
+    this.minHeight,
+    this.maxHeight,
+    this.alignment,
+  }) : child = Row(
+         mainAxisSize: MainAxisSize.min,
+         mainAxisAlignment: mainAxisAlignment,
+         crossAxisAlignment: crossAxisAlignment,
+         children: spacing > 0 ? _withSpacing(children, spacing, false) : children,
+       );
+
+  /// Convenience constructor for wrapping children over multiple lines.
+  FluxContent.wrap({
+    super.key,
+    required List<Widget> children,
+    double spacing = 8.0,
+    double runSpacing = 8.0,
+    WrapAlignment wrapAlignment = WrapAlignment.start,
+    WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
+    this.margin,
+    this.padding,
+    this.decoration,
+    this.scrollable = false,
+    this.minHeight,
+    this.maxHeight,
+    this.alignment,
+  }) : child = Wrap(
+         spacing: spacing,
+         runSpacing: runSpacing,
+         alignment: wrapAlignment,
+         crossAxisAlignment: crossAxisAlignment,
+         children: children,
+       );
+
   final Widget child;
+
+  /// Overrides the card's layout padding. Use `EdgeInsets.zero` to make this slot full-bleed.
+  final EdgeInsetsGeometry? margin;
 
   /// Padding applied inside the decoration (or around the child when no
   /// decoration is provided).
   final EdgeInsetsGeometry? padding;
 
   /// Optional [BoxDecoration] painted behind the content.
-  ///
-  /// When set, the decoration fills the full content area. Combine with
-  /// [padding] to add breathing room between the decoration edge and the
-  /// child.
   final BoxDecoration? decoration;
 
-  /// When true, wraps [child] in a [SingleChildScrollView] so that content
-  /// that overflows the card's height can be scrolled.
   final bool scrollable;
-
-  /// Minimum height of the content area.
   final double? minHeight;
-
-  /// Maximum height of the content area. Content beyond this height scrolls
-  /// if [scrollable] is true, or clips otherwise.
   final double? maxHeight;
-
-  /// Aligns [child] within the content area.
   final AlignmentGeometry? alignment;
+
+  @override
+  EdgeInsetsGeometry? get externalPaddingOverride => margin;
+
+  /// Helper to inject [SizedBox] gaps between children.
+  static List<Widget> _withSpacing(List<Widget> items, double spacing, bool isVertical) {
+    if (items.isEmpty) return items;
+    final result = <Widget>[];
+    for (int i = 0; i < items.length; i++) {
+      result.add(items[i]);
+      if (i < items.length - 1) {
+        result.add(isVertical ? SizedBox(height: spacing) : SizedBox(width: spacing));
+      }
+    }
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +135,7 @@ class FluxContent extends StatelessWidget {
       );
     }
 
-    if (decoration != null) result = DecoratedBox(decoration: decoration!, child: result);
+    if (decoration != null) result = Ink(decoration: decoration!, child: result);
 
     return result;
   }
