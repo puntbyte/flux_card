@@ -330,7 +330,7 @@ final directories = <_widgetbook.WidgetbookNode>[
                     .buildSectionHeaderUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Text alignment & Description',
+                name: 'Text & Row Alignments',
                 builder: _flux_card_widgetbook_usecases_flux_section_usecase
                     .buildSectionAlignmentUseCase,
               ),
