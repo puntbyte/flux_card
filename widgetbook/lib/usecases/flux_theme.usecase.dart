@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -15,7 +16,7 @@ Widget _themeCard(BuildContext context, FluxCardThemeData theme, String label, S
         media: FluxMedia(
           aspectRatio: 16 / 9,
           child: Ink.image(
-            image: const NetworkImage(_kThemeImageUrl),
+            image: const CachedNetworkImageProvider(_kThemeImageUrl),
             fit: BoxFit.cover,
           ),
         ),
@@ -63,7 +64,7 @@ Widget buildThemeOutlinedUseCase(BuildContext context) {
       media: FluxMedia(
         aspectRatio: 16 / 9,
         child: Ink.image(
-          image: const NetworkImage(_kThemeImageUrl),
+          image: const CachedNetworkImageProvider(_kThemeImageUrl),
           fit: BoxFit.cover,
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -28,7 +29,7 @@ Widget buildTicketBasicUseCase(BuildContext context) {
       media: FluxMedia(
         aspectRatio: 16 / 7,
         child: Ink.image(
-          image: const NetworkImage(
+          image: const CachedNetworkImageProvider(
             'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200',
           ),
           fit: BoxFit.cover,
@@ -132,12 +133,14 @@ Widget buildTicketOutlinedUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      backgrounds: const [
-        FluxBackground.gradient(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      underlay: [
+        FluxUnderlay(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
         ),
       ],

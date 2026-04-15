@@ -22,6 +22,8 @@ class WidgetbookApp extends StatelessWidget {
       darkTheme: dark,
       themeMode: ThemeMode.system,
       addons: [
+        InspectorAddon(),
+        SemanticsAddon(),
         ViewportAddon(
           const [
             ViewportData(

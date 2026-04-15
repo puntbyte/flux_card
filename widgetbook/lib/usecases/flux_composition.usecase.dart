@@ -18,60 +18,63 @@ Widget buildFreelancerProfileUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      media: FluxMedia(
+      media: FluxMedia.image(
         aspectRatio: 16 / 9,
-        child: Ink.image(
-          image: const NetworkImage(
-            'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=900',
-          ),
-          fit: BoxFit.cover,
+        fit: BoxFit.cover,
+        foregroundGradient: LinearGradient(
+          colors: [Colors.transparent, Theme.of(context).colorScheme.surface],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: [0.5, 0.95],
+        ),
+        image: const CachedNetworkImageProvider(
+          'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=900',
         ),
       ),
+
       overlays: [
         // Bookmark pill — top-right of photo.
         FluxOverlay(
           targets: const {FluxTarget.media},
           alignment: Alignment.topRight,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Material(
-                color: Colors.white,
+            Material(
+              color: Colors.grey.shade400.withValues(alpha: 0.8),
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
                 borderRadius: BorderRadius.circular(10),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () {},
-                  child: const Padding(
-                    padding: EdgeInsets.all(7),
-                    child: Icon(Icons.bookmark_border, size: 18),
-                  ),
+                onTap: () {},
+                child: const Padding(
+                  padding: EdgeInsets.all(7),
+                  child: Icon(Icons.bookmark_border, size: 18),
                 ),
               ),
             ),
           ],
         ),
+
         // Avatar — bottom-left of photo.
         FluxOverlay(
           targets: const {FluxTarget.media},
           alignment: Alignment.bottomLeft,
+          offset: Offset(0, 24),
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 14, bottom: 10),
-              child: Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2.5),
-                  color: Colors.grey.shade200,
-                ),
-                child: const Icon(Icons.person, size: 30, color: Colors.black45),
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey.shade400, width: 2.5),
+                color: Colors.grey.shade200,
               ),
+              child: const Icon(Icons.person, size: 30, color: Colors.black45),
             ),
           ],
         ),
       ],
+
       header: FluxSection(
+        spacing: 0,
         title: const Text(
           'Henrie Ekemezie',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
@@ -80,6 +83,7 @@ Widget buildFreelancerProfileUseCase(BuildContext context) {
         trailing: [
           Row(
             mainAxisSize: MainAxisSize.min,
+            spacing: 4,
             children: [
               CircleAvatar(
                 radius: 9,
@@ -89,7 +93,7 @@ Widget buildFreelancerProfileUseCase(BuildContext context) {
                   style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(width: 3),
+
               const CircleAvatar(
                 radius: 9,
                 backgroundColor: Color(0xFFFF7262),
@@ -98,15 +102,18 @@ Widget buildFreelancerProfileUseCase(BuildContext context) {
                   style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(width: 6),
+
+              const SizedBox(width: 2),
               const Text('Tools', style: TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),
         ],
         padding: EdgeInsets.zero,
       ),
+
       footer: IntrinsicHeight(
         child: Row(
+          spacing: 14,
           children: [
             Expanded(
               child: Row(
@@ -120,7 +127,7 @@ Widget buildFreelancerProfileUseCase(BuildContext context) {
                 ],
               ),
             ),
-            const SizedBox(width: 14),
+
             ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
@@ -135,10 +142,12 @@ Widget buildFreelancerProfileUseCase(BuildContext context) {
           ],
         ),
       ),
+
       theme: FluxCardThemeData.elevated.copyWith(
         borderRadius: const BorderRadius.all(Radius.circular(22)),
         padding: const EdgeInsets.all(16),
       ),
+
       onTap: () {},
     ),
     maxWidth: 400,
@@ -158,105 +167,101 @@ Widget buildCreatorProfileUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      media: FluxMedia(
-        aspectRatio: 0.72, // portrait
-        child: Ink.image(
-          image: const NetworkImage(
-            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=700',
+      media: FluxMedia(height: 360, child: SizedBox.shrink()),
+
+      underlay: [
+        FluxUnderlay(
+          targets: {.media, .header, .body, .footer},
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              image: const CachedNetworkImageProvider(
+                'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=700',
+              ),
+            ),
           ),
-          fit: BoxFit.cover,
         ),
-      ),
-      backgrounds: [
+
         // Gradient scrim over the lower ~65 % of the photo.
-        FluxBackground.gradient(
-          gradient: const LinearGradient(
-            colors: [Colors.transparent, Colors.black87],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.35, 1.0],
+        FluxUnderlay(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Colors.transparent, Colors.black87],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.35, 1.0],
+            ),
           ),
-          targets: const {FluxTarget.media},
         ),
       ],
-      overlays: [
-        // Name / bio / stats block in the lower-left of the photo.
-        FluxOverlay(
-          targets: const {FluxTarget.media},
-          alignment: Alignment.bottomLeft,
+
+      header: FluxSection(
+        padding: EdgeInsets.all(16),
+        title: Row(
+          spacing: 6,
+          children: const [
+            Text(
+              'Natasha Romanoff',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20),
+            ),
+            Icon(Icons.verified, color: Colors.blue, size: 19),
+          ],
+        ),
+
+        subtitle: const Text(
+          "I'm a Brand Designer who focuses on clarity\n& emotional connection.",
+          style: TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+      ),
+
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: IntrinsicHeight(
+          child: Row(
+            children: const [
+              _CreatorStat(value: '★ 4.8', label: 'Rating'),
+              VerticalDivider(color: Colors.white24, width: 20, thickness: 1),
+              _CreatorStat(value: '\$45k+', label: 'Earned'),
+              VerticalDivider(color: Colors.white24, width: 20, thickness: 1),
+              _CreatorStat(value: '\$50/hr', label: 'Rate'),
+            ],
+          ),
+        ),
+      ),
+
+      footer: FluxSection(
+        child: Row(
+          spacing: 10,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: const [
-                      Text(
-                        'Natasha Romanoff',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20,
-                        ),
-                      ),
-                      SizedBox(width: 6),
-                      Icon(Icons.verified, color: Colors.blue, size: 19),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  const Text(
-                    "I'm a Brand Designer who focuses on clarity\n& emotional connection.",
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-                  const SizedBox(height: 14),
-                  IntrinsicHeight(
-                    child: Row(
-                      children: const [
-                        _CreatorStat(value: '★ 4.8', label: 'Rating'),
-                        VerticalDivider(color: Colors.white24, width: 20, thickness: 1),
-                        _CreatorStat(value: '\$45k+', label: 'Earned'),
-                        VerticalDivider(color: Colors.white24, width: 20, thickness: 1),
-                        _CreatorStat(value: '\$50/hr', label: 'Rate'),
-                      ],
-                    ),
-                  ),
-                ],
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.email_outlined, size: 18),
+                label: const Text('Get In Touch'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                ),
+              ),
+            ),
+
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C36),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.bookmark_border, color: Colors.white),
+                onPressed: () {},
               ),
             ),
           ],
         ),
-      ],
-      footer: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.email_outlined, size: 18),
-              label: const Text('Get In Touch'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 0,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF2C2C36),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.bookmark_border, color: Colors.white),
-              onPressed: () {},
-            ),
-          ),
-        ],
       ),
+
       theme: const FluxCardThemeData(
         cardColor: Color(0xFF16161E),
         borderRadius: BorderRadius.all(Radius.circular(28)),
@@ -297,56 +302,78 @@ Widget buildPricingCardUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      backgrounds: [
-        // Solid contrast colour on the footer slot only — extends behind padding.
-        FluxBackground.gradient(
-          gradient: LinearGradient(colors: [footerBg, footerBg]),
-          targets: const {FluxTarget.footer},
+      underlay: [
+        FluxUnderlay(
+          targets: const {FluxTarget.header, FluxTarget.body},
+          zIndex: 1,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [cardBg, cardBg]),
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
+
+        // Footer background under
+        // FluxBackground(
+        //   targets: const {FluxTarget.footer},
+        //   zIndex: 0,
+        //   margin: EdgeInsets.only(top: -16),
+        //   decoration: BoxDecoration(gradient: LinearGradient(colors: [footerBg, footerBg])),
+        // ),
       ],
+
+      divider: FluxDivider(
+        afterHeader: Divider(
+          height: 1,
+          thickness: 1,
+          color: Colors.black26,
+          indent: 16,
+          endIndent: 16,
+        ),
+      ),
+
       header: FluxSection(
         leading: Container(
-          width: 44,
-          height: 44,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
           child: Icon(Icons.tv_outlined, color: iconFg, size: 22),
         ),
+
         title: Text(
           'One-Off',
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: bodyText),
         ),
+
         subtitle: Text(
           'Launch your dream site in 7 days',
           style: TextStyle(color: bodyMuted, fontSize: 13),
         ),
-        padding: EdgeInsets.zero,
+
+        runSpacing: 0,
       ),
+
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 10,
         children: [
           _PricingFeature(icon: Icons.web_outlined, text: 'Single page', color: bodyText),
-          const SizedBox(height: 10),
+
           _PricingFeature(icon: Icons.palette_outlined, text: 'Design only', color: bodyText),
-          const SizedBox(height: 10),
+
           _PricingFeature(
             icon: Icons.chat_bubble_outline,
             text: 'Slack communication',
             color: bodyText,
           ),
-          const SizedBox(height: 10),
+
           _PricingFeature(
             icon: Icons.draw_outlined,
             text: 'Custom Graphics / Illustrations',
             color: bodyText,
           ),
-        ],
-      ),
-      divider: const FluxDivider(afterBody: Divider(height: 1, thickness: 1)),
-      footer: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
+
           Row(
+            mainAxisAlignment: .spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,40 +386,39 @@ Widget buildPricingCardUseCase(BuildContext context) {
                   Text('Billed one time', style: TextStyle(fontSize: 12, color: footerMuted)),
                 ],
               ),
-              const Spacer(),
+
               OutlinedButton.icon(
                 onPressed: () {},
                 icon: Icon(Icons.grid_view_rounded, size: 14, color: footerText),
                 label: Text('Figma Project', style: TextStyle(color: footerText, fontSize: 12)),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: footerText.withOpacity(0.3)),
+                  side: BorderSide(color: footerText.withValues(alpha: 0.3)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: Text(
-              'Choose Design Only',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: footerText,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
         ],
       ),
+
+      footer: Text(
+        'Choose Design Only',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: footerText,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.2,
+        ),
+      ),
+
       theme: FluxCardThemeData(
-        cardColor: cardBg,
         padding: const EdgeInsets.all(20),
         spacing: 16,
         borderRadius: const BorderRadius.all(Radius.circular(20)),
+        cardColor: footerBg,
+        elevation: 8,
       ),
       onTap: () {},
     ),
@@ -418,26 +444,19 @@ Widget buildFullBleedProductUseCase(BuildContext context) {
     context,
     FluxCard(
       media: FluxMedia(
-        aspectRatio: 0.82,
-        alignment: .topCenter,
+        aspectRatio: 1.0,
+        alignment: Alignment.bottomCenter, // Fixed syntax here too
+
+        // Scrim moved natively to the media slot
         child: Ink.image(
-          image: const NetworkImage(
-            'https://static.vecteezy.com/system/resources/thumbnails/033/151/970/small/mango-in-woven-basket-png.png',
+          image: const CachedNetworkImageProvider(
+            'https://static.vecteezy.com/system/resources/thumbnails/033/151/970/small/'
+            'mango-in-woven-basket-png.png',
           ),
           fit: BoxFit.contain,
         ),
       ),
-      backgrounds: [
-        FluxBackground.gradient(
-          gradient: const LinearGradient(
-            colors: [Colors.transparent, Colors.black54],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.38, 1.0],
-          ),
-          targets: const {FluxTarget.media},
-        ),
-      ],
+
       overlays: [
         // "20% off" — top-left.
         FluxOverlay(
@@ -450,6 +469,7 @@ Widget buildFullBleedProductUseCase(BuildContext context) {
             ),
           ],
         ),
+
         // Price — top-right.
         FluxOverlay(
           targets: const {FluxTarget.media},
@@ -461,61 +481,57 @@ Widget buildFullBleedProductUseCase(BuildContext context) {
             ),
           ],
         ),
-        // Product name + description + tags — bottom-left.
-        FluxOverlay(
-          targets: const {FluxTarget.media},
-          alignment: Alignment.bottomLeft,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Alphonso',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Loved worldwide for their sweetness our\nAlphonso mangoes are a delicious delight.',
-                    style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      _Pill(label: 'Best Seller', bg: Colors.black38, border: Colors.white24),
-                      const SizedBox(width: 8),
-                      const Text('9 left', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                    ],
-                  ),
-                ],
-              ),
+      ],
+
+      underlay: [
+        FluxUnderlay(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Colors.transparent, Colors.black54],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.38, 1.0],
             ),
-          ],
+          ),
         ),
       ],
-      footer: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black87,
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            elevation: 0,
-          ),
-          child: const Text(
-            'Add to cart',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-          ),
+
+      header: FluxSection(
+        title: Text(
+          'Alphonso',
+          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800),
+        ),
+
+        subtitle: const Text(
+          'Loved worldwide for their sweetness our\nAlphonso mangoes are a delicious '
+          'delight.',
+          style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
         ),
       ),
+
+      body: Row(
+        children: [
+          _Pill(label: 'Best Seller', bg: Colors.black38, border: Colors.white24),
+          const SizedBox(width: 8),
+          const Text('9 left', style: TextStyle(color: Colors.white70, fontSize: 12)),
+        ],
+      ),
+
+      footer: ElevatedButton(
+        onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          elevation: 0,
+        ),
+        child: const Text(
+          'Add to cart',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+        ),
+      ),
+
       theme: const FluxCardThemeData(
         cardColor: Color(0xFFE69520),
         borderRadius: BorderRadius.all(Radius.circular(26)),
@@ -552,7 +568,8 @@ Widget buildPropertyListingUseCase(BuildContext context) {
       title: 'The Ubud Jungle Villa',
       location: 'Located in Ubud, Bali, Indonesia',
       description:
-          'Perched above the lush tropical rainforest, this open-air Balinese villa features thatched roofs, bamboo, and breathtaking panoramic views.',
+          'Perched above the lush tropical rainforest, this open-air Balinese villa features '
+          'thatched roofs, bamboo, and breathtaking panoramic views.',
       price: 'From Rp3,200,000 / night',
       ctaLabel: 'Book Now',
     ),
@@ -563,7 +580,8 @@ Widget buildPropertyListingUseCase(BuildContext context) {
       title: 'The Sakura Garden Ryokan',
       location: 'Located in Kyoto, Japan',
       description:
-          'Experience timeless Japanese hospitality in this traditional ryokan surrounded by blooming sakura trees and peaceful zen gardens.',
+          'Experience timeless Japanese hospitality in this traditional ryokan surrounded by '
+          'blooming sakura trees and peaceful zen gardens.',
       price: 'From ¥27,000 / night',
       ctaLabel: 'Reserve this place',
     ),
@@ -574,21 +592,14 @@ Widget buildPropertyListingUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      media: FluxMedia(
+      media: FluxMedia.image(
         aspectRatio: 16 / 11,
         borderRadius: BorderRadius.circular(16.0),
-        padding: EdgeInsets.all(8.0),
-        // child: CachedNetworkImage(
-        //   imageUrl: p.image,
-        //   placeholder: (context, url) => CircularProgressIndicator(),
-        //   errorWidget: (context, url, error) => Icon(Icons.error),
-        //   fit: BoxFit.cover,
-        // ),
-        child: Material(
-          color: Colors.transparent,
-          child: Ink.image(image: CachedNetworkImageProvider(p.image), fit: BoxFit.fill),
-        ),
+        padding: const EdgeInsets.all(8.0),
+        image: CachedNetworkImageProvider(p.image),
+        fit: BoxFit.cover,
       ),
+
       overlays: [
         if (p.badge != null)
           FluxOverlay(
@@ -695,12 +706,12 @@ Widget buildEventTicketUseCase(BuildContext context) {
     FluxCard(
       loading: loading,
 
-      decoration: BoxDecoration(),
+      //decoration: BoxDecoration(),
 
       media: FluxMedia(
         aspectRatio: 16 / 8,
         child: Ink.image(
-          image: const NetworkImage(
+          image: const CachedNetworkImageProvider(
             'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
           ),
           fit: BoxFit.cover,
@@ -724,20 +735,19 @@ Widget buildEventTicketUseCase(BuildContext context) {
         ),
       ],
 
-      backgrounds: [
-        FluxBackground.color(color: Colors.green, targets: {.header}),
-        FluxBackground.color(color: Colors.red, targets: {.footer}),
-      ],
+      // backgrounds: [
+      //   FluxBackground.color(color: Colors.green, targets: {.header}),
+      //   FluxBackground.color(color: Colors.red, targets: {.footer}),
+      // ],
 
-      // divider: FluxDivider(
-      //   afterHeader: FluxDashedDivider()
-      // ),
+      divider: FluxDivider(
+        afterHeader: FluxDashedDivider(color: Theme.of(context).disabledColor)
+      ),
 
       header: const FluxSection(
         title: Text('Flutter Dev Summit 2026', style: TextStyle(fontWeight: FontWeight.w800)),
         subtitle: Text('San Francisco Convention Center'),
-        decoration: BoxDecoration(color: Colors.amber),
-        padding: EdgeInsets.zero,
+        spacing: 2,
       ),
 
       footer: const FluxSection(
@@ -746,21 +756,17 @@ Widget buildEventTicketUseCase(BuildContext context) {
           Chip(label: Text('General Admission')),
           Text('Gate C4'),
         ],
-        decoration: BoxDecoration(color: Colors.amber),
-        padding: EdgeInsets.zero,
       ),
 
-      notch: const FluxNotch(
+      notch: FluxNotch(
         boundary: FluxSlotBoundary.afterHeader,
         notchRadius: 8,
-        side: BorderSide(width: 2, color: Colors.black),
+        side: BorderSide(width: 2, color: Theme.of(context).disabledColor),
       ),
 
-      //divider: const FluxDivider(afterHeader: FluxDashedDivider()),
-
       theme: FluxCardThemeData.outlined.copyWith(
-        borderSide: const BorderSide(width: 2, color: Colors.black),
-        padding: EdgeInsets.all(64),
+        padding: EdgeInsets.all(16),
+        spacing: 32
       ),
 
       onTap: () {},
@@ -827,7 +833,7 @@ class _PricingFeature extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: color.withOpacity(0.65)),
+        Icon(icon, size: 16, color: color.withValues(alpha: 0.65)),
         const SizedBox(width: 10),
         Text(text, style: TextStyle(color: color, fontSize: 14)),
       ],

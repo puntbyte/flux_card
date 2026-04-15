@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -18,7 +19,7 @@ Widget buildOverlayInteractiveUseCase(BuildContext context) {
           media: FluxMedia(
             aspectRatio: 16 / 9,
             child: Ink.image(
-              image: const NetworkImage(
+              image: const CachedNetworkImageProvider(
                 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200',
               ),
               fit: BoxFit.cover,
@@ -101,7 +102,7 @@ Widget buildOverlaySlotTargetingUseCase(BuildContext context) {
       media: FluxMedia(
         aspectRatio: 16 / 9,
         child: Ink.image(
-          image: const NetworkImage(
+          image: const CachedNetworkImageProvider(
             'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200',
           ),
           fit: BoxFit.cover,
@@ -140,10 +141,7 @@ Widget buildOverlayZIndexUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      media: FluxMedia(
-        height: 180,
-        child: Container(color: const Color(0xFF0F172A)),
-      ),
+      media: FluxMedia(height: 180, child: Container(color: const Color(0xFF0F172A))),
       overlays: [
         FluxOverlay(
           targets: const {FluxTarget.media},
@@ -198,7 +196,7 @@ Widget buildOverlayOffsetUseCase(BuildContext context) {
       media: FluxMedia(
         aspectRatio: 16 / 9,
         child: Ink.image(
-          image: const NetworkImage(
+          image: const CachedNetworkImageProvider(
             'https://fastly.picsum.photos/id/20/3670/2462.jpg?hmac=CmQ0ln-k5ZqkdtLvVO23LjVAEabZQx2wOaT4pyeG10I',
           ),
           fit: BoxFit.cover,
@@ -221,6 +219,59 @@ Widget buildOverlayOffsetUseCase(BuildContext context) {
       header: const FluxSection(
         title: Text('Offset nudge'),
         subtitle: Text('Use offset to fine-tune badge placement.'),
+        padding: EdgeInsets.zero,
+      ),
+      theme: FluxCardThemeData.elevated,
+      onTap: () {},
+    ),
+  );
+}
+
+@widgetbook.UseCase(name: 'Breakout Overlays', type: FluxOverlay, path: '[Flux Card]/Overlays')
+Widget buildOverlayBreakoutUseCase(BuildContext context) {
+  return previewSurface(
+    context,
+    FluxCard(
+      // Setting Clip.none allows overlays to push beyond the card borders!
+      clipBehavior: Clip.none,
+      media: FluxMedia(
+        aspectRatio: 16 / 9,
+        // When using Clip.none on the card, you must provide a border radius
+        // to the media if you want the image to match the card's top corners.
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: Ink.image(
+          image: const CachedNetworkImageProvider(
+            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800',
+          ),
+          fit: BoxFit.cover,
+        ),
+      ),
+      overlays: [
+        FluxOverlay(
+          targets: const {FluxTarget.media},
+          alignment: Alignment.topRight,
+          // Push the badge completely outside the top-right corner
+          offset: const Offset(24, -24),
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade400,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
+                ],
+              ),
+              child: const Text('NEW', style: TextStyle(fontWeight: FontWeight.w900)),
+            ),
+          ],
+        ),
+      ],
+      header: const FluxSection(
+        title: Text('Breakout Overlays'),
+        subtitle: Text(
+          'Set clipBehavior: Clip.none on the card to let badges break completely out of bounds.',
+        ),
         padding: EdgeInsets.zero,
       ),
       theme: FluxCardThemeData.elevated,

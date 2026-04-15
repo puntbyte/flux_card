@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../components/flux_background.dart';
+import '../components/flux_underlay.dart';
 import '../components/flux_overlay.dart';
 import '../core/enums.dart';
 import '../divider/flux_divider.dart';
 import 'boundary_tracker.dart';
+
+/// Interface for components that override the layout engine's default padding.
+abstract class FluxSlotWrapper {
+  /// If non-null, this padding completely overrides the card's default padding for this slot.
+  EdgeInsetsGeometry? get externalPaddingOverride;
+}
 
 class _SlotBlock {
   final Set<FluxTarget> targets;
@@ -14,12 +20,13 @@ class _SlotBlock {
 }
 
 abstract final class SlotResolver {
-  static Widget? wrapSlot({
+  static Widget? wrapSlot(
+    BuildContext context, {
     required FluxTarget target,
     required Widget? child,
     required Map<FluxTarget, List<Widget>> bgsByTarget,
     required Map<FluxTarget, List<Widget>> ovsByTarget,
-    EdgeInsets? contentPadding,
+    EdgeInsetsGeometry? contentPadding,
   }) {
     if (child == null) return null;
 
@@ -34,8 +41,9 @@ abstract final class SlotResolver {
 
     return Stack(
       fit: StackFit.passthrough,
+      clipBehavior: Clip.none,
       children: [
-        ...bgs.map((bg) => Positioned.fill(child: bg)),
+        ...bgs.map((bg) => FluxUnderlay.buildPositioned(context, bg)),
         paddedChild,
         ...ovs.map((ov) => Positioned.fill(child: ov)),
       ],
@@ -59,19 +67,18 @@ abstract final class SlotResolver {
     );
   }
 
-  /// Groups contiguous blocks and wraps them with multi-target decorations.
   static List<_SlotBlock> groupAndWrap(
+    BuildContext context,
     List<_SlotBlock> blocks,
     List<Widget> multiBgs,
     List<Widget> multiOvs,
   ) {
     var currentBlocks = List<_SlotBlock>.from(blocks);
 
-    void applyDecoration(Widget decoration, Set<FluxTarget> targets, bool isBg) {
+    void applyDecoration(Widget layerWidget, Set<FluxTarget> targets, bool isBg) {
       int startIdx = -1;
       int endIdx = -1;
 
-      // Find the start and end indices of the contiguous span
       for (int i = 0; i < currentBlocks.length; i++) {
         if (currentBlocks[i].targets.intersection(targets).isNotEmpty) {
           if (startIdx == -1) startIdx = i;
@@ -79,7 +86,6 @@ abstract final class SlotResolver {
         }
       }
 
-      // If a span was found, wrap the sublist into a single Stack
       if (startIdx != -1 && endIdx != -1) {
         final sublist = currentBlocks.sublist(startIdx, endIdx + 1);
         final combinedTargets = sublist.expand((b) => b.targets).toSet();
@@ -92,10 +98,11 @@ abstract final class SlotResolver {
 
         final stacked = Stack(
           fit: StackFit.passthrough,
+          clipBehavior: Clip.none,
           children: [
-            if (isBg) Positioned.fill(child: decoration),
+            if (isBg) FluxUnderlay.buildPositioned(context, layerWidget),
             column,
-            if (!isBg) Positioned.fill(child: decoration),
+            if (!isBg) Positioned.fill(child: layerWidget),
           ],
         );
 
@@ -104,7 +111,7 @@ abstract final class SlotResolver {
     }
 
     for (final bg in multiBgs) {
-      applyDecoration(bg, (bg as FluxBackground).targets, true);
+      applyDecoration(bg, (bg as FluxUnderlay).targets, true);
     }
     for (final ov in multiOvs) {
       applyDecoration(ov, (ov as FluxOverlay).targets, false);
@@ -113,7 +120,8 @@ abstract final class SlotResolver {
     return currentBlocks;
   }
 
-  static Widget? contentColumn({
+  static Widget? contentColumn(
+    BuildContext context, {
     required List<(FluxTarget, Widget?)> entries,
     required Map<FluxTarget, List<Widget>> bgsByTarget,
     required Map<FluxTarget, List<Widget>> ovsByTarget,
@@ -131,52 +139,69 @@ abstract final class SlotResolver {
 
     for (int i = 0; i < present.length; i++) {
       final target = present[i].$1;
+      final child = present[i].$2!;
 
-      final slotPad = EdgeInsets.only(
-        left: padding.left,
-        right: padding.right,
-        top: i == 0 ? padding.top : spacing / 2,
-        bottom: i == present.length - 1 ? padding.bottom : spacing / 2,
-      );
+      // 1. Insert structural layout gaps between slots
+      if (i > 0) {
+        final prevTarget = present[i - 1].$1;
+        final boundary = boundaryBetween(prevTarget, target);
+
+        // --- FIX #2: Make logic more explicit to avoid analyzer confusion ---
+        BoundaryTracker? tracker;
+        Widget? div;
+        if (boundary != null) {
+          tracker = boundaryTrackers?[boundary];
+          div = divider?.widgetFor(boundary);
+        }
+
+        Widget gapWidget;
+        if (tracker != null || div != null) {
+          gapWidget = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: spacing / 2),
+              if (tracker != null) BoundaryMarker(tracker: tracker, child: const SizedBox.shrink()),
+              if (div != null) div,
+              SizedBox(height: spacing / 2),
+            ],
+          );
+        } else {
+          gapWidget = SizedBox(height: spacing);
+        }
+        blocks.add(_SlotBlock({prevTarget, target}, gapWidget));
+      }
+
+      // 2. Check if the slot child wants to override the card-level padding
+      EdgeInsetsGeometry? overridePad;
+      // --- FIX #1: Explicitly cast to FluxSlotWrapper to access the property ---
+      if (child is FluxSlotWrapper) {
+        overridePad = (child as FluxSlotWrapper).externalPaddingOverride;
+      }
+
+      // 3. Apply override, otherwise fall back to card padding
+      final slotPad =
+          overridePad ??
+          EdgeInsets.only(
+            left: padding.left,
+            right: padding.right,
+            top: i == 0 ? padding.top : 0.0,
+            bottom: i == present.length - 1 ? padding.bottom : 0.0,
+          );
 
       final wrapped = wrapSlot(
+        context,
         target: target,
-        child: present[i].$2,
+        child: child,
         bgsByTarget: bgsByTarget,
         ovsByTarget: ovsByTarget,
         contentPadding: slotPad,
       )!;
 
-      // Group boundary markers and dividers with the gap so they are wrapped cleanly
-      if (i > 0) {
-        final prevTarget = present[i - 1].$1;
-        final boundary = boundaryBetween(prevTarget, target);
-        if (boundary != null) {
-          final tracker = boundaryTrackers?[boundary];
-          final div = divider?.widgetFor(boundary);
-          if (tracker != null || div != null) {
-            final boundaryWidget = Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (tracker != null)
-                  BoundaryMarker(
-                    tracker: tracker,
-                    child: const SizedBox(height: 0, width: double.infinity),
-                  ),
-                if (div != null) div,
-              ],
-            );
-            blocks.add(_SlotBlock({prevTarget, target}, boundaryWidget));
-          }
-        }
-      }
-
       blocks.add(_SlotBlock({target}, wrapped));
     }
 
-    // Apply the grouping algorithm!
-    final groupedBlocks = groupAndWrap(blocks, multiBgs, multiOvs);
+    final groupedBlocks = groupAndWrap(context, blocks, multiBgs, multiOvs);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

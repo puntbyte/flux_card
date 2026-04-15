@@ -37,8 +37,8 @@ class ProductGridPage extends StatelessWidget {
                 aspectRatio: 1,
                 child: Image.network(product.image, fit: BoxFit.cover),
               ),
-              backgrounds: const [
-                FluxBackground.gradient(
+              underlay: const [
+                FluxUnderlay.gradient(
                   gradient: LinearGradient(colors: [Color(0xFFF8FAFC), Color(0xFFE2E8F0)]),
                   targets: {FluxTarget.body},
                 ),
