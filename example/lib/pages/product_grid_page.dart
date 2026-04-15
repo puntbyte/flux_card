@@ -38,9 +38,11 @@ class ProductGridPage extends StatelessWidget {
                 child: Image.network(product.image, fit: BoxFit.cover),
               ),
               underlay: const [
-                FluxUnderlay.gradient(
-                  gradient: LinearGradient(colors: [Color(0xFFF8FAFC), Color(0xFFE2E8F0)]),
+                FluxUnderlay(
                   targets: {FluxTarget.body},
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Color(0xFFF8FAFC), Color(0xFFE2E8F0)]),
+                  ),
                 ),
               ],
               overlays: [

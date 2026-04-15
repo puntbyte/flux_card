@@ -23,8 +23,10 @@ class BlogPage extends StatelessWidget {
             child: Image.network(post.image, fit: BoxFit.cover),
           ),
           underlay: const [
-            FluxUnderlay.gradient(
-              gradient: LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),
+            FluxUnderlay(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),
+              ),
               targets: {FluxTarget.body},
             ),
           ],
