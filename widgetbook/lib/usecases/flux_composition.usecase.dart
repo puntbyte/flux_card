@@ -169,7 +169,7 @@ Widget buildCreatorProfileUseCase(BuildContext context) {
     FluxCard(
       media: FluxMedia(height: 360, child: SizedBox.shrink()),
 
-      underlay: [
+      underlays: [
         FluxUnderlay(
           targets: {.media, .header, .body, .footer},
           decoration: BoxDecoration(
@@ -302,7 +302,7 @@ Widget buildPricingCardUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      underlay: [
+      underlays: [
         FluxUnderlay(
           targets: const {FluxTarget.header, FluxTarget.body},
           zIndex: 1,
@@ -482,7 +482,7 @@ Widget buildFullBleedProductUseCase(BuildContext context) {
         ),
       ],
 
-      underlay: [
+      underlays: [
         FluxUnderlay(
           decoration: BoxDecoration(
             gradient: const LinearGradient(

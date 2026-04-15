@@ -27,7 +27,7 @@ Widget buildBackgroundColorUseCase(BuildContext context) {
     context,
     FluxCard(
       // Unified decoration constructor!
-      underlay: [FluxUnderlay(decoration: BoxDecoration(color: color))],
+      underlays: [FluxUnderlay(decoration: BoxDecoration(color: color))],
       header: const FluxSection.header(title: Text('Decoration'), padding: EdgeInsets.zero),
       body: const Text('FluxTarget.card (default) paints the whole surface.'),
       theme: FluxCardThemeData.elevated,
@@ -55,7 +55,7 @@ Widget buildBackgroundImageUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      underlay: [
+      underlays: [
         FluxUnderlay(
           targets: targets.isEmpty ? {FluxTarget.card} : targets,
           decoration: BoxDecoration(
@@ -138,7 +138,7 @@ Widget buildBackgroundOverlappingUseCase(BuildContext context) {
         actions: [OutlinedButton(onPressed: () {}, child: const Text('Awesome'))],
         padding: EdgeInsets.zero,
       ),
-      underlay: [
+      underlays: [
         FluxUnderlay(
           targets: const {FluxTarget.body},
           margin: EdgeInsets.all(-extrude), // Negative margin pushes the bounds outward
@@ -167,7 +167,7 @@ Widget buildBackgroundZIndexUseCase(BuildContext context) {
         padding: EdgeInsets.zero,
       ),
       body: const SizedBox(height: 140), // Provide some empty space for the backgrounds
-      underlay:[
+      underlays:[
         // Background 1 (Base layer, zIndex 0)
         FluxUnderlay(
           targets: const {FluxTarget.body},

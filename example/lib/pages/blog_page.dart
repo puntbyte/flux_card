@@ -22,7 +22,7 @@ class BlogPage extends StatelessWidget {
             aspectRatio: 16 / 9,
             child: Image.network(post.image, fit: BoxFit.cover),
           ),
-          underlay: const [
+          underlays: const [
             FluxUnderlay(
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),

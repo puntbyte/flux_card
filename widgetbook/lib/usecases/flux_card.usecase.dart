@@ -290,24 +290,26 @@ Widget buildRowLayoutUseCase(BuildContext context) {
     FluxCard(
       layout: FluxLayoutMode.row,
       media: FluxMedia(
+        //aspectRatio: 1,
         child: Ink.image(image: CachedNetworkImageProvider(destination.image), fit: BoxFit.cover),
       ),
+
       header: FluxSection(
         title: Text(destination.title),
         subtitle: Text(destination.location),
-        padding: EdgeInsets.zero,
       ),
+
       body: Text(destination.description, maxLines: 2, overflow: TextOverflow.ellipsis),
       footer: FluxSection(
         actions: [
           Text(destination.priceLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
-        padding: EdgeInsets.zero,
       ),
+
       theme: FluxCardThemeData.elevated.copyWith(flexMedia: flexMedia, flexContent: flexContent),
       onTap: () {},
     ),
-    maxWidth: 500,
+    //maxWidth: 500,
   );
 }
 

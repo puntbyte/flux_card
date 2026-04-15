@@ -29,10 +29,11 @@ void main() {
         home: Scaffold(
           body: Center(
             child: SizedBox(
+              key: const Key('host'),
               width: cardWidth,
-              child: FluxCard(
+              child: const FluxCard(
                 fullWidth: true,
-                // background: Container(key: const Key('bg')),
+                header: Text('Header'),
               ),
             ),
           ),
@@ -40,20 +41,38 @@ void main() {
       ),
     );
 
-    final Size size = tester.getSize(find.byKey(const Key('bg')));
-    expect(size.width, cardWidth);
+    final hostRect = tester.getRect(find.byKey(const Key('host')));
+    final cardRect = tester.getRect(
+      find.descendant(
+        of: find.byType(FluxCard),
+        matching: find.byType(Material),
+      ).first,
+    );
+
+    expect(cardRect.width, hostRect.width);
   });
 
   testWidgets('FluxCard respects media position in row layout', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
-          body: FluxCard(
-            layout: FluxLayoutMode.row,
-            mediaPosition: FluxMediaPosition.end,
-            media: SizedBox(width: 80, height: 80, child: ColoredBox(color: Colors.blue)),
-            header: Text('Header'),
-            body: Text('Body'),
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 400,
+              child: FluxCard(
+                layout: FluxLayoutMode.row,
+                mediaPosition: FluxMediaPosition.end,
+                media: const SizedBox(
+                  key: Key('media'),
+                  width: 80,
+                  height: 80,
+                  child: ColoredBox(color: Colors.blue),
+                ),
+                header: const Text('Header'),
+                body: const Text('Body'),
+              ),
+            ),
           ),
         ),
       ),
@@ -61,6 +80,13 @@ void main() {
 
     expect(find.text('Header'), findsOneWidget);
     expect(find.text('Body'), findsOneWidget);
-    expect(find.byType(Row), findsOneWidget);
+    expect(find.byKey(const Key('media')), findsOneWidget);
+
+    final mediaX = tester.getTopLeft(find.byKey(const Key('media'))).dx;
+    final headerX = tester.getTopLeft(find.text('Header')).dx;
+    final bodyX = tester.getTopLeft(find.text('Body')).dx;
+
+    expect(mediaX, greaterThan(headerX));
+    expect(mediaX, greaterThan(bodyX));
   });
 }

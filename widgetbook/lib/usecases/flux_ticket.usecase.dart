@@ -133,7 +133,7 @@ Widget buildTicketOutlinedUseCase(BuildContext context) {
   return previewSurface(
     context,
     FluxCard(
-      underlay: [
+      underlays: [
         FluxUnderlay(
           decoration: BoxDecoration(
             gradient: LinearGradient(

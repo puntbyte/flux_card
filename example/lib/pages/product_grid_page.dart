@@ -37,7 +37,7 @@ class ProductGridPage extends StatelessWidget {
                 aspectRatio: 1,
                 child: Image.network(product.image, fit: BoxFit.cover),
               ),
-              underlay: const [
+              underlays: const [
                 FluxUnderlay(
                   targets: {FluxTarget.body},
                   decoration: BoxDecoration(
