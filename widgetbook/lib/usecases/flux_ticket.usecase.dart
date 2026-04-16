@@ -8,7 +8,7 @@ import '../shared/preview_surface.dart';
 
 @widgetbook.UseCase(name: 'Basic ticket', type: FluxNotchShape, path: '[Flux Card]/Ticket Shape')
 Widget buildTicketBasicUseCase(BuildContext context) {
-  final notchRadius = context.knobs.double.slider(
+  final notchWidth = context.knobs.double.slider(
     label: 'Notch radius',
     min: 6,
     max: 28,
@@ -22,7 +22,7 @@ Widget buildTicketBasicUseCase(BuildContext context) {
   );
 
   // FluxNotch (targeted) snaps to the afterHeader boundary — no position knob
-  // needed. The dashed divider aligns by matching its indent to notchRadius.
+  // needed. The dashed divider aligns by matching its indent to notchWidth.
   return previewSurface(
     context,
     FluxCard(
@@ -50,11 +50,11 @@ Widget buildTicketBasicUseCase(BuildContext context) {
       ),
       notch: FluxNotch(
         boundary: FluxSlotBoundary.afterHeader,
-        notchRadius: notchRadius,
+        notchWidth: notchWidth,
         notchSide: notchSide,
       ),
       divider: FluxDivider(
-        afterHeader: FluxDashedDivider(indent: notchRadius, endIndent: notchRadius),
+        afterHeader: FluxDashedDivider(indent: notchWidth, endIndent: notchWidth),
       ),
       theme: FluxCardThemeData.elevated.copyWith(padding: const EdgeInsets.all(20)),
       onTap: () {},
@@ -69,7 +69,7 @@ Widget buildTicketBasicUseCase(BuildContext context) {
   path: '[Flux Card]/Ticket Shape',
 )
 Widget buildTicketHorizontalUseCase(BuildContext context) {
-  final notchRadius = context.knobs.double.slider(
+  final notchWidth = context.knobs.double.slider(
     label: 'Notch radius',
     min: 6,
     max: 28,
@@ -104,7 +104,7 @@ Widget buildTicketHorizontalUseCase(BuildContext context) {
       ),
       notch: FluxNotch.free(
         position: notchPosition,
-        notchRadius: notchRadius,
+        notchWidth: notchWidth,
         edge: FluxNotchEdge.horizontal,
         notchSide: FluxNotchSide.both,
       ),
@@ -122,7 +122,7 @@ Widget buildTicketHorizontalUseCase(BuildContext context) {
   path: '[Flux Card]/Ticket Shape',
 )
 Widget buildTicketOutlinedUseCase(BuildContext context) {
-  final notchRadius = context.knobs.double.slider(
+  final notchWidth = context.knobs.double.slider(
     label: 'Notch radius',
     min: 6,
     max: 24,
@@ -160,14 +160,14 @@ Widget buildTicketOutlinedUseCase(BuildContext context) {
       ),
       notch: FluxNotch(
         boundary: FluxSlotBoundary.afterHeader,
-        notchRadius: notchRadius,
+        notchWidth: notchWidth,
         notchSide: FluxNotchSide.both,
       ),
       divider: FluxDivider(
         afterHeader: FluxDashedDivider(
           color: Colors.white24,
-          indent: notchRadius,
-          endIndent: notchRadius,
+          indent: notchWidth,
+          endIndent: notchWidth,
         ),
       ),
       theme: FluxCardThemeData.standard.copyWith(

@@ -233,7 +233,7 @@ Widget buildOverlayBreakoutUseCase(BuildContext context) {
     context,
     FluxCard(
       // Setting Clip.none allows overlays to push beyond the card borders!
-      clipBehavior: Clip.none,
+      clipBehavior: Clip.antiAliasWithSaveLayer,
       media: FluxMedia(
         aspectRatio: 16 / 9,
         // When using Clip.none on the card, you must provide a border radius
@@ -250,8 +250,9 @@ Widget buildOverlayBreakoutUseCase(BuildContext context) {
         FluxOverlay(
           targets: const {FluxTarget.media},
           alignment: Alignment.topRight,
+          behavior: .breakout,
           // Push the badge completely outside the top-right corner
-          offset: const Offset(24, -24),
+          offset: const Offset(-5, -30),
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

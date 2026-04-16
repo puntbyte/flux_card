@@ -153,11 +153,13 @@ void main() {
     testWidgets('returns RoundedRectangleBorder when shape is null', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(builder: (ctx) {
-            final shape = FluxCardThemeData.standard.resolveShape(ctx);
-            expect(shape, isA<RoundedRectangleBorder>());
-            return const SizedBox.shrink();
-          }),
+          home: Builder(
+            builder: (ctx) {
+              final shape = FluxCardThemeData.standard.resolveShape(ctx);
+              expect(shape, isA<RoundedRectangleBorder>());
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       );
     });
@@ -166,11 +168,13 @@ void main() {
       const custom = StadiumBorder();
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(builder: (ctx) {
-            final shape = const FluxCardThemeData(shape: custom).resolveShape(ctx);
-            expect(shape, same(custom));
-            return const SizedBox.shrink();
-          }),
+          home: Builder(
+            builder: (ctx) {
+              final shape = const FluxCardThemeData(shape: custom).resolveShape(ctx);
+              expect(shape, same(custom));
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       );
     });
@@ -184,12 +188,14 @@ void main() {
               outline: const Color(0xFF123456),
             ),
           ),
-          home: Builder(builder: (ctx) {
-            final shape = FluxCardThemeData.outlined.resolveShape(ctx);
-            final border = shape as RoundedRectangleBorder;
-            expect(border.side.color, const Color(0xFF123456));
-            return const SizedBox.shrink();
-          }),
+          home: Builder(
+            builder: (ctx) {
+              final shape = FluxCardThemeData.outlined.resolveShape(ctx);
+              final border = shape as RoundedRectangleBorder;
+              expect(border.side.color, const Color(0xFF123456));
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       );
     });
@@ -203,11 +209,13 @@ void main() {
     testWidgets('falls back to standard when no theme is in context', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(builder: (ctx) {
-            final theme = FluxCardThemeData.of(ctx);
-            expect(theme, FluxCardThemeData.standard);
-            return const SizedBox.shrink();
-          }),
+          home: Builder(
+            builder: (ctx) {
+              final theme = FluxCardThemeData.of(ctx);
+              expect(theme, FluxCardThemeData.standard);
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       );
     });
@@ -215,14 +223,14 @@ void main() {
     testWidgets('picks up ThemeExtension from ThemeData', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(
-            extensions: [FluxCardThemeData.compact],
+          theme: ThemeData(extensions: [FluxCardThemeData.compact]),
+          home: Builder(
+            builder: (ctx) {
+              final theme = FluxCardThemeData.of(ctx);
+              expect(theme, FluxCardThemeData.compact);
+              return const SizedBox.shrink();
+            },
           ),
-          home: Builder(builder: (ctx) {
-            final theme = FluxCardThemeData.of(ctx);
-            expect(theme, FluxCardThemeData.compact);
-            return const SizedBox.shrink();
-          }),
         ),
       );
     });
@@ -233,11 +241,13 @@ void main() {
           theme: ThemeData(extensions: [FluxCardThemeData.compact]),
           home: FluxCardTheme(
             data: FluxCardThemeData.elevated,
-            child: Builder(builder: (ctx) {
-              final theme = FluxCardThemeData.of(ctx);
-              expect(theme, FluxCardThemeData.elevated);
-              return const SizedBox.shrink();
-            }),
+            child: Builder(
+              builder: (ctx) {
+                final theme = FluxCardThemeData.of(ctx);
+                expect(theme, FluxCardThemeData.elevated);
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       );
@@ -255,10 +265,12 @@ void main() {
         MaterialApp(
           home: FluxCardTheme(
             data: FluxCardThemeData.standard,
-            child: Builder(builder: (ctx) {
-              ctx.dependOnInheritedWidgetOfExactType<FluxCardTheme>();
-              return const SizedBox.shrink();
-            }),
+            child: Builder(
+              builder: (ctx) {
+                ctx.dependOnInheritedWidgetOfExactType<FluxCardTheme>();
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       );
@@ -267,10 +279,12 @@ void main() {
         MaterialApp(
           home: FluxCardTheme(
             data: FluxCardThemeData.elevated,
-            child: Builder(builder: (ctx) {
-              notified = true;
-              return const SizedBox.shrink();
-            }),
+            child: Builder(
+              builder: (ctx) {
+                notified = true;
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       );

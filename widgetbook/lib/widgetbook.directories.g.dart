@@ -85,6 +85,12 @@ final directories = <_widgetbook.WidgetbookNode>[
                         _flux_card_widgetbook_usecases_flux_advanced_cards_usecase
                             .buildAdvancedCommerceHeroUseCase,
                   ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Onlysocial Promo Banner',
+                    builder:
+                        _flux_card_widgetbook_usecases_flux_advanced_cards_usecase
+                            .buildOnlysocialPromoBannerUseCase,
+                  ),
                 ],
               ),
             ],

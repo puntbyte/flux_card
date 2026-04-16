@@ -742,7 +742,7 @@ Widget buildEventTicketUseCase(BuildContext context) {
 
       notch: FluxNotch(
         boundary: FluxSlotBoundary.afterHeader,
-        notchRadius: 8,
+        notchWidth: 8,
       ),
 
       header: const FluxSection(
