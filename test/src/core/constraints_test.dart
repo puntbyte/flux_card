@@ -131,5 +131,37 @@ void main() {
         expect(c.availableWidth, 320.0);
       });
     });
+
+    group('hasBoundedAvailableWidth', () {
+      test('is true when explicitWidth is set', () {
+        const c = FluxCardConstraints(
+          parentConstraints: BoxConstraints(),
+          explicitWidth: 300,
+        );
+        expect(c.hasBoundedAvailableWidth, isTrue);
+      });
+
+      test('is true when parent width is bounded', () {
+        const c = FluxCardConstraints(
+          parentConstraints: BoxConstraints(maxWidth: 375),
+        );
+        expect(c.hasBoundedAvailableWidth, isTrue);
+      });
+
+      test('is true when fullWidth is set with a bounded parent', () {
+        const c = FluxCardConstraints(
+          parentConstraints: BoxConstraints(maxWidth: 400),
+          fullWidth: true,
+        );
+        expect(c.hasBoundedAvailableWidth, isTrue);
+      });
+
+      test('is false when parent width is unbounded and no explicit width exists', () {
+        const c = FluxCardConstraints(
+          parentConstraints: BoxConstraints(),
+        );
+        expect(c.hasBoundedAvailableWidth, isFalse);
+      });
+    });
   });
 }

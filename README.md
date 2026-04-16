@@ -236,7 +236,9 @@ FluxSection.header({ leading, title, subtitle, description, trailing, margin, pa
 FluxSection.footer({ actions, actionsAlignment, margin, padding, decoration, spacing, ... })
 ```
 
-**Full bleed override.** Pass `margin: EdgeInsets.zero` to a `FluxSection` to break out of the card's global padding, then use its own `padding` to re-apply spacing internally. This is the correct way to create visually distinct header/footer zones that touch the card edges.
+**Full bleed override.** Pass `margin: EdgeInsets.zero` to a `FluxSection` to break out of the
+card's global padding, then use its own `padding` to re-apply spacing internally. This is the
+correct way to create visually distinct header/footer zones that touch the card edges.
 
 ```dart
 FluxCard(

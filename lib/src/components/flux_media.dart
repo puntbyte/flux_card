@@ -101,6 +101,7 @@ class FluxMedia extends StatelessWidget {
       return BoxDecoration(color: c, gradient: g, image: img, borderRadius: borderRadius);
     }
 
+    // 1. Resolve the primary child layer (either the ImageProvider or the raw widget)
     if (_image != null) {
       result = Ink(
         decoration: buildDecoration(
@@ -119,6 +120,7 @@ class FluxMedia extends StatelessWidget {
     final hasBackground = color != null || gradient != null;
     final hasForeground = foregroundColor != null || foregroundGradient != null;
 
+    // 2. Wrap in Stack if gradients/scrims are applied
     if (hasBackground || hasForeground) {
       final double bleed = borderRadius == null ? -1.0 : 0.0;
 
@@ -155,7 +157,7 @@ class FluxMedia extends StatelessWidget {
       );
     }
 
-    // Primary explicit sizing rules.
+    // 3. Apply primary sizing rules
     if (aspectRatio != null) {
       result = AspectRatio(aspectRatio: aspectRatio!, child: result);
     } else if (width != null || height != null) {
@@ -166,11 +168,16 @@ class FluxMedia extends StatelessWidget {
       }
     }
 
-    // Fallback for row-layout / scrollable scenarios:
-    // if height is unbounded and the caller did not provide an aspect ratio or
-    // explicit height, cap greedy children (like Ink.image) to a finite height.
+    // 4. Guard against greedy children in bounded-width / unbounded-height layouts
+    //
+    // Example: row-layout FluxCard inside a scroll view, with FluxMedia(child: Ink.image(...))
+    // and no aspectRatio / no explicit height.
+    //
+    // In that case the slot has a finite width but unbounded height. Greedy children
+    // try to expand to the "biggest" size and can receive infinite height.
     if (aspectRatio == null && height == null) {
       final childForFallback = result;
+
       result = LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxHeight.isFinite) {
@@ -189,10 +196,12 @@ class FluxMedia extends StatelessWidget {
       );
     }
 
+    // 5. Apply optional hardware clip
     if (borderRadius != null) {
       result = ClipRRect(borderRadius: borderRadius!, clipBehavior: clipBehavior, child: result);
     }
 
+    // 6. Apply external spacing
     if (padding != EdgeInsets.zero) {
       result = Padding(padding: padding, child: result);
     }

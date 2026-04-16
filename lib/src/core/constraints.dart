@@ -46,6 +46,13 @@ class FluxCardConstraints {
     return null;
   }
 
+  /// Whether the card has a real finite width that can safely drive
+  /// responsive layout decisions.
+  bool get hasBoundedAvailableWidth {
+    if (resolvedWidth != null) return true;
+    return parentConstraints.hasBoundedWidth;
+  }
+
   /// Width available for responsive breakpoint evaluation.
   ///
   /// Falls back to [double.infinity] when the parent is unbounded.

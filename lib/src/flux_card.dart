@@ -134,10 +134,15 @@ class _FluxCardState extends State<FluxCard> {
         fullHeight: widget.fullHeight,
       );
 
+      final bool isResponsiveUnboundedFallback =
+          widget.layout == FluxLayoutMode.responsive && !cardConstraints.hasBoundedAvailableWidth;
+
       final resolvedLayout = widget.layout == FluxLayoutMode.responsive
-          ? (cardConstraints.availableWidth >= effectiveTheme.responsiveBreakpoint
-                ? FluxLayoutMode.row
-                : FluxLayoutMode.column)
+          ? (isResponsiveUnboundedFallback
+                ? FluxLayoutMode.column
+                : (cardConstraints.availableWidth >= effectiveTheme.responsiveBreakpoint
+                      ? FluxLayoutMode.row
+                      : FluxLayoutMode.column))
           : widget.layout;
 
       final notch = widget.notch;
@@ -235,6 +240,17 @@ class _FluxCardState extends State<FluxCard> {
         child: contentTree,
       );
 
+      // Targeted fallback only for:
+      // - layout == responsive
+      // - parent width is truly unbounded
+      // - no explicit/full resolved width exists
+      //
+      // This gives nested stretch-based slot layouts a finite width without putting
+      // IntrinsicWidth into SlotResolver or other common bounded paths.
+      if (isResponsiveUnboundedFallback && cardConstraints.resolvedWidth == null) {
+        cardWidget = IntrinsicWidth(child: cardWidget);
+      }
+
       // Semantic Accessibility Wrapper
       if (widget.semanticLabel != null) {
         cardWidget = Semantics(
@@ -267,14 +283,14 @@ class _FluxCardState extends State<FluxCard> {
   }
 
   Widget _buildLayers(
-      FluxLayoutMode resolvedLayout,
-      FluxCardThemeData theme,
-      EdgeInsets resolvedPadding,
-      TextDirection? td,
-      BoxConstraints? parentConstraints,
-      ) {
-    final allUnderlays = widget.underlays ?? const[];
-    final allOvs = widget.overlays ?? const[];
+    FluxLayoutMode resolvedLayout,
+    FluxCardThemeData theme,
+    EdgeInsets resolvedPadding,
+    TextDirection? td,
+    BoxConstraints? parentConstraints,
+  ) {
+    final allUnderlays = widget.underlays ?? const [];
+    final allOvs = widget.overlays ?? const [];
 
     final underlaysByTarget = <FluxTarget, List<Widget>>{};
     final ovsByTarget = <FluxTarget, List<Widget>>{};
@@ -288,7 +304,7 @@ class _FluxCardState extends State<FluxCard> {
         if (und.isGlobal) {
           globalUnderlays.add(und);
         } else if (und.targets.length == 1) {
-          (underlaysByTarget[und.targets.first] ??=[]).add(und);
+          (underlaysByTarget[und.targets.first] ??= []).add(und);
         } else {
           multiUnderlays.add(und);
         }
@@ -302,7 +318,7 @@ class _FluxCardState extends State<FluxCard> {
         if (ov.isGlobal) {
           globalOvs.add(ov);
         } else if (ov.targets.length == 1) {
-          (ovsByTarget[ov.targets.first] ??=[]).add(ov);
+          (ovsByTarget[ov.targets.first] ??= []).add(ov);
         } else {
           multiOvs.add(ov);
         }
@@ -331,34 +347,35 @@ class _FluxCardState extends State<FluxCard> {
     }
     multiUnderlays.sort((a, b) => getZIndex(b).compareTo(getZIndex(a)));
 
-    final mainContent = FluxCardLayout(
-      mode: resolvedLayout,
-      mediaPosition: widget.mediaPosition,
-      mediaSpan: widget.mediaSpan,
-      theme: theme,
-      resolvedPadding: resolvedPadding,
-      divider: widget.divider,
-      boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
-      parentConstraints: parentConstraints,
-    ).build(
-      context,
-      media: widget.media,
-      header: widget.header,
-      body: widget.body,
-      footer: widget.footer,
-      // FIX: Passing the correct underlay variables instead of bgs
-      underlaysByTarget: underlaysByTarget,
-      ovsByTarget: ovsByTarget,
-      multiUnderlays: multiUnderlays,
-      multiOvs: multiOvs,
-    );
+    final mainContent =
+        FluxCardLayout(
+          mode: resolvedLayout,
+          mediaPosition: widget.mediaPosition,
+          mediaSpan: widget.mediaSpan,
+          theme: theme,
+          resolvedPadding: resolvedPadding,
+          divider: widget.divider,
+          boundaryTrackers: widget.notch?.isTargeted == true ? _trackers : null,
+          parentConstraints: parentConstraints,
+        ).build(
+          context,
+          media: widget.media,
+          header: widget.header,
+          body: widget.body,
+          footer: widget.footer,
+          // FIX: Passing the correct underlay variables instead of bgs
+          underlaysByTarget: underlaysByTarget,
+          ovsByTarget: ovsByTarget,
+          multiUnderlays: multiUnderlays,
+          multiOvs: multiOvs,
+        );
 
     if (globalUnderlays.isEmpty && globalOvs.isEmpty) return mainContent;
 
     return Stack(
       fit: StackFit.passthrough,
       clipBehavior: Clip.none,
-      children:[
+      children: [
         ...globalUnderlays.map((und) => FluxUnderlay.buildPositioned(context, und)),
         mainContent,
         ...globalOvs.map((ov) => Positioned.fill(child: ov)),

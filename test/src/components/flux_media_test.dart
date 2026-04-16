@@ -5,12 +5,73 @@ import 'package:flux_card/flux_card.dart';
 
 // A valid 1x1 transparent PNG image for safe image testing
 final Uint8List transparentImage = Uint8List.fromList(const <int>[
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49,
-  0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06,
-  0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44,
-  0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01, 0x0D,
-  0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42,
-  0x60, 0x82,
+  0x89,
+  0x50,
+  0x4E,
+  0x47,
+  0x0D,
+  0x0A,
+  0x1A,
+  0x0A,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x15,
+  0xC4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0A,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9C,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0D,
+  0x0A,
+  0x2D,
+  0xB4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4E,
+  0x44,
+  0xAE,
+  0x42,
+  0x60,
+  0x82,
 ]);
 
 void main() {
@@ -85,7 +146,8 @@ void main() {
       const childKey = Key('media_child');
       await tester.pumpWidget(
         wrap(
-          UnconstrainedBox( // Let FluxMedia size itself without loose center bounds
+          UnconstrainedBox(
+            // Let FluxMedia size itself without loose center bounds
             child: FluxMedia(width: 100, child: SizedBox(key: childKey, height: 50)),
           ),
         ),
@@ -97,13 +159,7 @@ void main() {
 
     testWidgets('padding wraps content with correct insets', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          const FluxMedia(
-            aspectRatio: 1.0,
-            padding: EdgeInsets.all(8),
-            child: SizedBox(),
-          ),
-        ),
+        wrap(const FluxMedia(aspectRatio: 1.0, padding: EdgeInsets.all(8), child: SizedBox())),
       );
 
       expect(
@@ -132,9 +188,7 @@ void main() {
     });
 
     testWidgets('no ClipRRect when borderRadius is null', (tester) async {
-      await tester.pumpWidget(
-        wrap(const FluxMedia(aspectRatio: 1.0, child: SizedBox())),
-      );
+      await tester.pumpWidget(wrap(const FluxMedia(aspectRatio: 1.0, child: SizedBox())));
       expect(find.byType(ClipRRect), findsNothing);
     });
   });
@@ -193,12 +247,7 @@ void main() {
   group('FluxMedia.image', () {
     testWidgets('renders without throwing', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          FluxMedia.image(
-            aspectRatio: 16 / 9,
-            image: MemoryImage(transparentImage),
-          ),
-        ),
+        wrap(FluxMedia.image(aspectRatio: 16 / 9, image: MemoryImage(transparentImage))),
       );
       // The Ink widget is used for image — verify widget tree is intact
       expect(find.byType(FluxMedia), findsOneWidget);
@@ -247,8 +296,8 @@ void main() {
 
   group('FluxMedia — unbounded constraints', () {
     testWidgets(
-      'does not throw in row layout inside scroll view when media child is greedy and no aspectRatio is set',
-          (tester) async {
+      'does not throw in row layout inside scroll view when child is greedy and no aspectRatio is set',
+      (tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -258,10 +307,7 @@ void main() {
                   child: FluxCard(
                     layout: FluxLayoutMode.row,
                     media: FluxMedia(
-                      child: Ink.image(
-                        image: MemoryImage(transparentImage),
-                        fit: BoxFit.fill,
-                      ),
+                      child: Ink.image(image: MemoryImage(transparentImage), fit: BoxFit.fill),
                     ),
                     header: const FluxSection(
                       title: Text('Row media'),
@@ -270,7 +316,6 @@ void main() {
                     ),
                     body: const Text('Body'),
                     theme: FluxCardThemeData.elevated,
-                    onTap: null,
                   ),
                 ),
               ),
@@ -283,7 +328,6 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.text('Row media'), findsOneWidget);
         expect(find.text('Body'), findsOneWidget);
-        expect(find.byType(FluxCard), findsOneWidget);
       },
     );
   });
