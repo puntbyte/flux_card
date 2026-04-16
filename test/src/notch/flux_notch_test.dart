@@ -396,6 +396,7 @@ void main() {
                       header: Text('Shape V'),
                     ),
                   ),
+
                   SizedBox(
                     width: 320,
                     child: FluxCard(
