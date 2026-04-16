@@ -11,11 +11,7 @@ class BoundaryTracker {
 class BoundaryMarker extends SingleChildRenderObjectWidget {
   final BoundaryTracker tracker;
 
-  const BoundaryMarker({
-    super.key,
-    required this.tracker,
-    super.child,
-  });
+  const BoundaryMarker({super.key, required this.tracker, super.child});
 
   @override
   RenderBoundaryMarker createRenderObject(BuildContext context) {

@@ -20,6 +20,7 @@ class FluxCardLayout {
     required this.resolvedPadding,
     this.divider,
     this.boundaryTrackers,
+    this.slotTrackers,
     this.parentConstraints,
   });
 
@@ -30,6 +31,7 @@ class FluxCardLayout {
   final EdgeInsets resolvedPadding;
   final FluxDivider? divider;
   final Map<FluxSlotBoundary, BoundaryTracker>? boundaryTrackers;
+  final Map<FluxTarget, BoundaryTracker>? slotTrackers;
   final BoxConstraints? parentConstraints;
 
   Widget build(
@@ -49,6 +51,7 @@ class FluxCardLayout {
       child: media,
       underlaysByTarget: underlaysByTarget,
       ovsByTarget: ovsByTarget,
+      tracker: slotTrackers?[FluxTarget.media],
     );
 
     final delegate = _getDelegate();
@@ -91,6 +94,7 @@ class FluxCardLayout {
           resolvedPadding: resolvedPadding,
           divider: divider,
           boundaryTrackers: boundaryTrackers,
+          slotTrackers: slotTrackers,
           parentConstraints: parentConstraints,
         );
       case FluxLayoutMode.row:
@@ -101,6 +105,7 @@ class FluxCardLayout {
           resolvedPadding: resolvedPadding,
           divider: divider,
           boundaryTrackers: boundaryTrackers,
+          slotTrackers: slotTrackers,
           parentConstraints: parentConstraints,
         );
       case FluxLayoutMode.inline:
@@ -111,6 +116,7 @@ class FluxCardLayout {
           resolvedPadding: resolvedPadding,
           divider: divider,
           boundaryTrackers: boundaryTrackers,
+          slotTrackers: slotTrackers,
           parentConstraints: parentConstraints,
         );
     }

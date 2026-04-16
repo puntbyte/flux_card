@@ -14,6 +14,7 @@ class FluxRowLayout extends FluxLayoutDelegate {
     required super.resolvedPadding,
     super.divider,
     super.boundaryTrackers,
+    super.slotTrackers,
     super.parentConstraints,
   });
 
@@ -81,6 +82,7 @@ class FluxRowLayout extends FluxLayoutDelegate {
         underlaysByTarget: underlaysByTarget,
         ovsByTarget: ovsByTarget,
         contentPadding: slotPad,
+        tracker: slotTrackers?[target],
       )!;
 
       final spanType = _getSpanType(target);

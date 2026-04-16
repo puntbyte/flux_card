@@ -15,6 +15,7 @@ abstract class FluxLayoutDelegate {
     required this.resolvedPadding,
     this.divider,
     this.boundaryTrackers,
+    this.slotTrackers,
     this.parentConstraints,
   });
 
@@ -24,6 +25,7 @@ abstract class FluxLayoutDelegate {
   final EdgeInsets resolvedPadding;
   final FluxDivider? divider;
   final Map<FluxSlotBoundary, BoundaryTracker>? boundaryTrackers;
+  final Map<FluxTarget, BoundaryTracker>? slotTrackers;
   final BoxConstraints? parentConstraints;
 
   Widget build(
@@ -68,9 +70,12 @@ abstract class FluxLayoutDelegate {
     List<Widget> multiUnderlays,
     List<Widget> multiOvs,
   ) {
+    final present = entries.where((e) => e.$2 != null).toList();
+    if (present.isEmpty) return null;
+
     return SlotResolver.contentColumn(
       context,
-      entries: entries,
+      entries: present,
       underlaysByTarget: underlaysByTarget,
       ovsByTarget: ovsByTarget,
       multiUnderlays: multiUnderlays,
@@ -79,6 +84,7 @@ abstract class FluxLayoutDelegate {
       spacing: theme.spacing,
       divider: divider,
       boundaryTrackers: boundaryTrackers,
+      slotTrackers: slotTrackers,
     );
   }
 

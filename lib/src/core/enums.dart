@@ -105,3 +105,7 @@ enum FluxSlotBoundary {
   /// Between the body slot and the footer slot.
   afterBody,
 }
+
+enum FluxNotchKind { ticket, vShape, slant }
+
+enum FluxOverlayBehavior { contained, breakout }

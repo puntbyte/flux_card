@@ -47,9 +47,9 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
     this.subtitleStyle,
     this.descriptionStyle,
   }) : child = null,
-        actions = null,
-        actionsAlignment = MainAxisAlignment.start,
-        runSpacing = 0;
+       actions = null,
+       actionsAlignment = MainAxisAlignment.start,
+       runSpacing = 0;
 
   const FluxSection.footer({
     super.key,
@@ -61,17 +61,17 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
     this.spacing = 12,
     this.runSpacing = 8,
   }) : leading = null,
-        title = null,
-        subtitle = null,
-        description = null,
-        trailing = null,
-        child = null,
-        headerCrossAxisAlignment = CrossAxisAlignment.start,
-        textCrossAxisAlignment = CrossAxisAlignment.start,
-        textMainAxisAlignment = MainAxisAlignment.start,
-        titleStyle = null,
-        subtitleStyle = null,
-        descriptionStyle = null;
+       title = null,
+       subtitle = null,
+       description = null,
+       trailing = null,
+       child = null,
+       headerCrossAxisAlignment = CrossAxisAlignment.start,
+       textCrossAxisAlignment = CrossAxisAlignment.start,
+       textMainAxisAlignment = MainAxisAlignment.start,
+       titleStyle = null,
+       subtitleStyle = null,
+       descriptionStyle = null;
 
   final Widget? leading;
   final Widget? title;
@@ -99,12 +99,18 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
 
   WrapAlignment _wrapAlignment(MainAxisAlignment value) {
     switch (value) {
-      case MainAxisAlignment.end: return WrapAlignment.end;
-      case MainAxisAlignment.center: return WrapAlignment.center;
-      case MainAxisAlignment.spaceBetween: return WrapAlignment.spaceBetween;
-      case MainAxisAlignment.spaceAround: return WrapAlignment.spaceAround;
-      case MainAxisAlignment.spaceEvenly: return WrapAlignment.spaceEvenly;
-      default: return WrapAlignment.start;
+      case MainAxisAlignment.end:
+        return WrapAlignment.end;
+      case MainAxisAlignment.center:
+        return WrapAlignment.center;
+      case MainAxisAlignment.spaceBetween:
+        return WrapAlignment.spaceBetween;
+      case MainAxisAlignment.spaceAround:
+        return WrapAlignment.spaceAround;
+      case MainAxisAlignment.spaceEvenly:
+        return WrapAlignment.spaceEvenly;
+      default:
+        return WrapAlignment.start;
     }
   }
 
@@ -113,11 +119,25 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
     final theme = FluxCardThemeData.of(context);
     final textTheme = Theme.of(context).textTheme;
 
-    final resolvedTitleStyle = titleStyle ?? theme.defaultTitleStyle ?? textTheme.titleMedium ?? const TextStyle(fontWeight: FontWeight.w700);
-    final resolvedSubtitleStyle = subtitleStyle ?? theme.defaultSubtitleStyle ?? textTheme.bodyMedium ?? const TextStyle();
-    final resolvedDescriptionStyle = descriptionStyle ?? theme.defaultDescriptionStyle ?? textTheme.bodySmall ?? const TextStyle();
+    final resolvedTitleStyle =
+        titleStyle ??
+        theme.defaultTitleStyle ??
+        textTheme.titleMedium ??
+        const TextStyle(fontWeight: FontWeight.w700);
+    final resolvedSubtitleStyle =
+        subtitleStyle ?? theme.defaultSubtitleStyle ?? textTheme.bodyMedium ?? const TextStyle();
+    final resolvedDescriptionStyle =
+        descriptionStyle ??
+        theme.defaultDescriptionStyle ??
+        textTheme.bodySmall ??
+        const TextStyle();
 
-    final hasHeader = leading != null || title != null || subtitle != null || description != null || (trailing != null && trailing!.isNotEmpty);
+    final hasHeader =
+        leading != null ||
+        title != null ||
+        subtitle != null ||
+        description != null ||
+        (trailing != null && trailing!.isNotEmpty);
     final hasActions = actions != null && actions!.isNotEmpty;
     final hasChild = child != null;
 
@@ -129,7 +149,8 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
     final textChildren = <Widget>[
       if (title != null) DefaultTextStyle.merge(style: resolvedTitleStyle, child: title!),
       if (subtitle != null) DefaultTextStyle.merge(style: resolvedSubtitleStyle, child: subtitle!),
-      if (description != null) DefaultTextStyle.merge(style: resolvedDescriptionStyle, child: description!),
+      if (description != null)
+        DefaultTextStyle.merge(style: resolvedDescriptionStyle, child: description!),
     ];
 
     final spacedTextChildren = <Widget>[
@@ -166,10 +187,7 @@ class FluxSection extends StatelessWidget implements FluxSlotWrapper {
             ],
           ],
         ),
-      if (hasChild) ...[
-        if (hasHeader) SizedBox(height: spacing),
-        child!,
-      ],
+      if (hasChild) ...[if (hasHeader) SizedBox(height: spacing), child!],
       if (hasActions) ...[
         if (hasHeader || hasChild) SizedBox(height: spacing),
         Wrap(

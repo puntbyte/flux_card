@@ -27,6 +27,7 @@ abstract final class SlotResolver {
     required Map<FluxTarget, List<Widget>> underlaysByTarget,
     required Map<FluxTarget, List<Widget>> ovsByTarget,
     EdgeInsetsGeometry? contentPadding,
+    BoundaryTracker? tracker,
   }) {
     if (child == null) return null;
 
@@ -37,17 +38,27 @@ abstract final class SlotResolver {
         ? Padding(padding: contentPadding, child: child)
         : child;
 
-    if (underlays.isEmpty && ovs.isEmpty) return paddedChild;
+    Widget result;
 
-    return Stack(
-      fit: StackFit.passthrough,
-      clipBehavior: Clip.none,
-      children: [
-        ...underlays.map((und) => FluxUnderlay.buildPositioned(context, und)),
-        paddedChild,
-        ...ovs.map((ov) => Positioned.fill(child: ov)),
-      ],
-    );
+    if (underlays.isEmpty && ovs.isEmpty) {
+      result = paddedChild;
+    } else {
+      result = Stack(
+        fit: StackFit.passthrough,
+        clipBehavior: Clip.none,
+        children: [
+          ...underlays.map((und) => FluxUnderlay.buildPositioned(context, und)),
+          paddedChild,
+          ...ovs.map((ov) => Positioned.fill(child: ov)),
+        ],
+      );
+    }
+
+    if (tracker != null) {
+      result = BoundaryMarker(tracker: tracker, child: result);
+    }
+
+    return result;
   }
 
   static Widget verticalGroup({required List<Widget?> slots, required double spacing}) {
@@ -130,6 +141,7 @@ abstract final class SlotResolver {
     required double spacing,
     FluxDivider? divider,
     Map<FluxSlotBoundary, BoundaryTracker>? boundaryTrackers,
+    Map<FluxTarget, BoundaryTracker>? slotTrackers,
   }) {
     final present = entries.where((e) => e.$2 != null).toList();
     if (present.isEmpty) return null;
@@ -194,6 +206,7 @@ abstract final class SlotResolver {
         underlaysByTarget: underlaysByTarget,
         ovsByTarget: ovsByTarget,
         contentPadding: slotPad,
+        tracker: slotTrackers?[target],
       )!;
 
       blocks.add(_SlotBlock({target}, wrapped));

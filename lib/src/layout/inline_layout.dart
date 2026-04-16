@@ -12,6 +12,7 @@ class FluxInlineLayout extends FluxLayoutDelegate {
     required super.resolvedPadding,
     super.divider,
     super.boundaryTrackers,
+    super.slotTrackers,
     super.parentConstraints,
   });
 
