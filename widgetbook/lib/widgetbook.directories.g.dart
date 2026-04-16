@@ -10,6 +10,8 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:flux_card_widgetbook/usecases/flux_advanced_cards.usecase.dart'
+    as _flux_card_widgetbook_usecases_flux_advanced_cards_usecase;
 import 'package:flux_card_widgetbook/usecases/flux_card.usecase.dart'
     as _flux_card_widgetbook_usecases_flux_card_usecase;
 import 'package:flux_card_widgetbook/usecases/flux_composition.usecase.dart'
@@ -71,6 +73,22 @@ final directories = <_widgetbook.WidgetbookNode>[
       _widgetbook.WidgetbookFolder(
         name: 'Cards',
         children: [
+          _widgetbook.WidgetbookFolder(
+            name: 'Advanced',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'FluxCard',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Commerce Hero',
+                    builder:
+                        _flux_card_widgetbook_usecases_flux_advanced_cards_usecase
+                            .buildAdvancedCommerceHeroUseCase,
+                  ),
+                ],
+              ),
+            ],
+          ),
           _widgetbook.WidgetbookComponent(
             name: 'FluxCard',
             useCases: [

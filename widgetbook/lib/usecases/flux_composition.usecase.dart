@@ -743,7 +743,6 @@ Widget buildEventTicketUseCase(BuildContext context) {
       notch: FluxNotch(
         boundary: FluxSlotBoundary.afterHeader,
         notchRadius: 8,
-        side: BorderSide(width: 2, color: Theme.of(context).disabledColor),
       ),
 
       header: const FluxSection(

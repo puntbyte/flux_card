@@ -162,7 +162,6 @@ Widget buildTicketOutlinedUseCase(BuildContext context) {
         boundary: FluxSlotBoundary.afterHeader,
         notchRadius: notchRadius,
         notchSide: FluxNotchSide.both,
-        side: const BorderSide(color: Colors.white24),
       ),
       divider: FluxDivider(
         afterHeader: FluxDashedDivider(

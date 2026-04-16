@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../core/enums.dart';
 import '../shapes/flux_notch_shape.dart';
 
+import 'package:flutter/material.dart';
+
+import '../core/enums.dart';
+
 /// Defines semicircular notches cut into the edges of a [FluxCard].
 ///
 /// Two constructors cover the two positioning modes:
@@ -15,19 +19,9 @@ import '../shapes/flux_notch_shape.dart';
 ///   of the card's height (vertical edge) or width (horizontal edge). Useful
 ///   for horizontal notches or when no slot boundary is relevant.
 ///
-/// ### Usage
-/// ```dart
-/// FluxCard(
-///   notch: FluxNotch(
-///     boundary: FluxSlotBoundary.afterHeader,
-///     notchRadius: 14,
-///     side: BorderSide(color: Colors.grey.shade300, width: 1.5),
-///   ),
-///   divider: FluxDivider(
-///     afterHeader: FluxDashedDivider(indent: 14, endIndent: 14),
-///   ),
-/// )
-/// ```
+/// The card outline is owned by [FluxCardThemeData.borderSide] /
+/// [FluxCardThemeData.shape]. [FluxNotch] only defines notch geometry
+/// and positioning.
 class FluxNotch {
   const FluxNotch({
     required FluxSlotBoundary boundary,
@@ -38,7 +32,6 @@ class FluxNotch {
     FluxNotchEdge edge = FluxNotchEdge.vertical,
     FluxNotchSide notchSide = FluxNotchSide.both,
     BorderRadius? borderRadius,
-    BorderSide side = BorderSide.none,
   }) : this._(
     boundary: boundary,
     fallbackPosition: fallbackPosition,
@@ -48,7 +41,6 @@ class FluxNotch {
     edge: edge,
     notchSide: notchSide,
     borderRadius: borderRadius,
-    side: side,
   );
 
   const FluxNotch.free({
@@ -57,7 +49,6 @@ class FluxNotch {
     FluxNotchEdge edge = FluxNotchEdge.vertical,
     FluxNotchSide notchSide = FluxNotchSide.both,
     BorderRadius? borderRadius,
-    BorderSide side = BorderSide.none,
   }) : this._(
     boundary: null,
     fallbackPosition: position,
@@ -67,7 +58,6 @@ class FluxNotch {
     edge: edge,
     notchSide: notchSide,
     borderRadius: borderRadius,
-    side: side,
   );
 
   const FluxNotch._({
@@ -79,7 +69,6 @@ class FluxNotch {
     required this.edge,
     required this.notchSide,
     this.borderRadius,
-    required this.side,
   });
 
   final FluxSlotBoundary? boundary;
@@ -97,81 +86,6 @@ class FluxNotch {
   final FluxNotchEdge edge;
   final FluxNotchSide notchSide;
   final BorderRadius? borderRadius;
-  final BorderSide side;
 
   bool get isTargeted => boundary != null;
-
-  CustomPainter buildBorderPainter(
-      double position,
-      BorderRadius resolvedBorderRadius,
-      TextDirection? td, {
-        NotchPositionResolver? notchPositionResolver,
-      }) => _FluxNotchBorderPainter(
-    notchPosition: position,
-    notchPositionResolver: notchPositionResolver,
-    notchRadius: notchRadius,
-    notchEdge: edge,
-    notchSide: notchSide,
-    borderRadius: resolvedBorderRadius,
-    side: side,
-    textDirection: td,
-  );
-}
-
-// ── Internal border painter ─────────────────────────────────────────────────
-
-class _FluxNotchBorderPainter extends CustomPainter {
-  const _FluxNotchBorderPainter({
-    required this.notchPosition,
-    this.notchPositionResolver,
-    required this.notchRadius,
-    required this.notchEdge,
-    required this.notchSide,
-    required this.borderRadius,
-    required this.side,
-    this.textDirection,
-  });
-
-  final double notchPosition;
-  final NotchPositionResolver? notchPositionResolver;
-  final double notchRadius;
-  final FluxNotchEdge notchEdge;
-  final FluxNotchSide notchSide;
-  final BorderRadius borderRadius;
-  final BorderSide side;
-  final TextDirection? textDirection;
-
-  double _resolvePosition(Size size) {
-    if (notchPositionResolver != null) {
-      final resolved = notchPositionResolver!(Offset.zero & size);
-      if (resolved != null) return resolved;
-    }
-    return notchPosition;
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (side == BorderSide.none || side.width == 0) return;
-    final path = NotchPathBuilder.build(
-      rect: Offset.zero & size,
-      borderRadius: borderRadius,
-      notchPosition: _resolvePosition(size),
-      notchRadius: notchRadius,
-      notchEdge: notchEdge,
-      notchSide: notchSide,
-      textDirection: textDirection,
-    );
-    canvas.drawPath(path, side.toPaint());
-  }
-
-  @override
-  bool shouldRepaint(_FluxNotchBorderPainter old) =>
-      old.notchPosition != notchPosition ||
-          old.notchPositionResolver != notchPositionResolver ||
-          old.notchRadius != notchRadius ||
-          old.notchEdge != notchEdge ||
-          old.notchSide != notchSide ||
-          old.borderRadius != borderRadius ||
-          old.side != side ||
-          old.textDirection != textDirection;
 }
