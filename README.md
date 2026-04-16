@@ -1,8 +1,11 @@
-# flux_card
+# Flux Card
 
 A constraint-aware, domain-agnostic, composition-first card layout engine for Flutter.
 
-`flux_card` provides a single `FluxCard` widget with named slots (media, header, body, footer), a declarative layering system for overlays and backgrounds, responsive layout switching, ticket-shaped notches, skeleton loading states, and a `ThemeExtension`-based theming system — all with zero external dependencies.
+`flux_card` provides a single `FluxCard` widget with named slots (media, header, body, footer), a
+declarative layering system for overlays and backgrounds, responsive layout switching, ticket-shaped
+notches, skeleton loading states, and a `ThemeExtension`-based theming system — all with zero
+external dependencies.
 
 ---
 
@@ -46,7 +49,8 @@ Then import:
 import 'package:flux_card/flux_card.dart';
 ```
 
-No additional configuration is required. The package has no external dependencies beyond the Flutter SDK.
+No additional configuration is required. The package has no external dependencies beyond the Flutter
+SDK.
 
 ---
 
@@ -79,11 +83,16 @@ FluxCard(
 
 `flux_card` is built around three ideas:
 
-**Slots.** `FluxCard` has four named content slots: `media`, `header`, `body`, and `footer`. Each slot accepts any widget. Slots that are `null` are omitted with no gap.
+**Slots.** `FluxCard` has four named content slots: `media`, `header`, `body`, and `footer`. Each
+slot accepts any widget. Slots that are `null` are omitted with no gap.
 
-**Layers.** On top of the slot content, you can inject `FluxOverlay` widgets (interactive, positioned over a slot) and `FluxUnderlay` widgets (decorative, rendered behind a slot). Both accept a `targets` set that controls which slot(s) they appear in.
+**Layers.** On top of the slot content, you can inject `FluxOverlay` widgets (interactive,
+positioned over a slot) and `FluxUnderlay` widgets (decorative, rendered behind a slot). Both accept
+a `targets` set that controls which slot(s) they appear in.
 
-**Theme.** `FluxCardThemeData` is a Flutter `ThemeExtension`. You can set it app-wide via `Theme.of(context).extensions`, pass it directly via the `theme` parameter on any `FluxCard`, or use one of the four built-in presets.
+**Theme.** `FluxCardThemeData` is a Flutter `ThemeExtension`. You can set it app-wide via
+`Theme.of(context).extensions`, pass it directly via the `theme` parameter on any `FluxCard`, or use
+one of the four built-in presets.
 
 ---
 
@@ -122,34 +131,35 @@ FluxCard({
 })
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `layout` | `FluxLayoutMode` | `column`, `row`, or `responsive`. In `responsive` mode the card switches between column and row based on `FluxCardThemeData.responsiveBreakpoint`. |
-| `mediaPosition` | `FluxMediaPosition` | `start` or `end`. In column layout: top or bottom. In row layout: left or right. |
-| `mediaSpan` | `FluxMediaSpan` | Controls whether media spans the full card height in row layout (`all`, `header`, `headerAndBody`, etc.). |
-| `media` | `Widget?` | Typically a `FluxMedia` widget. Any widget is accepted. |
-| `header` | `Widget?` | Typically a `FluxSection.header`. Any widget is accepted. |
-| `body` | `Widget?` | Typically a `FluxContent` or plain widget. Any widget is accepted. |
-| `footer` | `Widget?` | Typically a `FluxSection.footer`. Any widget is accepted. |
-| `overlays` | `List<Widget>?` | List of `FluxOverlay` widgets rendered above slot content. |
-| `underlays` | `List<Widget>?` | List of `FluxUnderlay` widgets rendered behind slot content. |
-| `foregroundColor` | `Color?` | Applies a default text and icon color across all slots via `DefaultTextStyle` and `IconTheme`. |
-| `decoration` | `BoxDecoration?` | Background decoration applied behind all content (supports gradients, images, etc.). |
-| `notch` | `FluxNotch?` | Applies a ticket-style semicircular notch to the card shape. |
-| `divider` | `FluxDivider?` | Inserts dividers between slots. |
-| `fullWidth` | `bool` | Expands the card to the full available width via `LayoutBuilder`. |
-| `fullHeight` | `bool` | Expands the card to the full available height. |
-| `theme` | `FluxCardThemeData?` | Per-card theme override. Falls back to `FluxCardThemeData.of(context)`. |
-| `clipBehavior` | `Clip?` | Overrides the theme's clip behavior. Set `Clip.none` to allow overlays to break outside card bounds. |
-| `semanticLabel` | `String?` | Wraps the card in a `Semantics` node. Automatically sets `button: true` when `onTap` is present. |
-| `loading` | `bool` | When `true`, replaces the card content with `FluxCardSkeleton`. |
-| `loadingWrapper` | `Widget Function(BuildContext, Widget)?` | Custom wrapper for the skeleton — use this to integrate an external shimmer package. |
+| Parameter         | Type                                     | Description                                                                                                                                        |
+|-------------------|------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `layout`          | `FluxLayoutMode`                         | `column`, `row`, or `responsive`. In `responsive` mode the card switches between column and row based on `FluxCardThemeData.responsiveBreakpoint`. |
+| `mediaPosition`   | `FluxMediaPosition`                      | `start` or `end`. In column layout: top or bottom. In row layout: left or right.                                                                   |
+| `mediaSpan`       | `FluxMediaSpan`                          | Controls whether media spans the full card height in row layout (`all`, `header`, `headerAndBody`, etc.).                                          |
+| `media`           | `Widget?`                                | Typically a `FluxMedia` widget. Any widget is accepted.                                                                                            |
+| `header`          | `Widget?`                                | Typically a `FluxSection.header`. Any widget is accepted.                                                                                          |
+| `body`            | `Widget?`                                | Typically a `FluxContent` or plain widget. Any widget is accepted.                                                                                 |
+| `footer`          | `Widget?`                                | Typically a `FluxSection.footer`. Any widget is accepted.                                                                                          |
+| `overlays`        | `List<Widget>?`                          | List of `FluxOverlay` widgets rendered above slot content.                                                                                         |
+| `underlays`       | `List<Widget>?`                          | List of `FluxUnderlay` widgets rendered behind slot content.                                                                                       |
+| `foregroundColor` | `Color?`                                 | Applies a default text and icon color across all slots via `DefaultTextStyle` and `IconTheme`.                                                     |
+| `decoration`      | `BoxDecoration?`                         | Background decoration applied behind all content (supports gradients, images, etc.).                                                               |
+| `notch`           | `FluxNotch?`                             | Applies a ticket-style semicircular notch to the card shape.                                                                                       |
+| `divider`         | `FluxDivider?`                           | Inserts dividers between slots.                                                                                                                    |
+| `fullWidth`       | `bool`                                   | Expands the card to the full available width via `LayoutBuilder`.                                                                                  |
+| `fullHeight`      | `bool`                                   | Expands the card to the full available height.                                                                                                     |
+| `theme`           | `FluxCardThemeData?`                     | Per-card theme override. Falls back to `FluxCardThemeData.of(context)`.                                                                            |
+| `clipBehavior`    | `Clip?`                                  | Overrides the theme's clip behavior. Set `Clip.none` to allow overlays to break outside card bounds.                                               |
+| `semanticLabel`   | `String?`                                | Wraps the card in a `Semantics` node. Automatically sets `button: true` when `onTap` is present.                                                   |
+| `loading`         | `bool`                                   | When `true`, replaces the card content with `FluxCardSkeleton`.                                                                                    |
+| `loadingWrapper`  | `Widget Function(BuildContext, Widget)?` | Custom wrapper for the skeleton — use this to integrate an external shimmer package.                                                               |
 
 ---
 
 ### FluxMedia
 
-A slot wrapper for media content (images, video players, maps, etc.) with aspect ratio control, scrims, and clip support.
+A slot wrapper for media content (images, video players, maps, etc.) with aspect ratio control,
+scrims, and clip support.
 
 ```dart
 // Widget child
@@ -178,19 +188,20 @@ FluxMedia.image({
 })
 ```
 
-| Parameter | Description |
-|---|---|
-| `aspectRatio` | Enforces a width-to-height ratio. Takes priority over `height`. |
-| `width` / `height` | Explicit pixel dimensions. When both are set, the media is aligned within its slot using `alignment`. |
-| `borderRadius` | Clips the media content to this radius. |
-| `gradient` | Background gradient painted behind the media child. |
-| `foregroundGradient` | Foreground gradient painted over the media child — useful for scrim effects. |
+| Parameter            | Description                                                                                           |
+|----------------------|-------------------------------------------------------------------------------------------------------|
+| `aspectRatio`        | Enforces a width-to-height ratio. Takes priority over `height`.                                       |
+| `width` / `height`   | Explicit pixel dimensions. When both are set, the media is aligned within its slot using `alignment`. |
+| `borderRadius`       | Clips the media content to this radius.                                                               |
+| `gradient`           | Background gradient painted behind the media child.                                                   |
+| `foregroundGradient` | Foreground gradient painted over the media child — useful for scrim effects.                          |
 
 ---
 
 ### FluxSection
 
-A structured content section for headers, footers, or any slot needing a leading / title / subtitle / trailing / actions layout.
+A structured content section for headers, footers, or any slot needing a leading / title /
+subtitle / trailing / actions layout.
 
 Three constructors are provided:
 
@@ -243,7 +254,8 @@ FluxCard(
 
 ### FluxContent
 
-A body-slot container for free-form content with optional spacing, constraints, decoration, and scroll support.
+A body-slot container for free-form content with optional spacing, constraints, decoration, and
+scroll support.
 
 ```dart
 // Generic
@@ -259,7 +271,8 @@ FluxContent.row({ List<Widget> children, double spacing = 8, ... })
 FluxContent.wrap({ List<Widget> children, double spacing = 8, double runSpacing = 8, ... })
 ```
 
-Like `FluxSection`, `FluxContent` implements `FluxSlotWrapper` and supports `margin` to override the card's global padding.
+Like `FluxSection`, `FluxContent` implements `FluxSlotWrapper` and supports `margin` to override the
+card's global padding.
 
 ---
 
@@ -279,13 +292,13 @@ FluxOverlay({
 })
 ```
 
-| Parameter | Description |
-|---|---|
-| `targets` | Which slot(s) to inject into. `{FluxTarget.card}` spans the whole card. `{FluxTarget.media}` constrains the overlay to the media slot only. |
-| `alignment` | Where inside the bounded slot area the overlay is anchored. All four corners and edges work correctly. |
-| `offset` | Optional pixel nudge applied after alignment. Use with `clipBehavior: Clip.none` on the card to push badges outside bounds. |
-| `zIndex` | Rendering order when multiple overlays target the same slot. Higher values render on top. |
-| `interactive` | Set to `false` for purely decorative overlays (e.g. watermarks). Empty space around the content is always transparent to pointer events. |
+| Parameter     | Description                                                                                                                                 |
+|---------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| `targets`     | Which slot(s) to inject into. `{FluxTarget.card}` spans the whole card. `{FluxTarget.media}` constrains the overlay to the media slot only. |
+| `alignment`   | Where inside the bounded slot area the overlay is anchored. All four corners and edges work correctly.                                      |
+| `offset`      | Optional pixel nudge applied after alignment. Use with `clipBehavior: Clip.none` on the card to push badges outside bounds.                 |
+| `zIndex`      | Rendering order when multiple overlays target the same slot. Higher values render on top.                                                   |
+| `interactive` | Set to `false` for purely decorative overlays (e.g. watermarks). Empty space around the content is always transparent to pointer events.    |
 
 **Target values:** `FluxTarget.card`, `FluxTarget.media`, `FluxTarget.header`, `FluxTarget.body`, `FluxTarget.footer`.
 
@@ -305,7 +318,8 @@ FluxUnderlay({
 })
 ```
 
-Use negative `margin` values to extrude the underlay outside its target bounds — this is the correct way to create overlapping decorative regions across adjacent slots.
+Use negative `margin` values to extrude the underlay outside its target bounds — this is the correct
+way to create overlapping decorative regions across adjacent slots.
 
 ---
 
@@ -321,7 +335,8 @@ FluxDivider({
 })
 ```
 
-Pass any widget as a divider — `Divider`, `FluxDashedDivider`, or a custom widget. Dividers are wrapped in `BoundaryMarker` nodes so `FluxNotch` can align notch positions with them.
+Pass any widget as a divider — `Divider`, `FluxDashedDivider`, or a custom widget. Dividers are
+wrapped in `BoundaryMarker` nodes so `FluxNotch` can align notch positions with them.
 
 ---
 
@@ -352,13 +367,17 @@ FluxNotch.free({
 })
 ```
 
-`FluxNotchShape` is the raw `ShapeBorder` form — use it when you need to assign the shape to `FluxCardThemeData.shape` directly or animate between shapes via `ShapeBorder.lerp`.
+`FluxNotchShape` is the raw `ShapeBorder` form — use it when you need to assign the shape to
+`FluxCardThemeData.shape` directly or animate between shapes via `ShapeBorder.lerp`.
 
-**Boundary values:** `FluxSlotBoundary.afterMedia`, `FluxSlotBoundary.afterHeader`, `FluxSlotBoundary.afterBody`.
+**Boundary values:** `FluxSlotBoundary.afterMedia`, `FluxSlotBoundary.afterHeader`,
+`FluxSlotBoundary.afterBody`.
 
-**Edge values:** `FluxNotchEdge.vertical` (left and right edges), `FluxNotchEdge.horizontal` (top and bottom edges).
+**Edge values:** `FluxNotchEdge.vertical` (left and right edges), `FluxNotchEdge.horizontal` (top
+and bottom edges).
 
-**Side values:** `FluxNotchSide.both`, `FluxNotchSide.left`, `FluxNotchSide.right` (or top/bottom for horizontal edges).
+**Side values:** `FluxNotchSide.both`, `FluxNotchSide.left`, `FluxNotchSide.right` (or top/bottom
+for horizontal edges).
 
 ---
 
@@ -380,7 +399,8 @@ FluxCardSkeleton({
 })
 ```
 
-Usually accessed via the `loading` parameter on `FluxCard` rather than directly. Use `loadingWrapper` to bridge an external shimmer package:
+Usually accessed via the `loading` parameter on `FluxCard` rather than directly. Use
+`loadingWrapper` to bridge an external shimmer package:
 
 ```dart
 FluxCard(
@@ -418,11 +438,11 @@ FluxCardThemeData({
 
 **Built-in presets:**
 
-| Preset | Description |
-|---|---|
-| `FluxCardThemeData.standard` | Flat, balanced spacing. No elevation. |
-| `FluxCardThemeData.compact` | Tighter padding and spacing for dense UIs. |
-| `FluxCardThemeData.elevated` | Box shadow, larger border radius. |
+| Preset                       | Description                                            |
+|------------------------------|--------------------------------------------------------|
+| `FluxCardThemeData.standard` | Flat, balanced spacing. No elevation.                  |
+| `FluxCardThemeData.compact`  | Tighter padding and spacing for dense UIs.             |
+| `FluxCardThemeData.elevated` | Box shadow, larger border radius.                      |
 | `FluxCardThemeData.outlined` | Thin border using `ColorScheme.outline`. No elevation. |
 
 All presets support `copyWith()`:
@@ -453,10 +473,10 @@ MaterialApp(
 
 ## Layout modes
 
-| Mode | Behavior |
-|---|---|
-| `FluxLayoutMode.column` | Slots stacked vertically. Media at top (start) or bottom (end). Default. |
-| `FluxLayoutMode.row` | Slots arranged horizontally. Media on the left (start) or right (end). `mediaSpan` controls how many content rows the media spans. |
+| Mode                        | Behavior                                                                                                                                                                                      |
+|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `FluxLayoutMode.column`     | Slots stacked vertically. Media at top (start) or bottom (end). Default.                                                                                                                      |
+| `FluxLayoutMode.row`        | Slots arranged horizontally. Media on the left (start) or right (end). `mediaSpan` controls how many content rows the media spans.                                                            |
 | `FluxLayoutMode.responsive` | Switches between `column` and `row` based on `FluxCardThemeData.responsiveBreakpoint` (default 600 logical pixels). Requires `fullWidth: true` or a known parent width to function correctly. |
 
 ---
@@ -476,7 +496,8 @@ Both `FluxOverlay` and `FluxUnderlay` accept a `targets` set:
 - `{FluxTarget.header}` — constrained to the header slot only.
 - `{FluxTarget.body}` — constrained to the body slot only.
 - `{FluxTarget.footer}` — constrained to the footer slot only.
-- Multiple targets — e.g. `{FluxTarget.header, FluxTarget.body}` — spans those slots as a combined region.
+- Multiple targets — e.g. `{FluxTarget.header, FluxTarget.body}` — spans those slots as a combined
+  region.
 
 Within a target, `zIndex` controls render order. Higher values appear on top.
 
@@ -487,7 +508,8 @@ Within a target, `zIndex` controls render order. Higher values appear on top.
 Theme resolution order (highest to lowest priority):
 
 1. `FluxCard.theme` parameter — per-card override.
-2. `FluxCardThemeData.of(context)` — nearest `FluxCardTheme` ancestor (automatically wraps the card during build).
+2. `FluxCardThemeData.of(context)` — nearest `FluxCardTheme` ancestor (automatically wraps the card
+   during build).
 3. `Theme.of(context).extensions[FluxCardThemeData]` — app-level `ThemeExtension`.
 4. `FluxCardThemeData()` — package defaults.
 
@@ -496,7 +518,8 @@ Theme resolution order (highest to lowest priority):
 ## Accessibility
 
 - Set `semanticLabel` to describe the card's purpose for screen readers.
-- When `onTap` or `onLongPress` is present and `semanticLabel` is set, the card is automatically marked as a button in the semantic tree.
+- When `onTap` or `onLongPress` is present and `semanticLabel` is set, the card is automatically
+  marked as a button in the semantic tree.
 - `foregroundColor` propagates through `DefaultTextStyle` and `IconTheme` to all slot content.
 
 ---
@@ -616,11 +639,14 @@ FluxCard(
 
 ## AI agent usage notes
 
-This section describes the package's API conventions in a structured format intended for LLM-assisted code generation.
+This section describes the package's API conventions in a structured format intended for
+LLM-assisted code generation.
 
 ### Widget naming conventions
 
-All public widgets and classes are prefixed with `Flux`. The main entry point is always `FluxCard`. Supporting components are: `FluxMedia`, `FluxSection`, `FluxContent`, `FluxOverlay`, `FluxUnderlay`, `FluxDivider`, `FluxNotch`, `FluxNotchShape`, `FluxCardSkeleton`, `FluxCardThemeData`.
+All public widgets and classes are prefixed with `Flux`. The main entry point is always `FluxCard`.
+Supporting components are: `FluxMedia`, `FluxSection`, `FluxContent`, `FluxOverlay`, `FluxUnderlay`,
+`FluxDivider`, `FluxNotch`, `FluxNotchShape`, `FluxCardSkeleton`, `FluxCardThemeData`.
 
 ### Enum types and their values
 
@@ -664,14 +690,15 @@ FluxNotchSide.right   // or bottom for horizontal
 
 ### Slot content — what each slot accepts
 
-Every slot (`media`, `header`, `body`, `footer`) accepts any `Widget`. The following widgets are purpose-built for each slot but are not required:
+Every slot (`media`, `header`, `body`, `footer`) accepts any `Widget`. The following widgets are
+purpose-built for each slot but are not required:
 
-| Slot | Purpose-built widget | Common alternatives |
-|---|---|---|
-| `media` | `FluxMedia` | `Image`, `Stack`, `VideoPlayer`, custom `Widget` |
-| `header` | `FluxSection.header` | `FluxSection`, `ListTile`, any `Widget` |
-| `body` | `FluxContent` | `Text`, `Column`, `FluxContent.column`, any `Widget` |
-| `footer` | `FluxSection.footer` | `FluxSection`, `Row` of buttons, any `Widget` |
+| Slot     | Purpose-built widget | Common alternatives                                  |
+|----------|----------------------|------------------------------------------------------|
+| `media`  | `FluxMedia`          | `Image`, `Stack`, `VideoPlayer`, custom `Widget`     |
+| `header` | `FluxSection.header` | `FluxSection`, `ListTile`, any `Widget`              |
+| `body`   | `FluxContent`        | `Text`, `Column`, `FluxContent.column`, any `Widget` |
+| `footer` | `FluxSection.footer` | `FluxSection`, `Row` of buttons, any `Widget`        |
 
 ### Layering — rules for overlays and underlays
 
@@ -681,7 +708,8 @@ Every slot (`media`, `header`, `body`, `footer`) accepts any `Widget`. The follo
 - Setting `targets: const {FluxTarget.media}` constrains it to the media slot only.
 - Multiple targets can be combined: `targets: const {FluxTarget.header, FluxTarget.body}`.
 - `zIndex` controls render order within the same target — default is `0`.
-- To allow an overlay to render outside the card's clip boundary, set `clipBehavior: Clip.none` on `FluxCard` and use `offset` on the `FluxOverlay`.
+- To allow an overlay to render outside the card's clip boundary, set `clipBehavior: Clip.none` on
+  `FluxCard` and use `offset` on the `FluxOverlay`.
 
 ### Theme — how to apply
 
@@ -699,23 +727,32 @@ FluxCard(theme: FluxCardThemeData.elevated.copyWith(padding: EdgeInsets.all(20))
 ### Common patterns for code generation
 
 When generating a card that needs a full-bleed header image with a gradient scrim:
+
 - Place the image in `FluxMedia` as the `media` slot.
-- Add a `FluxUnderlay` with `targets: const {FluxTarget.media}` and a gradient `BoxDecoration` as a foreground scrim.
+- Add a `FluxUnderlay` with `targets: const {FluxTarget.media}` and a gradient `BoxDecoration` as a
+  foreground scrim.
 - Set `foregroundColor: Colors.white` on `FluxCard` so all text slots read as white automatically.
-- Set `theme: const FluxCardThemeData(spacing: 0)` to remove the gap between media and header when the design calls for overlapping text.
+- Set `theme: const FluxCardThemeData(spacing: 0)` to remove the gap between media and header when
+  the design calls for overlapping text.
 
 When generating a card with a badge or chip overlaying the media:
+
 - Add a `FluxOverlay` with `targets: const {FluxTarget.media}` and the desired `alignment`.
 - Place the badge widget inside `children` on the `FluxOverlay`.
 
 When generating a loading skeleton:
+
 - Set `loading: true` on `FluxCard`. All slots are automatically replaced by a shimmer placeholder.
-- The skeleton mirrors the presence of `media`, `header`, `body`, and `footer` based on whether those slots are non-null.
+- The skeleton mirrors the presence of `media`, `header`, `body`, and `footer` based on whether
+  those slots are non-null.
 
 When generating a ticket card:
+
 - Add a `FluxDivider` with a divider widget at `afterHeader`.
-- Add a `FluxNotch` with `boundary: FluxSlotBoundary.afterHeader` — the notch position automatically aligns with the divider after the first layout pass.
-- Set `side` on `FluxNotch` to draw the notch border; set a matching `BorderSide` on `FluxCardThemeData` for the card outline.
+- Add a `FluxNotch` with `boundary: FluxSlotBoundary.afterHeader` — the notch position automatically
+  aligns with the divider after the first layout pass.
+- Set `side` on `FluxNotch` to draw the notch border; set a matching `BorderSide` on
+  `FluxCardThemeData` for the card outline.
 
 ---
 
