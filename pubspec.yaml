@@ -1,7 +1,7 @@
 name: flux_card
 description: >-
   A constraint-aware, domain-agnostic, composition-first card layout engine for Flutter.
-version: 0.0.1
+version: 0.1.0
 homepage:
 
 topics:
@@ -11,10 +11,24 @@ topics:
   - composition
   - flutter
 
+screenshots:
+  - description: Hero profile card preview for flux_card.
+    path: screenshots/screenshot_1.jpg
+  - description: Ticket cards preview showing structured card layouts.
+    path: screenshots/screenshot_2.jpg
+  - description: Breakout card preview with layered composition.
+    path: screenshots/screenshot_3.jpg
+  - description: Overlay card preview demonstrating badge-style overlays.
+    path: screenshots/screenshot_4.jpg
+  - description: Vertical card preview using a column layout.
+    path: screenshots/screenshot_5.jpg
+  - description: Horizontal card preview using a row layout.
+    path: screenshots/screenshot_6.jpg
+
 
 environment:
-  sdk: ^3.11.4
-  flutter: ">=1.17.0"
+  sdk: ^3.10.0
+  flutter: ">=3.0.0"
 
 dependencies:
   flutter:

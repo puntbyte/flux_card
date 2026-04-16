@@ -1,4 +1,4 @@
-# flux_card
+# Flux Card
 
 > A composition-first, constraint-aware card layout engine for Flutter.
 
