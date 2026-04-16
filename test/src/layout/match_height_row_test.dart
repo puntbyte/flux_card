@@ -7,10 +7,7 @@ void main() {
   // coordinates mathematically without centering offsets getting in the way.
   Widget wrap(Widget child) => MaterialApp(
     home: Scaffold(
-      body: Align(
-        alignment: Alignment.topLeft,
-        child: child,
-      ),
+      body: Align(alignment: Alignment.topLeft, child: child),
     ),
   );
 
@@ -22,20 +19,30 @@ void main() {
       const mediaKey = Key('media');
       const contentKey = Key('content');
 
-      await tester.pumpWidget(wrap(
-        const SizedBox(
-          width: 400,
-          child: FluxMatchHeightRow(
-            flexMedia: 1,
-            flexContent: 1,
-            mediaStart: true,
-            // Media wants to be 150px tall
-            media: SizedBox(key: mediaKey, height: 150, child: ColoredBox(color: Colors.red)),
-            // Content only wants to be 50px tall
-            content: SizedBox(key: contentKey, height: 50, child: ColoredBox(color: Colors.blue)),
+      await tester.pumpWidget(
+        wrap(
+          const SizedBox(
+            width: 400,
+            child: FluxMatchHeightRow(
+              flexMedia: 1,
+              flexContent: 1,
+              mediaStart: true,
+              // Media wants to be 150px tall
+              media: SizedBox(
+                key: mediaKey,
+                height: 150,
+                child: ColoredBox(color: Colors.red),
+              ),
+              // Content only wants to be 50px tall
+              content: SizedBox(
+                key: contentKey,
+                height: 50,
+                child: ColoredBox(color: Colors.blue),
+              ),
+            ),
           ),
         ),
-      ));
+      );
 
       final mediaSize = tester.getSize(find.byKey(mediaKey));
       final contentSize = tester.getSize(find.byKey(contentKey));
@@ -53,18 +60,22 @@ void main() {
       const mediaKey = Key('media');
       const contentKey = Key('content');
 
-      await tester.pumpWidget(wrap(
-        const SizedBox(
-          width: 500,
-          child: FluxMatchHeightRow(
-            flexMedia: 2,   // 2/5 of 500 = 200
-            flexContent: 3, // 3/5 of 500 = 300
-            mediaStart: true,
-            media: SizedBox(key: mediaKey, height: 100),
-            content: SizedBox(key: contentKey, height: 100),
+      await tester.pumpWidget(
+        wrap(
+          const SizedBox(
+            width: 500,
+            child: FluxMatchHeightRow(
+              flexMedia: 2,
+              // 2/5 of 500 = 200
+              flexContent: 3,
+              // 3/5 of 500 = 300
+              mediaStart: true,
+              media: SizedBox(key: mediaKey, height: 100),
+              content: SizedBox(key: contentKey, height: 100),
+            ),
           ),
         ),
-      ));
+      );
 
       final mediaSize = tester.getSize(find.byKey(mediaKey));
       final contentSize = tester.getSize(find.byKey(contentKey));
@@ -80,18 +91,20 @@ void main() {
       const mediaKey = Key('media');
       const contentKey = Key('content');
 
-      await tester.pumpWidget(wrap(
-        const SizedBox(
-          width: 400,
-          child: FluxMatchHeightRow(
-            flexMedia: 1,
-            flexContent: 3,
-            mediaStart: true,
-            media: SizedBox(key: mediaKey, height: 100),
-            content: SizedBox(key: contentKey, height: 100),
+      await tester.pumpWidget(
+        wrap(
+          const SizedBox(
+            width: 400,
+            child: FluxMatchHeightRow(
+              flexMedia: 1,
+              flexContent: 3,
+              mediaStart: true,
+              media: SizedBox(key: mediaKey, height: 100),
+              content: SizedBox(key: contentKey, height: 100),
+            ),
           ),
         ),
-      ));
+      );
 
       final mediaPos = tester.getTopLeft(find.byKey(mediaKey));
       final contentPos = tester.getTopLeft(find.byKey(contentKey));
@@ -104,18 +117,20 @@ void main() {
       const mediaKey = Key('media');
       const contentKey = Key('content');
 
-      await tester.pumpWidget(wrap(
-        const SizedBox(
-          width: 400,
-          child: FluxMatchHeightRow(
-            flexMedia: 1,
-            flexContent: 3,
-            mediaStart: false,
-            media: SizedBox(key: mediaKey, height: 100),
-            content: SizedBox(key: contentKey, height: 100),
+      await tester.pumpWidget(
+        wrap(
+          const SizedBox(
+            width: 400,
+            child: FluxMatchHeightRow(
+              flexMedia: 1,
+              flexContent: 3,
+              mediaStart: false,
+              media: SizedBox(key: mediaKey, height: 100),
+              content: SizedBox(key: contentKey, height: 100),
+            ),
           ),
         ),
-      ));
+      );
 
       final mediaPos = tester.getTopLeft(find.byKey(mediaKey));
       final contentPos = tester.getTopLeft(find.byKey(contentKey));
@@ -131,19 +146,21 @@ void main() {
       const mediaKey = Key('media');
       const contentKey = Key('content');
 
-      await tester.pumpWidget(wrap(
-        // UnconstrainedBox simulates an unbounded horizontal scroll view
-        UnconstrainedBox(
-          child: FluxMatchHeightRow(
-            flexMedia: 1,
-            flexContent: 1,
-            mediaStart: true,
-            // Children must provide their own natural widths here
-            media: const SizedBox(key: mediaKey, width: 120, height: 100),
-            content: const SizedBox(key: contentKey, width: 80, height: 50),
+      await tester.pumpWidget(
+        wrap(
+          // UnconstrainedBox simulates an unbounded horizontal scroll view
+          UnconstrainedBox(
+            child: FluxMatchHeightRow(
+              flexMedia: 1,
+              flexContent: 1,
+              mediaStart: true,
+              // Children must provide their own natural widths here
+              media: const SizedBox(key: mediaKey, width: 120, height: 100),
+              content: const SizedBox(key: contentKey, width: 80, height: 50),
+            ),
           ),
         ),
-      ));
+      );
 
       final mediaSize = tester.getSize(find.byKey(mediaKey));
       final contentSize = tester.getSize(find.byKey(contentKey));
@@ -163,19 +180,21 @@ void main() {
     // Missing Children
     // -------------------------------------------------------------------------
     testWidgets('renders safely with only one child', (tester) async {
-      await tester.pumpWidget(wrap(
-        const SizedBox(
-          width: 400,
-          child: FluxMatchHeightRow(
-            flexMedia: 1,
-            flexContent: 1,
-            mediaStart: true,
-            media: SizedBox(height: 100),
-            // Missing content
-            content: SizedBox.shrink(),
+      await tester.pumpWidget(
+        wrap(
+          const SizedBox(
+            width: 400,
+            child: FluxMatchHeightRow(
+              flexMedia: 1,
+              flexContent: 1,
+              mediaStart: true,
+              media: SizedBox(height: 100),
+              // Missing content
+              content: SizedBox.shrink(),
+            ),
           ),
         ),
-      ));
+      );
 
       // Should not throw an assertion and should layout properly
       final rowSize = tester.getSize(find.byType(FluxMatchHeightRow));
@@ -189,24 +208,26 @@ void main() {
       bool mediaTapped = false;
       bool contentTapped = false;
 
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 400,
-          child: FluxMatchHeightRow(
-            flexMedia: 1,
-            flexContent: 1,
-            mediaStart: true,
-            media: GestureDetector(
-              onTap: () => mediaTapped = true,
-              child: const SizedBox(height: 100, child: ColoredBox(color: Colors.red)),
-            ),
-            content: GestureDetector(
-              onTap: () => contentTapped = true,
-              child: const SizedBox(height: 100, child: ColoredBox(color: Colors.blue)),
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 400,
+            child: FluxMatchHeightRow(
+              flexMedia: 1,
+              flexContent: 1,
+              mediaStart: true,
+              media: GestureDetector(
+                onTap: () => mediaTapped = true,
+                child: const SizedBox(height: 100, child: ColoredBox(color: Colors.red)),
+              ),
+              content: GestureDetector(
+                onTap: () => contentTapped = true,
+                child: const SizedBox(height: 100, child: ColoredBox(color: Colors.blue)),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       // Tap on the media (left side, flex 1 -> 0 to 200px)
       await tester.tapAt(const Offset(100, 50));

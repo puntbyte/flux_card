@@ -17,17 +17,24 @@ void main() {
         resolvedPadding: EdgeInsets.zero,
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return layout.build(
-            context,
-            mediaSlot: const SizedBox(height: 50, child: Text('Media')),
-            header: const Text('Header'),
-            body: const Text('Body'),
-            underlaysByTarget: {}, ovsByTarget: {}, multiUnderlays: [], multiOvs:[],
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return layout.build(
+                context,
+                mediaSlot: const SizedBox(height: 50, child: Text('Media')),
+                header: const Text('Header'),
+                body: const Text('Body'),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+              );
+            },
+          ),
+        ),
+      );
 
       final mediaY = tester.getTopLeft(find.text('Media')).dy;
       final headerY = tester.getTopLeft(find.text('Header')).dy;
@@ -43,17 +50,24 @@ void main() {
         resolvedPadding: EdgeInsets.zero,
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return layout.build(
-            context,
-            mediaSlot: const SizedBox(height: 50, child: Text('Media')),
-            header: const Text('Header'),
-            body: const Text('Body'),
-            underlaysByTarget: {}, ovsByTarget: {}, multiUnderlays: [], multiOvs:[],
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return layout.build(
+                context,
+                mediaSlot: const SizedBox(height: 50, child: Text('Media')),
+                header: const Text('Header'),
+                body: const Text('Body'),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+              );
+            },
+          ),
+        ),
+      );
 
       final headerY = tester.getTopLeft(find.text('Header')).dy;
       final bodyY = tester.getTopLeft(find.text('Body')).dy;
@@ -71,16 +85,23 @@ void main() {
         resolvedPadding: EdgeInsets.zero,
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return layout.build(
-            context,
-            mediaSlot: null,
-            header: const Text('Header Only'),
-            underlaysByTarget: {}, ovsByTarget: {}, multiUnderlays:[], multiOvs:[],
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return layout.build(
+                context,
+                mediaSlot: null,
+                header: const Text('Header Only'),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+              );
+            },
+          ),
+        ),
+      );
 
       expect(find.text('Header Only'), findsOneWidget);
     });

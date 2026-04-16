@@ -8,11 +8,7 @@ import 'package:flux_card/src/layout/slot_resolver.dart';
 
 // Dummy wrapper for testing external padding overrides
 class DummySlotWrapper extends StatelessWidget implements FluxSlotWrapper {
-  const DummySlotWrapper({
-    super.key,
-    required this.child,
-    this.externalPaddingOverride,
-  });
+  const DummySlotWrapper({super.key, required this.child, this.externalPaddingOverride});
 
   final Widget child;
 
@@ -49,17 +45,24 @@ void main() {
         resolvedPadding: EdgeInsets.zero,
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return layout.build(
-            context,
-            mediaSlot: null,
-            header: const Text('Header'),
-            body: const Text('Body'),
-            underlaysByTarget: {}, ovsByTarget: {}, multiUnderlays: [], multiOvs:[],
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return layout.build(
+                context,
+                mediaSlot: null,
+                header: const Text('Header'),
+                body: const Text('Body'),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+              );
+            },
+          ),
+        ),
+      );
 
       expect(find.byType(FluxMatchHeightRow), findsNothing);
 
@@ -76,18 +79,25 @@ void main() {
         resolvedPadding: EdgeInsets.zero,
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return layout.build(
-            context,
-            mediaSlot: const SizedBox(height: 100, child: Text('Media')),
-            header: const Text('Header'),
-            body: const Text('Body'),
-            footer: const Text('Footer'),
-            underlaysByTarget: {}, ovsByTarget: {}, multiUnderlays:[], multiOvs:[],
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return layout.build(
+                context,
+                mediaSlot: const SizedBox(height: 100, child: Text('Media')),
+                header: const Text('Header'),
+                body: const Text('Body'),
+                footer: const Text('Footer'),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+              );
+            },
+          ),
+        ),
+      );
 
       expect(find.byType(FluxMatchHeightRow), findsOneWidget);
 
@@ -109,18 +119,25 @@ void main() {
         resolvedPadding: EdgeInsets.zero,
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return layout.build(
-            context,
-            mediaSlot: const SizedBox(height: 100, child: Text('Media')),
-            header: const SizedBox(height: 50, child: Text('Header')),
-            body: const SizedBox(height: 100, child: Text('Body')),
-            footer: const SizedBox(height: 50, child: Text('Footer')),
-            underlaysByTarget: {}, ovsByTarget: {}, multiUnderlays:[], multiOvs:[],
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return layout.build(
+                context,
+                mediaSlot: const SizedBox(height: 100, child: Text('Media')),
+                header: const SizedBox(height: 50, child: Text('Header')),
+                body: const SizedBox(height: 100, child: Text('Body')),
+                footer: const SizedBox(height: 50, child: Text('Footer')),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+              );
+            },
+          ),
+        ),
+      );
 
       expect(find.byType(FluxMatchHeightRow), findsOneWidget);
 
@@ -132,7 +149,7 @@ void main() {
       // Mathematical proof of the layout structure
       expect(headerY, 0.0);
       expect(mediaY, 60.0); // Header height (50) + spacing (10)
-      expect(bodyY, 60.0);  // Body aligns with media top
+      expect(bodyY, 60.0); // Body aligns with media top
       expect(footerY, 170.0); // Media Y (60) + Media Height (100) + spacing (10)
     });
 
@@ -144,19 +161,26 @@ void main() {
         resolvedPadding: EdgeInsets.all(20), // Card default padding
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return layout.build(
-            context,
-            mediaSlot: const SizedBox(height: 100, child: Text('Media')),
-            header: const DummySlotWrapper(
-              externalPaddingOverride: EdgeInsets.all(50), // Force override
-              child: Text('Override'),
-            ),
-            underlaysByTarget: {}, ovsByTarget: {}, multiUnderlays: [], multiOvs:[],
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return layout.build(
+                context,
+                mediaSlot: const SizedBox(height: 100, child: Text('Media')),
+                header: const DummySlotWrapper(
+                  externalPaddingOverride: EdgeInsets.all(50), // Force override
+                  child: Text('Override'),
+                ),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+              );
+            },
+          ),
+        ),
+      );
 
       // Find the Padding widget wrapping our Override text
       final paddingWidget = tester.widget<Padding>(

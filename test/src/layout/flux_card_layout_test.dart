@@ -9,10 +9,7 @@ void main() {
   Widget wrap(Widget child) {
     return MaterialApp(
       home: Scaffold(
-        body: Align(
-          alignment: Alignment.topLeft,
-          child: child,
-        ),
+        body: Align(alignment: Alignment.topLeft, child: child),
       ),
     );
   }
@@ -22,10 +19,7 @@ void main() {
       home: Scaffold(
         body: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: 400,
-            child: child,
-          ),
+          child: SizedBox(width: 400, child: child),
         ),
       ),
     );

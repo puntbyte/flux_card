@@ -10,16 +10,17 @@ void main() {
   const theme = FluxCardThemeData(spacing: 10, padding: EdgeInsets.zero);
 
   group('FluxInlineLayout', () {
-    testWidgets('mediaPosition.start splits layout: Header -> Media -> Body',
-            (tester) async {
-          const layout = FluxInlineLayout(
-            mediaPosition: FluxMediaPosition.start,
-            mediaSpan: FluxMediaSpan.all,
-            theme: theme,
-            resolvedPadding: EdgeInsets.zero,
-          );
+    testWidgets('mediaPosition.start splits layout: Header -> Media -> Body', (tester) async {
+      const layout = FluxInlineLayout(
+        mediaPosition: FluxMediaPosition.start,
+        mediaSpan: FluxMediaSpan.all,
+        theme: theme,
+        resolvedPadding: EdgeInsets.zero,
+      );
 
-          await tester.pumpWidget(wrap(Builder(
+      await tester.pumpWidget(
+        wrap(
+          Builder(
             builder: (context) {
               return layout.build(
                 context,
@@ -33,28 +34,31 @@ void main() {
                 multiOvs: [],
               );
             },
-          )));
+          ),
+        ),
+      );
 
-          final headerY = tester.getTopLeft(find.text('Header')).dy;
-          final mediaY = tester.getTopLeft(find.text('Media')).dy;
-          final bodyY = tester.getTopLeft(find.text('Body')).dy;
-          final footerY = tester.getTopLeft(find.text('Footer')).dy;
+      final headerY = tester.getTopLeft(find.text('Header')).dy;
+      final mediaY = tester.getTopLeft(find.text('Media')).dy;
+      final bodyY = tester.getTopLeft(find.text('Body')).dy;
+      final footerY = tester.getTopLeft(find.text('Footer')).dy;
 
-          expect(headerY, lessThan(mediaY));
-          expect(mediaY, lessThan(bodyY));
-          expect(bodyY, lessThan(footerY));
-        });
+      expect(headerY, lessThan(mediaY));
+      expect(mediaY, lessThan(bodyY));
+      expect(bodyY, lessThan(footerY));
+    });
 
-    testWidgets('mediaPosition.end splits layout: Body -> Media -> Footer',
-            (tester) async {
-          const layout = FluxInlineLayout(
-            mediaPosition: FluxMediaPosition.end,
-            mediaSpan: FluxMediaSpan.all,
-            theme: theme,
-            resolvedPadding: EdgeInsets.zero,
-          );
+    testWidgets('mediaPosition.end splits layout: Body -> Media -> Footer', (tester) async {
+      const layout = FluxInlineLayout(
+        mediaPosition: FluxMediaPosition.end,
+        mediaSpan: FluxMediaSpan.all,
+        theme: theme,
+        resolvedPadding: EdgeInsets.zero,
+      );
 
-          await tester.pumpWidget(wrap(Builder(
+      await tester.pumpWidget(
+        wrap(
+          Builder(
             builder: (context) {
               return layout.build(
                 context,
@@ -68,17 +72,19 @@ void main() {
                 multiOvs: [],
               );
             },
-          )));
+          ),
+        ),
+      );
 
-          final headerY = tester.getTopLeft(find.text('Header')).dy;
-          final bodyY = tester.getTopLeft(find.text('Body')).dy;
-          final mediaY = tester.getTopLeft(find.text('Media')).dy;
-          final footerY = tester.getTopLeft(find.text('Footer')).dy;
+      final headerY = tester.getTopLeft(find.text('Header')).dy;
+      final bodyY = tester.getTopLeft(find.text('Body')).dy;
+      final mediaY = tester.getTopLeft(find.text('Media')).dy;
+      final footerY = tester.getTopLeft(find.text('Footer')).dy;
 
-          expect(headerY, lessThan(bodyY));
-          expect(bodyY, lessThan(mediaY));
-          expect(mediaY, lessThan(footerY));
-        });
+      expect(headerY, lessThan(bodyY));
+      expect(bodyY, lessThan(mediaY));
+      expect(mediaY, lessThan(footerY));
+    });
 
     testWidgets('handles missing slots gracefully', (tester) async {
       const layout = FluxInlineLayout(
@@ -88,19 +94,23 @@ void main() {
         resolvedPadding: EdgeInsets.zero,
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return layout.build(
-            context,
-            mediaSlot: const SizedBox(height: 50, child: Text('Media')),
-            footer: const Text('Footer'),
-            underlaysByTarget: {},
-            ovsByTarget: {},
-            multiUnderlays: [],
-            multiOvs: [],
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return layout.build(
+                context,
+                mediaSlot: const SizedBox(height: 50, child: Text('Media')),
+                footer: const Text('Footer'),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+              );
+            },
+          ),
+        ),
+      );
 
       expect(find.text('Media'), findsOneWidget);
       expect(find.text('Footer'), findsOneWidget);
@@ -114,28 +124,27 @@ void main() {
       expect(mediaY, lessThan(footerY));
     });
 
-    testWidgets('uses afterMedia boundary tracker when provided',
-            (tester) async {
-          final tracker = BoundaryTracker();
+    testWidgets('uses afterMedia boundary tracker when provided', (tester) async {
+      final tracker = BoundaryTracker();
 
-          const layout = FluxInlineLayout(
-            mediaPosition: FluxMediaPosition.start,
-            mediaSpan: FluxMediaSpan.all,
-            theme: theme,
-            resolvedPadding: EdgeInsets.zero,
-            boundaryTrackers: null,
-          );
+      const layout = FluxInlineLayout(
+        mediaPosition: FluxMediaPosition.start,
+        mediaSpan: FluxMediaSpan.all,
+        theme: theme,
+        resolvedPadding: EdgeInsets.zero,
+        boundaryTrackers: null,
+      );
 
-          await tester.pumpWidget(wrap(Builder(
+      await tester.pumpWidget(
+        wrap(
+          Builder(
             builder: (context) {
               final customLayout = FluxInlineLayout(
                 mediaPosition: layout.mediaPosition,
                 mediaSpan: layout.mediaSpan,
                 theme: layout.theme,
                 resolvedPadding: layout.resolvedPadding,
-                boundaryTrackers: {
-                  FluxSlotBoundary.afterMedia: tracker,
-                },
+                boundaryTrackers: {FluxSlotBoundary.afterMedia: tracker},
               );
 
               return customLayout.build(
@@ -150,13 +159,15 @@ void main() {
                 multiOvs: [],
               );
             },
-          )));
+          ),
+        ),
+      );
 
-          expect(find.text('Media'), findsOneWidget);
-          expect(find.text('Header'), findsOneWidget);
-          expect(find.text('Body'), findsOneWidget);
-          expect(find.text('Footer'), findsOneWidget);
-          expect(tracker.renderBox, isNotNull);
-        });
+      expect(find.text('Media'), findsOneWidget);
+      expect(find.text('Header'), findsOneWidget);
+      expect(find.text('Body'), findsOneWidget);
+      expect(find.text('Footer'), findsOneWidget);
+      expect(tracker.renderBox, isNotNull);
+    });
   });
 }

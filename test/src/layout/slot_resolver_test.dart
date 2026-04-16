@@ -8,11 +8,7 @@ import 'package:flux_card/src/layout/boundary_tracker.dart';
 import 'package:flux_card/src/layout/slot_resolver.dart';
 
 class DummySlotWrapper extends StatelessWidget implements FluxSlotWrapper {
-  const DummySlotWrapper({
-    super.key,
-    required this.child,
-    this.externalPaddingOverride,
-  });
+  const DummySlotWrapper({super.key, required this.child, this.externalPaddingOverride});
 
   final Widget child;
 
@@ -26,10 +22,7 @@ class DummySlotWrapper extends StatelessWidget implements FluxSlotWrapper {
 void main() {
   Widget wrap(Widget child) {
     return Material(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: child,
-      ),
+      child: Directionality(textDirection: TextDirection.ltr, child: child),
     );
   }
 
@@ -56,10 +49,7 @@ void main() {
     });
 
     test('returns null for unrelated slots', () {
-      expect(
-        SlotResolver.boundaryBetween(FluxTarget.media, FluxTarget.body),
-        isNull,
-      );
+      expect(SlotResolver.boundaryBetween(FluxTarget.media, FluxTarget.body), isNull);
     });
   });
 
@@ -86,64 +76,52 @@ void main() {
       expect(sizedBoxes.length, 2);
     });
 
-    testWidgets('returns SizedBox.shrink when all slots are empty or null',
-            (tester) async {
-          await tester.pumpWidget(
-            wrap(
-              SlotResolver.verticalGroup(
-                slots: [null, null],
-                spacing: 10,
-              ),
-            ),
-          );
+    testWidgets('returns SizedBox.shrink when all slots are empty or null', (tester) async {
+      await tester.pumpWidget(wrap(SlotResolver.verticalGroup(slots: [null, null], spacing: 10)));
 
-          expect(find.byType(Column), findsNothing);
-          expect(find.byType(SizedBox), findsOneWidget);
-        });
+      expect(find.byType(Column), findsNothing);
+      expect(find.byType(SizedBox), findsOneWidget);
+    });
   });
 
   group('SlotResolver.wrapSlot', () {
-    testWidgets('returns padded child when no underlays/overlays exist',
-            (tester) async {
-          await tester.pumpWidget(
-            wrap(
-              Builder(
-                builder: (context) {
-                  final widget = SlotResolver.wrapSlot(
-                    context,
-                    target: FluxTarget.header,
-                    child: const Text('Header'),
-                    underlaysByTarget: {},
-                    ovsByTarget: {},
-                    contentPadding: const EdgeInsets.all(12),
-                  );
-                  return widget ?? const SizedBox.shrink();
-                },
-              ),
-            ),
-          );
+    testWidgets('returns padded child when no underlays/overlays exist', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              final widget = SlotResolver.wrapSlot(
+                context,
+                target: FluxTarget.header,
+                child: const Text('Header'),
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                contentPadding: const EdgeInsets.all(12),
+              );
+              return widget ?? const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
 
-          expect(find.text('Header'), findsOneWidget);
+      expect(find.text('Header'), findsOneWidget);
 
-          expect(
-            find.byWidgetPredicate(
-                  (widget) =>
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
               widget is Stack &&
-                  widget.fit == StackFit.passthrough &&
-                  widget.clipBehavior == Clip.none,
-            ),
-            findsNothing,
-          );
+              widget.fit == StackFit.passthrough &&
+              widget.clipBehavior == Clip.none,
+        ),
+        findsNothing,
+      );
 
-          final padding = tester.widget<Padding>(
-            find.ancestor(
-              of: find.text('Header'),
-              matching: find.byType(Padding),
-            ),
-          );
+      final padding = tester.widget<Padding>(
+        find.ancestor(of: find.text('Header'), matching: find.byType(Padding)),
+      );
 
-          expect(padding.padding, const EdgeInsets.all(12));
-        });
+      expect(padding.padding, const EdgeInsets.all(12));
+    });
 
     testWidgets('wraps child in Stack when layers exist', (tester) async {
       await tester.pumpWidget(
@@ -158,7 +136,9 @@ void main() {
                   FluxTarget.body: [const FluxUnderlay()],
                 },
                 ovsByTarget: {
-                  FluxTarget.body: [const FluxOverlay(children: [Text('Badge')])],
+                  FluxTarget.body: [
+                    const FluxOverlay(children: [Text('Badge')]),
+                  ],
                 },
                 contentPadding: EdgeInsets.zero,
               );
@@ -170,8 +150,8 @@ void main() {
 
       expect(
         find.byWidgetPredicate(
-              (widget) =>
-          widget is Stack &&
+          (widget) =>
+              widget is Stack &&
               widget.fit == StackFit.passthrough &&
               widget.clipBehavior == Clip.none,
         ),
@@ -185,138 +165,126 @@ void main() {
   });
 
   group('SlotResolver.contentColumn', () {
-    testWidgets(
-      'respects externalPaddingOverride from FluxSlotWrapper',
-          (tester) async {
-        await tester.pumpWidget(
-          wrap(
-            Builder(
-              builder: (context) {
-                final widget = SlotResolver.contentColumn(
-                  context,
-                  entries: const [
-                    (
+    testWidgets('respects externalPaddingOverride from FluxSlotWrapper', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              final widget = SlotResolver.contentColumn(
+                context,
+                entries: const [
+                  (
                     FluxTarget.body,
                     DummySlotWrapper(
                       externalPaddingOverride: EdgeInsets.all(42),
                       child: Text('Override Me'),
                     ),
-                    ),
-                  ],
-                  underlaysByTarget: {},
-                  ovsByTarget: {},
-                  multiUnderlays: [],
-                  multiOvs: [],
-                  padding: const EdgeInsets.all(10),
-                  spacing: 0,
-                );
-                return widget ?? const SizedBox.shrink();
-              },
-            ),
+                  ),
+                ],
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+                padding: const EdgeInsets.all(10),
+                spacing: 0,
+              );
+              return widget ?? const SizedBox.shrink();
+            },
           ),
-        );
+        ),
+      );
 
-        final padding = tester.widget<Padding>(
-          find
-              .ancestor(
-            of: find.text('Override Me'),
-            matching: find.byType(Padding),
-          )
-              .first,
-        );
+      final padding = tester.widget<Padding>(
+        find.ancestor(of: find.text('Override Me'), matching: find.byType(Padding)).first,
+      );
 
-        expect(padding.padding, const EdgeInsets.all(42));
-      },
-    );
+      expect(padding.padding, const EdgeInsets.all(42));
+    });
 
-    testWidgets('injects boundary trackers and dividers between slots',
-            (tester) async {
-          final tracker = BoundaryTracker();
+    testWidgets('injects boundary trackers and dividers between slots', (tester) async {
+      final tracker = BoundaryTracker();
 
-          await tester.pumpWidget(
-            wrap(
-              Builder(
-                builder: (context) {
-                  final widget = SlotResolver.contentColumn(
-                    context,
-                    entries: const [
-                      (FluxTarget.header, Text('Header')),
-                      (FluxTarget.body, Text('Body')),
-                    ],
-                    underlaysByTarget: {},
-                    ovsByTarget: {},
-                    multiUnderlays: [],
-                    multiOvs: [],
-                    padding: EdgeInsets.zero,
-                    spacing: 20,
-                    divider: const FluxDivider(afterHeader: Text('--- DIVIDER ---')),
-                    boundaryTrackers: {FluxSlotBoundary.afterHeader: tracker},
-                  );
-                  return widget ?? const SizedBox.shrink();
-                },
-              ),
-            ),
-          );
-
-          expect(find.text('Header'), findsOneWidget);
-          expect(find.text('Body'), findsOneWidget);
-          expect(find.text('--- DIVIDER ---'), findsOneWidget);
-          expect(tracker.renderBox, isNotNull);
-        });
-
-    testWidgets(
-      'groups adjacent slots when multi-target layers are provided',
-          (tester) async {
-        await tester.pumpWidget(
-          wrap(
-            Builder(
-              builder: (context) {
-                final widget = SlotResolver.contentColumn(
-                  context,
-                  entries: const [
-                    (FluxTarget.header, Text('Header')),
-                    (FluxTarget.body, Text('Body')),
-                  ],
-                  underlaysByTarget: {},
-                  ovsByTarget: {},
-                  multiUnderlays: [
-                    FluxUnderlay(
-                      targets: const {FluxTarget.header, FluxTarget.body},
-                      decoration: const BoxDecoration(color: Colors.red),
-                    ),
-                  ],
-                  multiOvs: [
-                    const FluxOverlay(
-                      targets: {FluxTarget.header, FluxTarget.body},
-                      children: [Text('Multi OV')],
-                    ),
-                  ],
-                  padding: EdgeInsets.zero,
-                  spacing: 0,
-                );
-                return widget ?? const SizedBox.shrink();
-              },
-            ),
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              final widget = SlotResolver.contentColumn(
+                context,
+                entries: const [
+                  (FluxTarget.header, Text('Header')),
+                  (FluxTarget.body, Text('Body')),
+                ],
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [],
+                multiOvs: [],
+                padding: EdgeInsets.zero,
+                spacing: 20,
+                divider: const FluxDivider(afterHeader: Text('--- DIVIDER ---')),
+                boundaryTrackers: {FluxSlotBoundary.afterHeader: tracker},
+              );
+              return widget ?? const SizedBox.shrink();
+            },
           ),
-        );
+        ),
+      );
 
-        expect(find.text('Header'), findsOneWidget);
-        expect(find.text('Body'), findsOneWidget);
-        expect(find.text('Multi OV'), findsOneWidget);
+      expect(find.text('Header'), findsOneWidget);
+      expect(find.text('Body'), findsOneWidget);
+      expect(find.text('--- DIVIDER ---'), findsOneWidget);
+      expect(tracker.renderBox, isNotNull);
+    });
 
-        final stackFinder = find.byWidgetPredicate(
-              (widget) =>
-          widget is Stack &&
-              widget.alignment == AlignmentDirectional.topStart &&
-              widget.fit == StackFit.passthrough &&
-              widget.clipBehavior == Clip.none,
-        );
+    testWidgets('groups adjacent slots when multi-target layers are provided', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              final widget = SlotResolver.contentColumn(
+                context,
+                entries: const [
+                  (FluxTarget.header, Text('Header')),
+                  (FluxTarget.body, Text('Body')),
+                ],
+                underlaysByTarget: {},
+                ovsByTarget: {},
+                multiUnderlays: [
+                  FluxUnderlay(
+                    targets: const {FluxTarget.header, FluxTarget.body},
+                    decoration: const BoxDecoration(color: Colors.red),
+                  ),
+                ],
+                multiOvs: [
+                  const FluxOverlay(
+                    targets: {FluxTarget.header, FluxTarget.body},
+                    children: [Text('Multi OV')],
+                  ),
+                ],
+                padding: EdgeInsets.zero,
+                spacing: 0,
+              );
+              return widget ?? const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
 
-        expect(stackFinder, findsAtLeastNWidgets(2));
-        expect(find.byType(FluxUnderlay), findsOneWidget);
-        expect(find.byType(FluxOverlay), findsOneWidget);
-      },
-    );
+      expect(find.text('Header'), findsOneWidget);
+      expect(find.text('Body'), findsOneWidget);
+      expect(find.text('Multi OV'), findsOneWidget);
+
+      final stackFinder = find.byWidgetPredicate(
+        (widget) =>
+            widget is Stack &&
+            widget.alignment == AlignmentDirectional.topStart &&
+            widget.fit == StackFit.passthrough &&
+            widget.clipBehavior == Clip.none,
+      );
+
+      expect(stackFinder, findsAtLeastNWidgets(2));
+      expect(find.byType(FluxUnderlay), findsOneWidget);
+      expect(find.byType(FluxOverlay), findsOneWidget);
+    });
 
     testWidgets('returns null when every entry is null', (tester) async {
       await tester.pumpWidget(
@@ -325,10 +293,7 @@ void main() {
             builder: (context) {
               final widget = SlotResolver.contentColumn(
                 context,
-                entries: const [
-                  (FluxTarget.header, null),
-                  (FluxTarget.body, null),
-                ],
+                entries: const [(FluxTarget.header, null), (FluxTarget.body, null)],
                 underlaysByTarget: {},
                 ovsByTarget: {},
                 multiUnderlays: [],

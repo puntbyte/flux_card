@@ -3,8 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flux_card/flux_card.dart';
 
 void main() {
-  Widget wrap(Widget child) =>
-      MaterialApp(home: Scaffold(body: SizedBox(width: 300, child: child)));
+  Widget wrap(Widget child) => MaterialApp(
+    home: Scaffold(body: SizedBox(width: 300, child: child)),
+  );
 
   // ---------------------------------------------------------------------------
   // Via FluxCard.loading
@@ -12,10 +13,7 @@ void main() {
 
   group('FluxCardSkeleton — via FluxCard.loading', () {
     testWidgets('appears when loading is true', (tester) async {
-      await tester.pumpWidget(wrap(const FluxCard(
-        loading: true,
-        header: Text('hidden'),
-      )));
+      await tester.pumpWidget(wrap(const FluxCard(loading: true, header: Text('hidden'))));
       expect(find.byType(FluxCardSkeleton), findsOneWidget);
     });
 
@@ -32,10 +30,7 @@ void main() {
                   onPressed: () => setState(() => loading = false),
                   child: const Text('stop'),
                 ),
-                FluxCard(
-                  loading: loading,
-                  header: const Text('header'),
-                ),
+                FluxCard(loading: loading, header: const Text('header')),
               ],
             ),
           ),
@@ -59,31 +54,25 @@ void main() {
 
   group('FluxCardSkeleton — slot flags', () {
     testWidgets('hasMedia adds media skeleton region', (tester) async {
-      await tester.pumpWidget(wrap(const FluxCard(
-        loading: true,
-        media: SizedBox(height: 100),
-        header: Text('h'),
-      )));
+      await tester.pumpWidget(
+        wrap(const FluxCard(loading: true, media: SizedBox(height: 100), header: Text('h'))),
+      );
       // We just verify it renders without throwing and skeleton is present
       expect(find.byType(FluxCardSkeleton), findsOneWidget);
     });
 
     testWidgets('hasFooter: false omits footer skeleton region', (tester) async {
       // Default: hasFooter is false — no footer shimmer
-      await tester.pumpWidget(wrap(const FluxCard(
-        loading: true,
-        header: Text('h'),
-        body: Text('b'),
-      )));
+      await tester.pumpWidget(
+        wrap(const FluxCard(loading: true, header: Text('h'), body: Text('b'))),
+      );
       expect(find.byType(FluxCardSkeleton), findsOneWidget);
     });
 
     testWidgets('hasFooter: true shows footer skeleton region', (tester) async {
-      await tester.pumpWidget(wrap(const FluxCard(
-        loading: true,
-        header: Text('h'),
-        footer: Text('f'),
-      )));
+      await tester.pumpWidget(
+        wrap(const FluxCard(loading: true, header: Text('h'), footer: Text('f'))),
+      );
       expect(find.byType(FluxCardSkeleton), findsOneWidget);
     });
   });
@@ -95,17 +84,21 @@ void main() {
   group('FluxCardSkeleton — loadingWrapper', () {
     testWidgets('loadingWrapper receives skeleton and can wrap it', (tester) async {
       Widget? receivedSkeleton;
-      await tester.pumpWidget(wrap(FluxCard(
-        loading: true,
-        header: const Text('hidden'),
-        loadingWrapper: (context, skeleton) {
-          receivedSkeleton = skeleton;
-          return DecoratedBox(
-            decoration: const BoxDecoration(color: Colors.yellow),
-            child: skeleton,
-          );
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          FluxCard(
+            loading: true,
+            header: const Text('hidden'),
+            loadingWrapper: (context, skeleton) {
+              receivedSkeleton = skeleton;
+              return DecoratedBox(
+                decoration: const BoxDecoration(color: Colors.yellow),
+                child: skeleton,
+              );
+            },
+          ),
+        ),
+      );
 
       expect(receivedSkeleton, isNotNull);
       expect(find.byType(DecoratedBox), findsWidgets);
@@ -113,14 +106,18 @@ void main() {
 
     testWidgets('loadingWrapper is not called when loading is false', (tester) async {
       bool wrapperCalled = false;
-      await tester.pumpWidget(wrap(FluxCard(
-        loading: false,
-        header: const Text('visible'),
-        loadingWrapper: (context, skeleton) {
-          wrapperCalled = true;
-          return skeleton;
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          FluxCard(
+            loading: false,
+            header: const Text('visible'),
+            loadingWrapper: (context, skeleton) {
+              wrapperCalled = true;
+              return skeleton;
+            },
+          ),
+        ),
+      );
 
       expect(wrapperCalled, isFalse);
       expect(find.text('visible'), findsOneWidget);
@@ -156,29 +153,37 @@ void main() {
 
   group('FluxCardSkeleton — layout modes', () {
     testWidgets('column skeleton renders without throwing', (tester) async {
-      await tester.pumpWidget(wrap(const SizedBox(
-        width: 300,
-        child: FluxCard(
-          layout: FluxLayoutMode.column,
-          loading: true,
-          media: SizedBox(height: 80),
-          header: Text('h'),
-          body: Text('b'),
+      await tester.pumpWidget(
+        wrap(
+          const SizedBox(
+            width: 300,
+            child: FluxCard(
+              layout: FluxLayoutMode.column,
+              loading: true,
+              media: SizedBox(height: 80),
+              header: Text('h'),
+              body: Text('b'),
+            ),
+          ),
         ),
-      )));
+      );
       expect(find.byType(FluxCardSkeleton), findsOneWidget);
     });
 
     testWidgets('row skeleton renders without throwing', (tester) async {
-      await tester.pumpWidget(wrap(const SizedBox(
-        width: 400,
-        child: FluxCard(
-          layout: FluxLayoutMode.row,
-          loading: true,
-          media: SizedBox(height: 80),
-          header: Text('h'),
+      await tester.pumpWidget(
+        wrap(
+          const SizedBox(
+            width: 400,
+            child: FluxCard(
+              layout: FluxLayoutMode.row,
+              loading: true,
+              media: SizedBox(height: 80),
+              header: Text('h'),
+            ),
+          ),
         ),
-      )));
+      );
       expect(find.byType(FluxCardSkeleton), findsOneWidget);
     });
   });

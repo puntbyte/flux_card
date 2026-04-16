@@ -17,16 +17,16 @@ class _TestLayoutDelegate extends FluxLayoutDelegate {
 
   @override
   Widget build(
-      BuildContext context, {
-        Widget? mediaSlot,
-        Widget? header,
-        Widget? body,
-        Widget? footer,
-        required Map<FluxTarget, List<Widget>> underlaysByTarget,
-        required Map<FluxTarget, List<Widget>> ovsByTarget,
-        required List<Widget> multiUnderlays,
-        required List<Widget> multiOvs,
-      }) {
+    BuildContext context, {
+    Widget? mediaSlot,
+    Widget? header,
+    Widget? body,
+    Widget? footer,
+    required Map<FluxTarget, List<Widget>> underlaysByTarget,
+    required Map<FluxTarget, List<Widget>> ovsByTarget,
+    required List<Widget> multiUnderlays,
+    required List<Widget> multiOvs,
+  }) {
     return const SizedBox.shrink();
   }
 }
@@ -72,17 +72,25 @@ void main() {
         resolvedPadding: EdgeInsets.zero,
       );
 
-      await tester.pumpWidget(wrap(Builder(
-        builder: (context) {
-          return delegate.buildFullContentColumn(
-            context,
-            const Text('Header'),
-            const Text('Body'),
-            const Text('Footer'),
-            {}, {}, [],[],
-          ) ?? const SizedBox.shrink();
-        },
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return delegate.buildFullContentColumn(
+                    context,
+                    const Text('Header'),
+                    const Text('Body'),
+                    const Text('Footer'),
+                    {},
+                    {},
+                    [],
+                    [],
+                  ) ??
+                  const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
 
       expect(find.text('Header'), findsOneWidget);
       expect(find.text('Body'), findsOneWidget);

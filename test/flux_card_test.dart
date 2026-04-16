@@ -195,9 +195,7 @@ void main() {
       });
     });
 
-    testWidgets('falls back to column layout when responsive width is unbounded', (
-        tester,
-        ) async {
+    testWidgets('falls back to column layout when responsive width is unbounded', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -207,16 +205,11 @@ void main() {
                 scrollDirection: Axis.horizontal,
                 child: FluxCard(
                   layout: FluxLayoutMode.responsive,
-                  theme: FluxCardThemeData.elevated.copyWith(
-                    responsiveBreakpoint: 500,
-                  ),
+                  theme: FluxCardThemeData.elevated.copyWith(responsiveBreakpoint: 500),
                   media: const FluxMedia(
                     width: 80,
                     height: 80,
-                    child: ColoredBox(
-                      key: Key('media_unbounded'),
-                      color: Colors.blue,
-                    ),
+                    child: ColoredBox(key: Key('media_unbounded'), color: Colors.blue),
                   ),
                   header: const Text('Header'),
                   body: const Text('Body'),

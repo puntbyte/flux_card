@@ -16,7 +16,7 @@ void main() {
     });
 
     test('getInnerPath equals getOuterPath for the same rect', () {
-      const shape = FluxNotchShape(notchRadius: 10, notchPosition: 0.5);
+      const shape = FluxNotchShape(notchWidth: 10, notchPosition: 0.5);
       const rect = Rect.fromLTWH(0, 0, 200, 150);
       final outer = shape.getOuterPath(rect);
       final inner = shape.getInnerPath(rect);
@@ -25,9 +25,9 @@ void main() {
       expect(outer.getBounds(), inner.getBounds());
     });
 
-    test('notchRadius 0 produces a path with the same outline as a rounded rect', () {
+    test('notchWidth 0 produces a path with the same outline as a rounded rect', () {
       const shape = FluxNotchShape(
-        notchRadius: 0,
+        notchWidth: 0,
         borderRadius: BorderRadius.all(Radius.circular(16)),
       );
       final path = shape.getOuterPath(const Rect.fromLTWH(0, 0, 200, 100));
@@ -38,7 +38,7 @@ void main() {
       const shape = FluxNotchShape(
         notchEdge: FluxNotchEdge.horizontal,
         notchPosition: 0.5,
-        notchRadius: 12,
+        notchWidth: 12,
       );
       final path = shape.getOuterPath(const Rect.fromLTWH(0, 0, 300, 200));
       expect(path.computeMetrics().isNotEmpty, isTrue);
@@ -58,10 +58,7 @@ void main() {
 
     test('notchPositionResolver returning null falls back to notchPosition', () {
       const double fallback = 0.7;
-      final shape = FluxNotchShape(
-        notchPosition: fallback,
-        notchPositionResolver: (_) => null,
-      );
+      final shape = FluxNotchShape(notchPosition: fallback, notchPositionResolver: (_) => null);
       // Just verify no exception is thrown
       final path = shape.getOuterPath(const Rect.fromLTWH(0, 0, 200, 150));
       expect(path.computeMetrics().isNotEmpty, isTrue);
@@ -74,21 +71,21 @@ void main() {
 
   group('FluxNotchShape — scale', () {
     test('scale(1.0) returns a shape with the same parameters', () {
-      const shape = FluxNotchShape(notchRadius: 12, notchPosition: 0.5);
+      const shape = FluxNotchShape(notchWidth: 12, notchPosition: 0.5);
       final scaled = shape.scale(1.0) as FluxNotchShape;
-      expect(scaled.notchRadius, 12.0);
+      expect(scaled.notchWidth, 12.0);
     });
 
-    test('scale(2.0) doubles notchRadius', () {
-      const shape = FluxNotchShape(notchRadius: 10);
+    test('scale(2.0) doubles notchWidth', () {
+      const shape = FluxNotchShape(notchWidth: 10);
       final scaled = shape.scale(2.0) as FluxNotchShape;
-      expect(scaled.notchRadius, 20.0);
+      expect(scaled.notchWidth, 20.0);
     });
 
-    test('scale(0.5) halves notchRadius', () {
-      const shape = FluxNotchShape(notchRadius: 20);
+    test('scale(0.5) halves notchWidth', () {
+      const shape = FluxNotchShape(notchWidth: 20);
       final scaled = shape.scale(0.5) as FluxNotchShape;
-      expect(scaled.notchRadius, 10.0);
+      expect(scaled.notchWidth, 10.0);
     });
 
     test('dimensions returns EdgeInsets.zero', () {
@@ -103,31 +100,31 @@ void main() {
 
   group('FluxNotchShape — lerp', () {
     test('lerpFrom with another FluxNotchShape at t=0 returns first shape params', () {
-      const a = FluxNotchShape(notchRadius: 8, notchPosition: 0.3);
-      const b = FluxNotchShape(notchRadius: 24, notchPosition: 0.7);
+      const a = FluxNotchShape(notchWidth: 8, notchPosition: 0.3);
+      const b = FluxNotchShape(notchWidth: 24, notchPosition: 0.7);
       final result = b.lerpFrom(a, 0.0) as FluxNotchShape;
-      expect(result.notchRadius, closeTo(8.0, 0.001));
+      expect(result.notchWidth, closeTo(8.0, 0.001));
     });
 
     test('lerpFrom with another FluxNotchShape at t=1 returns second shape params', () {
-      const a = FluxNotchShape(notchRadius: 8, notchPosition: 0.3);
-      const b = FluxNotchShape(notchRadius: 24, notchPosition: 0.7);
+      const a = FluxNotchShape(notchWidth: 8, notchPosition: 0.3);
+      const b = FluxNotchShape(notchWidth: 24, notchPosition: 0.7);
       final result = b.lerpFrom(a, 1.0) as FluxNotchShape;
-      expect(result.notchRadius, closeTo(24.0, 0.001));
+      expect(result.notchWidth, closeTo(24.0, 0.001));
     });
 
-    test('lerpFrom at t=0.5 interpolates notchRadius', () {
-      const a = FluxNotchShape(notchRadius: 0);
-      const b = FluxNotchShape(notchRadius: 20);
+    test('lerpFrom at t=0.5 interpolates notchWidth', () {
+      const a = FluxNotchShape(notchWidth: 0);
+      const b = FluxNotchShape(notchWidth: 20);
       final result = b.lerpFrom(a, 0.5) as FluxNotchShape;
-      expect(result.notchRadius, closeTo(10.0, 0.001));
+      expect(result.notchWidth, closeTo(10.0, 0.001));
     });
 
     test('lerpTo with another FluxNotchShape at t=0.5 interpolates', () {
-      const a = FluxNotchShape(notchRadius: 0);
-      const b = FluxNotchShape(notchRadius: 40);
+      const a = FluxNotchShape(notchWidth: 0);
+      const b = FluxNotchShape(notchWidth: 40);
       final result = a.lerpTo(b, 0.5) as FluxNotchShape;
-      expect(result.notchRadius, closeTo(20.0, 0.001));
+      expect(result.notchWidth, closeTo(20.0, 0.001));
     });
 
     test('lerpFrom with non-FluxNotchShape returns null', () {
@@ -143,10 +140,10 @@ void main() {
     });
 
     test('ShapeBorder.lerp between two FluxNotchShapes works', () {
-      const a = FluxNotchShape(notchRadius: 0);
-      const b = FluxNotchShape(notchRadius: 16);
+      const a = FluxNotchShape(notchWidth: 0);
+      const b = FluxNotchShape(notchWidth: 16);
       final result = ShapeBorder.lerp(a, b, 0.5)! as FluxNotchShape;
-      expect(result.notchRadius, closeTo(8.0, 0.001));
+      expect(result.notchWidth, closeTo(8.0, 0.001));
     });
   });
 
@@ -156,43 +153,44 @@ void main() {
 
   group('FluxNotchShape — paint', () {
     testWidgets('paint is called when used as card shape with side', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 300,
-            child: FluxCard(
-              theme: const FluxCardThemeData(
-                shape: FluxNotchShape(
-                  notchRadius: 12,
-                  notchPosition: 0.5,
-                  side: BorderSide(color: Colors.black, width: 1.5),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              child: FluxCard(
+                theme: const FluxCardThemeData(
+                  shape: FluxNotchShape(
+                    notchWidth: 12,
+                    notchPosition: 0.5,
+                    side: BorderSide(color: Colors.black, width: 1.5),
+                  ),
                 ),
+                header: const Text('outlined notch card'),
               ),
-              header: const Text('outlined notch card'),
             ),
           ),
         ),
-      ));
+      );
       expect(find.text('outlined notch card'), findsOneWidget);
     });
 
     testWidgets('paint with BorderSide.none does not throw', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 300,
-            child: FluxCard(
-              theme: const FluxCardThemeData(
-                shape: FluxNotchShape(
-                  notchRadius: 14,
-                  side: BorderSide.none,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              child: FluxCard(
+                theme: const FluxCardThemeData(
+                  shape: FluxNotchShape(notchWidth: 14, side: BorderSide.none),
                 ),
+                header: const Text('no border'),
               ),
-              header: const Text('no border'),
             ),
           ),
         ),
-      ));
+      );
       expect(find.text('no border'), findsOneWidget);
     });
   });

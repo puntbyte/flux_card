@@ -35,17 +35,12 @@ void main() {
       });
 
       test('returns null when fullWidth is true but parent is unbounded', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(),
-          fullWidth: true,
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints(), fullWidth: true);
         expect(c.resolvedWidth, isNull);
       });
 
       test('returns null when no explicit width and fullWidth is false', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(maxWidth: 300),
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints(maxWidth: 300));
         expect(c.resolvedWidth, isNull);
       });
     });
@@ -81,17 +76,12 @@ void main() {
       });
 
       test('returns null when fullHeight is true but parent is unbounded', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(),
-          fullHeight: true,
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints(), fullHeight: true);
         expect(c.resolvedHeight, isNull);
       });
 
       test('returns null when no explicit height and fullHeight is false', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(maxHeight: 500),
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints(maxHeight: 500));
         expect(c.resolvedHeight, isNull);
       });
     });
@@ -110,16 +100,12 @@ void main() {
       });
 
       test('returns parent maxWidth when parent is bounded', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(maxWidth: 375),
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints(maxWidth: 375));
         expect(c.availableWidth, 375.0);
       });
 
       test('returns infinity when parent is unbounded and no explicit width', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(),
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints());
         expect(c.availableWidth, double.infinity);
       });
 
@@ -134,17 +120,12 @@ void main() {
 
     group('hasBoundedAvailableWidth', () {
       test('is true when explicitWidth is set', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(),
-          explicitWidth: 300,
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints(), explicitWidth: 300);
         expect(c.hasBoundedAvailableWidth, isTrue);
       });
 
       test('is true when parent width is bounded', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(maxWidth: 375),
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints(maxWidth: 375));
         expect(c.hasBoundedAvailableWidth, isTrue);
       });
 
@@ -157,9 +138,7 @@ void main() {
       });
 
       test('is false when parent width is unbounded and no explicit width exists', () {
-        const c = FluxCardConstraints(
-          parentConstraints: BoxConstraints(),
-        );
+        const c = FluxCardConstraints(parentConstraints: BoxConstraints());
         expect(c.hasBoundedAvailableWidth, isFalse);
       });
     });

@@ -29,14 +29,13 @@ void main() {
     testWidgets('tracker.renderBox is non-null after mount', (tester) async {
       final tracker = BoundaryTracker();
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: BoundaryMarker(
-            tracker: tracker,
-            child: const SizedBox(width: 100, height: 50),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BoundaryMarker(tracker: tracker, child: const SizedBox(width: 100, height: 50)),
           ),
         ),
-      ));
+      );
 
       expect(tracker.renderBox, isNotNull);
     });
@@ -44,14 +43,13 @@ void main() {
     testWidgets('tracker.renderBox is null after widget is unmounted', (tester) async {
       final tracker = BoundaryTracker();
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: BoundaryMarker(
-            tracker: tracker,
-            child: const SizedBox(width: 100, height: 50),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BoundaryMarker(tracker: tracker, child: const SizedBox(width: 100, height: 50)),
           ),
         ),
-      ));
+      );
 
       expect(tracker.renderBox, isNotNull);
 
@@ -65,26 +63,24 @@ void main() {
       final tracker1 = BoundaryTracker();
       final tracker2 = BoundaryTracker();
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: BoundaryMarker(
-            tracker: tracker1,
-            child: const SizedBox(width: 100, height: 50),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BoundaryMarker(tracker: tracker1, child: const SizedBox(width: 100, height: 50)),
           ),
         ),
-      ));
+      );
 
       expect(tracker1.renderBox, isNotNull);
       expect(tracker2.renderBox, isNull);
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: BoundaryMarker(
-            tracker: tracker2,
-            child: const SizedBox(width: 100, height: 50),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BoundaryMarker(tracker: tracker2, child: const SizedBox(width: 100, height: 50)),
           ),
         ),
-      ));
+      );
 
       // After update: old tracker cleared, new tracker set
       expect(tracker1.renderBox, isNull);
@@ -94,14 +90,13 @@ void main() {
     testWidgets('tracker.renderBox has the correct size after layout', (tester) async {
       final tracker = BoundaryTracker();
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: BoundaryMarker(
-            tracker: tracker,
-            child: const SizedBox(width: 200, height: 80),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BoundaryMarker(tracker: tracker, child: const SizedBox(width: 200, height: 80)),
           ),
         ),
-      ));
+      );
 
       expect(tracker.renderBox?.size, const Size(200, 80));
     });
@@ -109,14 +104,13 @@ void main() {
     testWidgets('child widget renders inside BoundaryMarker', (tester) async {
       final tracker = BoundaryTracker();
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: BoundaryMarker(
-            tracker: tracker,
-            child: const Text('inside marker'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BoundaryMarker(tracker: tracker, child: const Text('inside marker')),
           ),
         ),
-      ));
+      );
 
       expect(find.text('inside marker'), findsOneWidget);
     });
@@ -125,22 +119,18 @@ void main() {
       final tracker1 = BoundaryTracker();
       final tracker2 = BoundaryTracker();
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: Column(
-            children: [
-              BoundaryMarker(
-                tracker: tracker1,
-                child: const SizedBox(width: 100, height: 40),
-              ),
-              BoundaryMarker(
-                tracker: tracker2,
-                child: const SizedBox(width: 100, height: 60),
-              ),
-            ],
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                BoundaryMarker(tracker: tracker1, child: const SizedBox(width: 100, height: 40)),
+                BoundaryMarker(tracker: tracker2, child: const SizedBox(width: 100, height: 60)),
+              ],
+            ),
           ),
         ),
-      ));
+      );
 
       expect(tracker1.renderBox, isNotNull);
       expect(tracker2.renderBox, isNotNull);
