@@ -60,6 +60,7 @@ Widget buildMediaRowBoxFitUseCase(BuildContext context) {
       // No aspectRatio or height — child fills the row slot height.
       // BoxFit is applied to the full slot area, not a fixed-size sub-region.
       media: FluxMedia(
+        // aspectRatio: 16 / 9,
         child: Ink.image(image: CachedNetworkImageProvider(demoProducts[1].image), fit: fit),
       ),
       header: const FluxSection(
@@ -187,7 +188,7 @@ Widget buildMediaGradientsUseCase(BuildContext context) {
           ),
           fit: BoxFit.cover,
           colorFilter: useBackground
-              ? ColorFilter.mode(Colors.white.withOpacity(0.5), BlendMode.dstIn)
+              ? ColorFilter.mode(Colors.white.withValues(alpha: 0.5), BlendMode.dstIn)
               : null,
         ),
       ),

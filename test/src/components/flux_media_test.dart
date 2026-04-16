@@ -244,4 +244,47 @@ void main() {
       expect(size.height, 200.0);
     });
   });
+
+  group('FluxMedia — unbounded constraints', () {
+    testWidgets(
+      'does not throw in row layout inside scroll view when media child is greedy and no aspectRatio is set',
+          (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: SizedBox(
+                  width: 375,
+                  child: FluxCard(
+                    layout: FluxLayoutMode.row,
+                    media: FluxMedia(
+                      child: Ink.image(
+                        image: MemoryImage(transparentImage),
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    header: const FluxSection(
+                      title: Text('Row media'),
+                      subtitle: Text('Greedy child in unbounded-height viewport'),
+                      padding: EdgeInsets.zero,
+                    ),
+                    body: const Text('Body'),
+                    theme: FluxCardThemeData.elevated,
+                    onTap: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('Row media'), findsOneWidget);
+        expect(find.text('Body'), findsOneWidget);
+        expect(find.byType(FluxCard), findsOneWidget);
+      },
+    );
+  });
 }

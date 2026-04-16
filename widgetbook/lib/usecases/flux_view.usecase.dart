@@ -125,6 +125,15 @@ Widget buildSliverListUseCase(BuildContext context) {
   path: '[Flux Card]/Views (Scrollables)',
 )
 Widget buildSliverGridUseCase(BuildContext context) {
+  final screenWidth = MediaQuery.sizeOf(context).width;
+  final isNarrow = screenWidth < 600;
+
+  final products = [
+    ...demoProducts,
+    ...demoProducts,
+    ...demoProducts,
+  ];
+
   return Scaffold(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: CustomScrollView(
@@ -136,7 +145,9 @@ Widget buildSliverGridUseCase(BuildContext context) {
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.purple, Colors.orange]),
+                gradient: LinearGradient(
+                  colors: [Colors.purple, Colors.orange],
+                ),
               ),
             ),
           ),
@@ -144,15 +155,15 @@ Widget buildSliverGridUseCase(BuildContext context) {
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isNarrow ? 1 : 2,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 0.68,
+              childAspectRatio: isNarrow ? 0.75 : 0.68,
             ),
             delegate: SliverChildBuilderDelegate(
-              (context, index) => _buildProductCard(demoProducts[index]),
-              childCount: demoProducts.length,
+                  (context, index) => _buildProductCard(products[index]),
+              childCount: products.length,
             ),
           ),
         ),

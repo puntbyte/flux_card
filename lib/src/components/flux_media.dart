@@ -55,7 +55,6 @@ class FluxMedia extends StatelessWidget {
 
   final Widget? child;
 
-  // Image-specific fields
   final ImageProvider? _image;
   final BoxFit? _imageFit;
   final AlignmentGeometry? _imageAlignment;
@@ -102,7 +101,6 @@ class FluxMedia extends StatelessWidget {
       return BoxDecoration(color: c, gradient: g, image: img, borderRadius: borderRadius);
     }
 
-    // 1. Resolve the primary child layer (either the ImageProvider or the raw widget)
     if (_image != null) {
       result = Ink(
         decoration: buildDecoration(
@@ -121,9 +119,7 @@ class FluxMedia extends StatelessWidget {
     final hasBackground = color != null || gradient != null;
     final hasForeground = foregroundColor != null || foregroundGradient != null;
 
-    // 2. Wrap in Stack if gradients/scrims are applied
     if (hasBackground || hasForeground) {
-      // If borderRadius is null, it's full bleed. Apply 1px bleed to fix sub-pixel gaps.
       final double bleed = borderRadius == null ? -1.0 : 0.0;
 
       result = Stack(
@@ -142,9 +138,7 @@ class FluxMedia extends StatelessWidget {
                 ),
               ),
             ),
-
           result,
-
           if (hasForeground)
             Positioned(
               top: bleed,
@@ -161,23 +155,47 @@ class FluxMedia extends StatelessWidget {
       );
     }
 
-    // 3. Apply Dimensions
+    // Primary explicit sizing rules.
     if (aspectRatio != null) {
       result = AspectRatio(aspectRatio: aspectRatio!, child: result);
     } else if (width != null || height != null) {
       result = SizedBox(width: width ?? double.infinity, height: height, child: result);
+
       if (width != null && height != null) {
         result = Align(alignment: alignment, child: result);
       }
     }
 
-    // 4. Apply optional hardware clip (used mostly for non-Image widgets like VideoPlayers)
+    // Fallback for row-layout / scrollable scenarios:
+    // if height is unbounded and the caller did not provide an aspect ratio or
+    // explicit height, cap greedy children (like Ink.image) to a finite height.
+    if (aspectRatio == null && height == null) {
+      final childForFallback = result;
+      result = LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxHeight.isFinite) {
+            return childForFallback;
+          }
+
+          final double? fallbackMaxHeight =
+              width ?? (constraints.maxWidth.isFinite ? constraints.maxWidth : null);
+
+          if (fallbackMaxHeight == null || fallbackMaxHeight <= 0) {
+            return childForFallback;
+          }
+
+          return LimitedBox(maxHeight: fallbackMaxHeight, child: childForFallback);
+        },
+      );
+    }
+
     if (borderRadius != null) {
       result = ClipRRect(borderRadius: borderRadius!, clipBehavior: clipBehavior, child: result);
     }
 
-    // 5. Apply external spacing
-    if (padding != EdgeInsets.zero) result = Padding(padding: padding, child: result);
+    if (padding != EdgeInsets.zero) {
+      result = Padding(padding: padding, child: result);
+    }
 
     return result;
   }
