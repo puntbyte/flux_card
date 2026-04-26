@@ -76,6 +76,7 @@ Widget buildTicketHorizontalUseCase(BuildContext context) {
     divisions: 22,
     initialValue: 14,
   );
+
   final notchPosition = context.knobs.double.slider(
     label: 'Notch position',
     min: 0.1,
@@ -90,11 +91,13 @@ Widget buildTicketHorizontalUseCase(BuildContext context) {
     context,
     FluxCard(
       layout: FluxLayoutMode.column,
+
       header: const FluxSection(
         title: Text('CONCERT TICKET'),
         subtitle: Text('The Flutter Experience — Live'),
         padding: EdgeInsets.zero,
       ),
+
       footer: const FluxSection(
         actions: [
           Text('Fri 18 Apr 2026 • 8:00 PM', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -102,12 +105,15 @@ Widget buildTicketHorizontalUseCase(BuildContext context) {
         ],
         padding: EdgeInsets.zero,
       ),
+
       notch: FluxNotch.free(
         position: notchPosition,
         notchWidth: notchWidth,
+        borderRadius: BorderRadius.all(Radius.circular(notchWidth)),
         edge: FluxNotchEdge.horizontal,
         notchSide: FluxNotchSide.both,
       ),
+
       divider: const FluxDivider(afterHeader: FluxDashedDivider()),
       theme: FluxCardThemeData.elevated.copyWith(padding: const EdgeInsets.all(20)),
       onTap: () {},
@@ -123,7 +129,7 @@ Widget buildTicketHorizontalUseCase(BuildContext context) {
 )
 Widget buildTicketOutlinedUseCase(BuildContext context) {
   final notchWidth = context.knobs.double.slider(
-    label: 'Notch radius',
+    label: 'Notch radius/depth',
     min: 6,
     max: 24,
     divisions: 18,
@@ -161,6 +167,7 @@ Widget buildTicketOutlinedUseCase(BuildContext context) {
       notch: FluxNotch(
         boundary: FluxSlotBoundary.afterHeader,
         notchWidth: notchWidth,
+        notchDepth: notchWidth,
         notchSide: FluxNotchSide.both,
       ),
       divider: FluxDivider(

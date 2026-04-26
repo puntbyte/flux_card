@@ -31,6 +31,9 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
   final showFooter = context.knobs.boolean(label: 'Show footer', initialValue: true);
   final loading = context.knobs.boolean(label: 'Loading');
 
+  // NEW: Semantic merging knob
+  final mergeSemantics = context.knobs.boolean(label: 'Merge semantics');
+
   final product = demoProducts.first;
 
   return previewSurface(
@@ -40,6 +43,7 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
       mediaPosition: mediaPosition,
       mediaSpan: mediaSpan,
       loading: loading,
+      mergeSemantics: mergeSemantics,
       media: FluxMedia(
         aspectRatio: 16 / 9,
         child: Ink.image(image: CachedNetworkImageProvider(product.image), fit: BoxFit.cover),
@@ -90,6 +94,103 @@ Widget buildInteractiveCardUseCase(BuildContext context) {
   );
 }
 
+// NEW: Simple Card Boilerplate Demo
+@widgetbook.UseCase(name: 'Simple Card', type: FluxCard, path: '[Flux Card]/Cards')
+Widget buildSimpleCardUseCase(BuildContext context) {
+  final layout = context.knobs.object.segmented<FluxLayoutMode>(
+    label: 'Layout',
+    options: FluxLayoutMode.values,
+    labelBuilder: (m) => m.name,
+  );
+
+  return previewSurface(
+    context,
+    FluxCard.simple(
+      layout: layout,
+      title: 'FluxCard.simple',
+      subtitle: 'Zero boilerplate factory',
+      description:
+          'Use this constructor when you just need a standard text card '
+          'without writing out the FluxSection and FluxContent primitives manually.',
+      media: FluxMedia.image(
+        aspectRatio: layout == FluxLayoutMode.row ? 1 : 16 / 9,
+        image: const CachedNetworkImageProvider(
+          'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800',
+        ),
+        fit: BoxFit.cover,
+      ),
+      ctaLabel: 'Learn More',
+      onCtaPressed: () {},
+      onTap: () {},
+      theme: FluxCardThemeData.elevated,
+    ),
+    maxWidth: layout == FluxLayoutMode.row ? 600 : 400,
+  );
+}
+
+// NEW: Expandable Media Demo
+@widgetbook.UseCase(name: 'Expandable Media', type: FluxCard, path: '[Flux Card]/Cards')
+Widget buildExpandableMediaUseCase(BuildContext context) {
+  final layout = context.knobs.object.segmented<FluxLayoutMode>(
+    label: 'Layout',
+    options: const [FluxLayoutMode.column, FluxLayoutMode.row, FluxLayoutMode.inline],
+    labelBuilder: (m) => m.name,
+  );
+
+  final isMediaExpanded = context.knobs.boolean(label: 'Expand media', initialValue: true);
+
+  final cardHeight = context.knobs.double.slider(
+    label: 'Forced parent height',
+    min: 300,
+    max: 600,
+    divisions: 15,
+    initialValue: 400,
+  );
+
+  return previewSurface(
+    context,
+    Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 16),
+          child: Text(
+            'The card is placed inside a fixed-height parent. '
+            'When expanded is true, the media absorbs all remaining space.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        SizedBox(
+          height: cardHeight,
+          child: FluxCard(
+            layout: layout,
+            isMediaExpanded: isMediaExpanded,
+            media: FluxMedia(
+              // Notice there is no aspectRatio constraint here!
+              child: Ink.image(
+                image: CachedNetworkImageProvider(demoDestinations.first.image),
+                fit: BoxFit.cover,
+              ),
+            ),
+            header: const FluxSection(
+              title: Text('Dynamic Height'),
+              subtitle: Text('isMediaExpanded: true'),
+              padding: EdgeInsets.zero,
+            ),
+            body: const Text('Try changing the parent height or toggling the expansion knob.'),
+            footer: FluxSection(
+              actions: [ElevatedButton(onPressed: () {}, child: const Text('Action'))],
+              padding: EdgeInsets.zero,
+            ),
+            theme: FluxCardThemeData.elevated,
+            onTap: () {},
+          ),
+        ),
+      ],
+    ),
+    maxWidth: layout == FluxLayoutMode.row ? 650 : 400,
+  );
+}
+
 @widgetbook.UseCase(name: 'Row Spanning', type: FluxCard, path: '[Flux Card]/Cards')
 Widget buildRowSpanningUseCase(BuildContext context) {
   final mediaSpan = context.knobs.object.segmented<FluxMediaSpan>(
@@ -121,7 +222,6 @@ Widget buildRowSpanningUseCase(BuildContext context) {
         fit: BoxFit.cover,
       ),
 
-      // Use the new semantic .header!
       header: FluxSection.header(
         title: Text(post.title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(post.category),
@@ -134,7 +234,6 @@ Widget buildRowSpanningUseCase(BuildContext context) {
         style: TextStyle(fontSize: 13),
       ),
 
-      // Use the new semantic .footer with spaceBetween!
       footer: FluxSection.footer(
         actionsAlignment: MainAxisAlignment.spaceBetween,
         actions: [
@@ -142,7 +241,6 @@ Widget buildRowSpanningUseCase(BuildContext context) {
             '${post.author} • ${post.readTime}',
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
-          // Spacer() removed! spaceBetween handles the layout now.
           IconButton(onPressed: () {}, icon: const Icon(Icons.bookmark_border, size: 20)),
         ],
         padding: EdgeInsets.zero,
@@ -290,14 +388,10 @@ Widget buildRowLayoutUseCase(BuildContext context) {
     FluxCard(
       layout: FluxLayoutMode.row,
       media: FluxMedia(
-        //aspectRatio: 1,
         child: Ink.image(image: CachedNetworkImageProvider(destination.image), fit: BoxFit.cover),
       ),
 
-      header: FluxSection(
-        title: Text(destination.title),
-        subtitle: Text(destination.location),
-      ),
+      header: FluxSection(title: Text(destination.title), subtitle: Text(destination.location)),
 
       body: Text(destination.description, maxLines: 2, overflow: TextOverflow.ellipsis),
       footer: FluxSection(
@@ -309,7 +403,6 @@ Widget buildRowLayoutUseCase(BuildContext context) {
       theme: FluxCardThemeData.elevated.copyWith(flexMedia: flexMedia, flexContent: flexContent),
       onTap: () {},
     ),
-    //maxWidth: 500,
   );
 }
 
@@ -392,13 +485,12 @@ Widget buildHeroAnimationUseCase(BuildContext context) {
     context,
     Builder(
       builder: (innerContext) => FluxCard(
-        // Set to Clip.none to ensure the Hero doesn't get abruptly cut off during the flight.
         clipBehavior: Clip.none,
         media: Hero(
           tag: 'hero-product-image',
           child: FluxMedia.image(
             aspectRatio: 16 / 9,
-            image: CachedNetworkImageProvider(
+            image: const CachedNetworkImageProvider(
               'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
             ),
             fit: BoxFit.cover,
@@ -412,7 +504,6 @@ Widget buildHeroAnimationUseCase(BuildContext context) {
         ),
         theme: FluxCardThemeData.elevated,
         onTap: () {
-          // Push a detail page to demonstrate the Hero transition
           Navigator.of(innerContext).push(
             MaterialPageRoute(
               builder: (context) => Scaffold(
@@ -423,7 +514,7 @@ Widget buildHeroAnimationUseCase(BuildContext context) {
                     Hero(
                       tag: 'hero-product-image',
                       child: Ink.image(
-                        image: CachedNetworkImageProvider(
+                        image: const CachedNetworkImageProvider(
                           'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
                         ),
                         fit: BoxFit.cover,

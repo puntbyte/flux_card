@@ -57,10 +57,7 @@ Widget buildMediaRowBoxFitUseCase(BuildContext context) {
     context,
     FluxCard(
       layout: FluxLayoutMode.row,
-      // No aspectRatio or height — child fills the row slot height.
-      // BoxFit is applied to the full slot area, not a fixed-size sub-region.
       media: FluxMedia(
-        // aspectRatio: 16 / 9,
         child: Ink.image(image: CachedNetworkImageProvider(demoProducts[1].image), fit: fit),
       ),
       header: const FluxSection(
@@ -73,6 +70,45 @@ Widget buildMediaRowBoxFitUseCase(BuildContext context) {
       onTap: () {},
     ),
     maxWidth: 500,
+  );
+}
+
+// NEW: Fixed width media in row demonstration
+@widgetbook.UseCase(
+  name: 'Row — Fixed Width (Flex Content)',
+  type: FluxMedia,
+  path: '[Flux Card]/Media',
+)
+Widget buildMediaRowFixedWidthUseCase(BuildContext context) {
+  final width = context.knobs.double.slider(
+    label: 'Media Width (px)',
+    min: 80,
+    max: 240,
+    initialValue: 120,
+  );
+
+  return previewSurface(
+    context,
+    FluxCard(
+      layout: FluxLayoutMode.row,
+      media: FluxMedia(
+        width: width, // Hard pixel width assigned here!
+        child: Ink.image(
+          image: CachedNetworkImageProvider(demoDestinations[1].image),
+          fit: BoxFit.cover,
+        ),
+      ),
+      header: FluxSection(
+        title: Text('Fixed Width: ${width.toStringAsFixed(0)}px'),
+        padding: EdgeInsets.zero,
+      ),
+      body: const Text(
+        'The media slot forces an exact pixel width while still perfectly height-matching. '
+        'The row layout automatically delegates all remaining space to the flexible content block.',
+      ),
+      theme: FluxCardThemeData.elevated,
+    ),
+    maxWidth: 550,
   );
 }
 
@@ -181,7 +217,6 @@ Widget buildMediaGradientsUseCase(BuildContext context) {
                 stops: [0.4, 1.0],
               )
             : null,
-        // Using a semi-transparent image to show the background gradient if active
         child: Ink.image(
           image: const NetworkImage(
             'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600',

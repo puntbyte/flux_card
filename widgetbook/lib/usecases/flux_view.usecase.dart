@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flux_card/flux_card.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
@@ -10,12 +11,20 @@ import '../demo/demo_product.dart';
 Widget _buildPostCard(DemoPost post) {
   return FluxCard(
     layout: FluxLayoutMode.row,
-    media: FluxMedia.image(aspectRatio: 1.0, image: NetworkImage(post.image), fit: BoxFit.cover),
+
+    media: FluxMedia.image(
+      aspectRatio: 1.0,
+      image: CachedNetworkImageProvider(post.image),
+      fit: BoxFit.cover,
+      padding: EdgeInsets.all(8),
+    ),
+
     header: FluxSection.header(
       title: Text(post.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Text(post.category),
       padding: EdgeInsets.zero,
     ),
+
     footer: FluxSection.footer(
       actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
@@ -24,7 +33,8 @@ Widget _buildPostCard(DemoPost post) {
       ],
       padding: EdgeInsets.zero,
     ),
-    theme: FluxCardThemeData.elevated,
+
+    theme: FluxCardThemeData.elevated.copyWith(padding: EdgeInsets.zero),
     onTap: () {},
   );
 }
@@ -32,7 +42,15 @@ Widget _buildPostCard(DemoPost post) {
 Widget _buildProductCard(DemoProduct product) {
   return FluxCard(
     layout: FluxLayoutMode.column,
-    media: FluxMedia.image(aspectRatio: 1.0, image: NetworkImage(product.image), fit: BoxFit.cover),
+
+    media: FluxMedia.image(
+      aspectRatio: .95,
+      image: CachedNetworkImageProvider(product.image),
+      fit: BoxFit.cover,
+      padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
+      borderRadius: BorderRadius.circular(16),
+    ),
+
     header: FluxSection.header(
       title: Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(product.brand, style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -47,7 +65,8 @@ Widget _buildProductCard(DemoProduct product) {
         const Icon(Icons.add_shopping_cart, size: 20),
       ],
     ),
-    theme: FluxCardThemeData.elevated.copyWith(spacing: 4),
+
+    theme: FluxCardThemeData.elevated.copyWith(spacing: 2, padding: EdgeInsets.all(8)),
     onTap: () {},
   );
 }
@@ -93,6 +112,7 @@ Widget buildGridViewUseCase(BuildContext context) {
   path: '[Flux Card]/Views (Scrollables)',
 )
 Widget buildSliverListUseCase(BuildContext context) {
+  final posts = [...demoPosts, ...demoPosts, ...demoPosts, ...demoPosts];
   return Scaffold(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: CustomScrollView(
@@ -103,15 +123,15 @@ Widget buildSliverListUseCase(BuildContext context) {
           expandedHeight: 120,
           flexibleSpace: FlexibleSpaceBar(background: ColoredBox(color: Colors.blue)),
         ),
+
         SliverPadding(
           padding: const EdgeInsets.all(16),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _buildPostCard(demoPosts[index]),
-              );
-            }, childCount: demoPosts.length),
+          sliver: SliverList.builder(
+            itemCount: posts.length,
+            itemBuilder: (BuildContext context, int index) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: _buildPostCard(posts[index]),
+            ),
           ),
         ),
       ],
@@ -125,14 +145,7 @@ Widget buildSliverListUseCase(BuildContext context) {
   path: '[Flux Card]/Views (Scrollables)',
 )
 Widget buildSliverGridUseCase(BuildContext context) {
-  final screenWidth = MediaQuery.sizeOf(context).width;
-  final isNarrow = screenWidth < 600;
-
-  final products = [
-    ...demoProducts,
-    ...demoProducts,
-    ...demoProducts,
-  ];
+  final products = [...demoProducts, ...demoProducts, ...demoProducts, ...demoProducts];
 
   return Scaffold(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -145,24 +158,25 @@ Widget buildSliverGridUseCase(BuildContext context) {
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.purple, Colors.orange],
-                ),
+                gradient: LinearGradient(colors: [Colors.purple, Colors.orange]),
               ),
             ),
           ),
         ),
+
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isNarrow ? 1 : 2,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 200,
+              mainAxisExtent: 276,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: isNarrow ? 0.75 : 0.68,
+              //childAspectRatio: 0.64,
             ),
+
             delegate: SliverChildBuilderDelegate(
-                  (context, index) => _buildProductCard(products[index]),
+              (context, index) => _buildProductCard(products[index]),
               childCount: products.length,
             ),
           ),
