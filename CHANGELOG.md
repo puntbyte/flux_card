@@ -1,4 +1,46 @@
-## [0.1.0] - Initial release
+## [0.2.0]
+
+### Added
+
+- **Simple Card Factory**: Added `FluxCard.simple()` boilerplate-reducing factory constructor for 
+  quickly generating standard text-and-action cards without manually writing out `FluxSection` and 
+  `FluxContent` primitives.
+- **Expandable Media**: Added `isMediaExpanded` property to `FluxCard`. When `true`, the media slot 
+  will dynamically stretch to fill remaining vertical space. Includes automatic safety-checks that 
+  gracefully disable expansion when placed inside unbounded-height scrolling parents to prevent 
+  layout crashes.
+- **Semantic Merging**: Added `mergeSemantics` property to `FluxCard` and `FluxCardThemeData`. When 
+  enabled, the card is wrapped in a `MergeSemantics` widget, allowing screen readers 
+  (VoiceOver/TalkBack) to read the entire card as a single cohesive element.
+- **New Widgetbook Use Cases**: Added interactive demos for `Expandable Media`, `Simple Card`, and 
+  `Row — Fixed Width (Flex Content)`.
+
+### Changed / Improved
+
+- **Exact Pixel Widths in Row Layout**: Improved `FluxMatchHeightRow` layout algorithm. The row 
+  layout now automatically detects if a `FluxMedia` slot has a strict pixel width 
+  (e.g., `width: 120`) and prioritizes that exact size, dynamically distributing all remaining 
+  horizontal space to the content block instead of strictly enforcing flex ratios.
+- **Breakout Overlay Performance**: Extracted breakout overlay rendering into a dedicated 
+  `FluxBreakoutStack` stateful widget. This massive performance win ensures that post-frame 
+  geometry recalculations for extruding overlays no longer trigger a rebuild of the entire card and 
+  its contents.
+- **Internal Architecture**: Split `flux_card.dart` into smaller, single-responsibility files and 
+  abstracted layer sorting into a dedicated `FluxLayerPartitions` utility for better 
+  maintainability.
+
+### Documentation
+
+- **Gallery Layout**: Replaced the stacked image preview in the `README.md` with a visually 
+  balanced, responsive grid layout grouped by aspect ratio to better highlight layout flexibility.
+
+### Fixed
+
+- **Intrinsic Layout Crash**: Replaced the internal `LayoutBuilder` inside `FluxMedia` with a 
+  custom `_FallbackHeightBox` render object. This prevents framework-level `RenderFlex` assertion 
+  crashes that occurred when rows queried the media slot for its intrinsic dimensions.
+
+## [0.1.0]
 
 First public release of `flux_card`.
 
@@ -6,10 +48,12 @@ First public release of `flux_card`.
 
 #### Core card system
 
-- Added `FluxCard` as the root card widget with named slots for `media`, `header`, `body`, and `footer`
+- Added `FluxCard` as the root card widget with named slots for `media`, `header`, `body`, and
+  `footer`
 - Added support for layout modes: `column`, `row`, `responsive`, and `inline`
 - Added `mediaPosition` and `mediaSpan` controls for flexible slot arrangements
-- Added support for `foregroundColor`, `decoration`, semantic labels, interactions, and explicit/full size constraints
+- Added support for `foregroundColor`, `decoration`, semantic labels, interactions, and
+  explicit/full size constraints
 
 #### Card building primitives
 
@@ -49,7 +93,8 @@ First public release of `flux_card`.
 
 #### Tooling and examples
 
-- Added Widgetbook use cases for cards, overlays, underlays, loading, themes, notches, and advanced compositions
+- Added Widgetbook use cases for cards, overlays, underlays, loading, themes, notches, and advanced
+  compositions
 - Added example app patterns such as blog, product, and destination cards
 - Added package tests covering components, layout behavior, shapes, and card interactions
 

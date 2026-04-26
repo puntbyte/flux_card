@@ -1,7 +1,7 @@
 name: flux_card
 description: >-
   A constraint-aware, domain-agnostic, composition-first card layout engine for Flutter.
-version: 0.1.0
+version: 0.2.0
 
 homepage: https://github.com/puntbyte/flux_card
 repository: https://github.com/puntbyte/flux_card
@@ -27,7 +27,6 @@ screenshots:
     path: screenshots/screenshot_5.jpg
   - description: Horizontal card preview using a row layout.
     path: screenshots/screenshot_6.jpg
-
 
 environment:
   sdk: ^3.10.0

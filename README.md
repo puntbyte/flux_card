@@ -13,19 +13,29 @@ It gives you:
 * notch support
 * built-in loading skeletons
 * theme presets with `ThemeExtension`
+* **[NEW]** zero-boilerplate `FluxCard.simple()` factory
+* **[NEW]** expandable media and screen-reader semantics merging
 
-Version **0.1.0** is the first public release.
+Version **0.2.0** is the latest public release.
 
 ---
 
 ## Preview
 
-![Profile card preview](screenshots/screenshot_1.jpg)
-![Ticket cards preview](screenshots/screenshot_2.jpg)
-![Breakout card preview](screenshots/screenshot_3.jpg)
-![Overlay card preview](screenshots/screenshot_4.jpg)
-![Vertical card preview](screenshots/screenshot_5.jpg)
-![Horizontal card preview](screenshots/screenshot_6.jpg)
+<p align="center">
+  <img src="screenshots/screenshot_3.jpg" width="100%" alt="Breakout card preview" />
+</p>
+<p align="center">
+  <img src="screenshots/screenshot_1.jpg" width="49%" alt="Profile card preview" />
+  <img src="screenshots/screenshot_5.jpg" width="49%" alt="Vertical card preview" />
+</p>
+<p align="center">
+  <img src="screenshots/screenshot_2.jpg" width="49%" alt="Ticket cards preview" />
+  <img src="screenshots/screenshot_4.jpg" width="49%" alt="Overlay card preview" />
+</p>
+<p align="center">
+  <img src="screenshots/screenshot_6.jpg" width="100%" alt="Horizontal card preview" />
+</p>
 
 ---
 
@@ -54,9 +64,10 @@ At that point, teams usually either duplicate UI or build fragile ad-hoc abstrac
 
 ## Features
 
-* `FluxCard` root widget
+* `FluxCard` root widget and zero-boilerplate `FluxCard.simple()` factory
 * Named slots: `media`, `header`, `body`, `footer`
 * Layout modes: `column`, `row`, `responsive`, `inline`
+* Expandable media support (`isMediaExpanded`) for uniform grid heights
 * `FluxMedia`, `FluxSection`, and `FluxContent` helper widgets
 * `FluxOverlay` and `FluxUnderlay` with slot targeting
 * `FluxOverlayBehavior.breakout` for extruding overlays without disabling card clipping
@@ -73,7 +84,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flux_card: ^0.1.0
+  flux_card: ^0.2.0
 ```
 
 Then import:
@@ -85,6 +96,8 @@ import 'package:flux_card/flux_card.dart';
 ---
 
 ## Quick start
+
+For highly composed cards, use the default constructor with slot primitives:
 
 ```dart
 FluxCard(
@@ -103,15 +116,33 @@ FluxCard(
   body: const Text('Body content goes here.'),
   footer: FluxSection.footer(
     padding: EdgeInsets.zero,
-    actions: [
+    actions:[
       FilledButton(
-        onPressed: null,
+        onPressed: () {},
         child: Text('Action'),
       ),
     ],
   ),
   theme: FluxCardThemeData.elevated,
   onTap: () {},
+)
+```
+
+If you just need a standard text-and-action card without the boilerplate, use the `.simple` factory:
+
+```dart
+FluxCard.simple(
+  title: 'Simple Card',
+  subtitle: 'Zero boilerplate',
+  description: 'A fast way to build standard cards.',
+  ctaLabel: 'Learn More',
+  onCtaPressed: () {},
+  media: FluxMedia.image(
+    aspectRatio: 16 / 9,
+    image: const NetworkImage('https://example.com/image.jpg'),
+    fit: BoxFit.cover,
+  ),
+  theme: FluxCardThemeData.elevated,
 )
 ```
 
@@ -182,6 +213,7 @@ FluxCard({
   FluxLayoutMode layout = FluxLayoutMode.column,
   FluxMediaPosition mediaPosition = FluxMediaPosition.start,
   FluxMediaSpan mediaSpan = FluxMediaSpan.all,
+  bool isMediaExpanded = false,
   Widget? media,
   Widget? header,
   Widget? body,
@@ -199,6 +231,7 @@ FluxCard({
   FluxCardThemeData? theme,
   Clip? clipBehavior,
   String? semanticLabel,
+  bool? mergeSemantics,
   VoidCallback? onTap,
   VoidCallback? onLongPress,
   bool loading = false,
@@ -206,7 +239,7 @@ FluxCard({
 })
 ```
 
-Use `FluxCard` when you want a reusable card surface that can scale from simple content cards to 
+Use `FluxCard` when you want a reusable card surface that can scale from simple content cards to
 highly composed promo or commerce layouts.
 
 ---
@@ -256,6 +289,7 @@ Good for:
 
 Also includes:
 
+* `FluxSection.header(...)`
 * `FluxSection.footer(...)`
 
 ---
@@ -298,7 +332,7 @@ FluxOverlay(
 Use `behavior` to control how overlays are rendered:
 
 * `FluxOverlayBehavior.contained` keeps the overlay inside the card layer
-* `FluxOverlayBehavior.breakout` allows the overlay to extend outside the card while the card 
+* `FluxOverlayBehavior.breakout` allows the overlay to extend outside the card while the card
   itself remains clipped
 
 Example:
@@ -308,7 +342,7 @@ FluxOverlay(
   behavior: FluxOverlayBehavior.breakout,
   targets: const {FluxTarget.media},
   alignment: Alignment.bottomRight,
-  children: [
+  children:[
     SizedBox(
       width: 120,
       height: 180,
@@ -318,7 +352,8 @@ FluxOverlay(
 )
 ```
 
-This is the recommended way to build extruding overlays.
+This is the recommended way to build extruding overlays. *Note: Breakout overlays are 
+rendering-optimized and will not cause unnecessary layout rebuilds.*
 
 ---
 
@@ -331,7 +366,7 @@ FluxUnderlay(
   targets: const {FluxTarget.card},
   decoration: BoxDecoration(
     gradient: LinearGradient(
-      colors: [Color(0x11000000), Color(0x00000000)],
+      colors:[Color(0x11000000), Color(0x00000000)],
     ),
   ),
 )
@@ -386,7 +421,7 @@ FluxCard(
     notchDepth: 14,
   ),
   divider: const FluxDivider(
-    afterHeader: Divider(height: 1),
+    afterHeader: FluxDashedDivider(),
   ),
   theme: FluxCardThemeData.outlined,
   header: const Text('Concert Ticket'),
@@ -470,7 +505,7 @@ App-wide example:
 ```dart
 MaterialApp(
   theme: ThemeData(
-    extensions: [
+    extensions:[
       FluxCardThemeData.elevated,
     ],
   ),
@@ -505,13 +540,41 @@ Best for:
 * list rows
 * side-by-side media/content cards
 
+**Tip for Fixed Widths:** By default, `Row` mode distributes horizontal space via `flexMedia` and 
+`flexContent` ratios in the theme. If you need an exact pixel size for your image, just assign an 
+explicit `width` to `FluxMedia(width: 120)`—the layout engine will automatically respect it and 
+give all remaining flexible space to the content block!
+
 ```dart
 FluxCard(
   layout: FluxLayoutMode.row,
   mediaPosition: FluxMediaPosition.start,
+  media: FluxMedia(
+    width: 120, // Forces an exact width, while content flexes to fill the rest
+    child: ...
+  ),
   ...
 )
 ```
+
+## Expandable Media (`isMediaExpanded`)
+
+When placing cards inside a layout with fixed heights (like a `GridView` or an explicitly sized 
+parent container), you often want the media image to stretch and absorb all the remaining vertical 
+space so all cards look uniform.
+
+```dart
+FluxCard(
+  isMediaExpanded: true,
+  media: FluxMedia(
+    child: Ink.image(image: NetworkImage(url), fit: BoxFit.cover),
+  ),
+  ...
+)
+```
+*(Note: Safety checks are built-in. If you put an expanded card inside an unbounded scrolling view 
+like `ListView`, the layout engine intelligently disables expansion to prevent Flutter crash 
+exceptions.)*
 
 ## Responsive
 
@@ -548,11 +611,11 @@ FluxCard(
       fit: BoxFit.cover,
     ),
   ),
-  overlays: [
+  overlays:[
     FluxOverlay(
       targets: const {FluxTarget.media},
       alignment: Alignment.topLeft,
-      children: [
+      children:[
         Chip(label: Text('Sale')),
       ],
     ),
@@ -564,7 +627,7 @@ FluxCard(
   ),
   footer: FluxSection.footer(
     padding: EdgeInsets.zero,
-    actions: [
+    actions:[
       FilledButton(
         onPressed: null,
         child: Text('Add to cart'),
@@ -587,12 +650,12 @@ FluxCard(
       fit: BoxFit.cover,
     ),
   ),
-  overlays: [
+  overlays:[
     FluxOverlay(
       behavior: FluxOverlayBehavior.breakout,
       targets: const {FluxTarget.media},
       alignment: Alignment.bottomRight,
-      children: [
+      children:[
         SizedBox(
           width: 120,
           height: 160,
@@ -618,8 +681,8 @@ FluxCard(
     boundary: FluxSlotBoundary.afterHeader,
     notchDepth: 14,
   ),
-  divider: const FluxDivider(
-    afterHeader: Divider(height: 1),
+  divider: FluxDivider(
+    afterHeader: FluxDashedDivider(indent: 14, endIndent: 14),
   ),
   theme: FluxCardThemeData.outlined,
   header: const FluxSection(
@@ -636,6 +699,8 @@ FluxCard(
 ## Accessibility
 
 * `semanticLabel` lets you describe the card for assistive technologies
+* **[NEW]** `mergeSemantics: true` combines all inner text nodes so Screen Readers announce the 
+  card cohesively in one swipe. Can be set globally via `FluxCardThemeData` or per-card.
 * cards automatically expose button semantics when `onTap` or `onLongPress` is provided
 * `foregroundColor` helps propagate a readable default foreground color through slot content
 
@@ -647,7 +712,7 @@ The package includes:
 
 * a Widgetbook project for interactive exploration
 * an example app
-* use cases for cards, overlays, underlays, themes, notches, and scrollable layouts
+* use cases for cards, overlays, underlays, loading, themes, notches, and scrollable layouts
 
 Recommended screenshot sections for this README:
 
@@ -658,16 +723,19 @@ Recommended screenshot sections for this README:
 
 ---
 
-## Version 0.1.0 notes
+## Version 0.2.0 notes
 
-`0.1.0` is the first public release and focuses on:
+`0.2.0` introduces major developer experience and performance improvements:
 
-* core card composition primitives
-* layered slot rendering
-* theme-driven styling
-* loading skeleton support
-* notch-based card shapes
-* Widgetbook examples and package tests
+* **Simple Card Factory**: Added `FluxCard.simple()` to quickly build standard cards with zero 
+  boilerplate.
+* **Expandable Media**: Added `isMediaExpanded` to dynamically stretch media inside `GridView`s 
+  without crashing unconstrained lists.
+* **Exact Pixel Row Layouts**: `FluxMatchHeightRow` now perfectly respects explicit widths on 
+  `FluxMedia` (e.g. `width: 120`) while allocating remaining space to flex content.
+* **Semantic Merging**: Added `mergeSemantics` for robust screen-reader accessibility.
+* **Breakout Rendering Performance**: Extracted breakout overlays into an isolated render tree to 
+  prevent entire-card rebuilds during geometry checks.
 
 ---
 
@@ -679,9 +747,3 @@ Possible future directions:
 * more notch styles
 * richer Widgetbook showcases
 * higher-level convenience factories for common card patterns
-
----
-
-## License
-
-MIT
