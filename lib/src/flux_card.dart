@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'components/flux_overlay.dart';
+import 'components/flux_breakout_stack.dart';
+import 'components/flux_section.dart';
 import 'components/flux_underlay.dart';
 import 'core/constraints.dart';
 import 'core/enums.dart';
+import 'core/layer_partitions.dart';
 import 'core/theme.dart';
 import 'divider/flux_divider.dart';
 import 'layout/boundary_tracker.dart';
@@ -18,6 +20,7 @@ class FluxCard extends StatefulWidget {
     this.layout = FluxLayoutMode.column,
     this.mediaPosition = FluxMediaPosition.start,
     this.mediaSpan = FluxMediaSpan.all,
+    this.isMediaExpanded = false,
     this.media,
     this.header,
     this.body,
@@ -35,15 +38,68 @@ class FluxCard extends StatefulWidget {
     this.theme,
     this.clipBehavior,
     this.semanticLabel,
+    this.mergeSemantics,
     this.onTap,
     this.onLongPress,
     this.loading = false,
     this.loadingWrapper,
   });
 
+  /// A convenient factory for creating a simple, standard card without boilerplate.
+  factory FluxCard.simple({
+    Key? key,
+    String? title,
+    String? subtitle,
+    String? description,
+    Widget? media,
+    String? ctaLabel,
+    VoidCallback? onCtaPressed,
+    VoidCallback? onTap,
+    FluxLayoutMode layout = FluxLayoutMode.column,
+    bool isMediaExpanded = false,
+    FluxCardThemeData? theme,
+    bool? mergeSemantics,
+  }) {
+    return FluxCard(
+      key: key,
+      layout: layout,
+      theme: theme,
+      onTap: onTap,
+      isMediaExpanded: isMediaExpanded,
+      mergeSemantics: mergeSemantics,
+      media: media,
+      header: (title != null || subtitle != null || description != null)
+          ? FluxSection.header(
+        title: title != null ? Text(title) : null,
+        subtitle: subtitle != null ? Text(subtitle) : null,
+        description: description != null ? Text(description) : null,
+        padding: EdgeInsets.zero,
+      )
+          : null,
+      footer: (ctaLabel != null)
+          ? FluxSection.footer(
+        padding: EdgeInsets.zero,
+        actions:[
+          FilledButton(
+            onPressed: onCtaPressed,
+            child: Text(ctaLabel),
+          ),
+        ],
+      )
+          : null,
+    );
+  }
+
   final FluxLayoutMode layout;
   final FluxMediaPosition mediaPosition;
   final FluxMediaSpan mediaSpan;
+
+  /// Whether the media slot should expand to fill remaining vertical space.
+  ///
+  /// Automatically ignored if the card is placed in an unbounded height
+  /// context (like a `ListView`) to prevent layout exceptions.
+  final bool isMediaExpanded;
+
   final Widget? media;
   final Widget? header;
   final Widget? body;
@@ -61,6 +117,7 @@ class FluxCard extends StatefulWidget {
   final FluxCardThemeData? theme;
   final Clip? clipBehavior;
   final String? semanticLabel;
+  final bool? mergeSemantics;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final bool loading;
@@ -71,17 +128,15 @@ class FluxCard extends StatefulWidget {
 }
 
 class _FluxCardState extends State<FluxCard> {
-  final BoundaryTracker _cardTracker = BoundaryTracker();
-  final BoundaryTracker _afterMediaTracker = BoundaryTracker();
-  final BoundaryTracker _afterHeaderTracker = BoundaryTracker();
-  final BoundaryTracker _afterBodyTracker = BoundaryTracker();
+  final _cardTracker = BoundaryTracker();
+  final _afterMediaTracker = BoundaryTracker();
+  final _afterHeaderTracker = BoundaryTracker();
+  final _afterBodyTracker = BoundaryTracker();
 
-  final BoundaryTracker _mediaTracker = BoundaryTracker();
-  final BoundaryTracker _headerTracker = BoundaryTracker();
-  final BoundaryTracker _bodyTracker = BoundaryTracker();
-  final BoundaryTracker _footerTracker = BoundaryTracker();
-
-  bool _breakoutRebuildScheduled = false;
+  final _mediaTracker = BoundaryTracker();
+  final _headerTracker = BoundaryTracker();
+  final _bodyTracker = BoundaryTracker();
+  final _footerTracker = BoundaryTracker();
 
   Map<FluxSlotBoundary, BoundaryTracker> get _boundaryTrackers => {
     FluxSlotBoundary.afterMedia: _afterMediaTracker,
@@ -97,7 +152,10 @@ class _FluxCardState extends State<FluxCard> {
   };
 
   bool get _needsLayoutBuilder =>
-      widget.layout == FluxLayoutMode.responsive || widget.fullWidth || widget.fullHeight;
+      widget.layout == FluxLayoutMode.responsive ||
+          widget.fullWidth ||
+          widget.fullHeight ||
+          widget.isMediaExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -109,21 +167,21 @@ class _FluxCardState extends State<FluxCard> {
       data: effectiveTheme,
       child: _needsLayoutBuilder
           ? LayoutBuilder(
-              builder: (context, constraints) => _buildCard(
-                context: context,
-                theme: effectiveTheme,
-                textDirection: textDirection,
-                resolvedPadding: resolvedPadding,
-                parentConstraints: constraints,
-              ),
-            )
+        builder: (context, constraints) => _buildCard(
+          context: context,
+          theme: effectiveTheme,
+          textDirection: textDirection,
+          resolvedPadding: resolvedPadding,
+          parentConstraints: constraints,
+        ),
+      )
           : _buildCard(
-              context: context,
-              theme: effectiveTheme,
-              textDirection: textDirection,
-              resolvedPadding: resolvedPadding,
-              parentConstraints: null,
-            ),
+        context: context,
+        theme: effectiveTheme,
+        textDirection: textDirection,
+        resolvedPadding: resolvedPadding,
+        parentConstraints: null,
+      ),
     );
   }
 
@@ -156,18 +214,18 @@ class _FluxCardState extends State<FluxCard> {
       textDirection: textDirection,
     );
 
-    final layers = _partitionLayers();
+    final layers = FluxLayerPartitions.partition(widget.underlays, widget.overlays);
 
     final cardContent = widget.loading
         ? _buildLoadingContent(layout: resolvedLayout, theme: theme)
         : _buildLiveContent(
-            context: context,
-            layout: resolvedLayout,
-            theme: theme,
-            resolvedPadding: resolvedPadding,
-            parentConstraints: parentConstraints,
-            layers: layers,
-          );
+      context: context,
+      layout: resolvedLayout,
+      theme: theme,
+      resolvedPadding: resolvedPadding,
+      parentConstraints: parentConstraints,
+      layers: layers,
+    );
 
     Widget contentTree = _buildContentTree(context: context, cardContent: cardContent);
 
@@ -182,7 +240,7 @@ class _FluxCardState extends State<FluxCard> {
       cardWidget = IntrinsicWidth(child: cardWidget);
     }
 
-    cardWidget = _wrapSemantics(cardWidget);
+    cardWidget = _wrapSemantics(cardWidget, theme);
 
     final trackedCard = BoundaryMarker(
       tracker: _cardTracker,
@@ -193,23 +251,18 @@ class _FluxCardState extends State<FluxCard> {
       ),
     );
 
-    final breakoutEntries = _buildBreakoutOverlayEntries(layers.breakoutOverlays);
-
-    if (breakoutEntries.isEmpty) {
-      return trackedCard;
-    }
-
-    return Stack(clipBehavior: Clip.none, children: [trackedCard, ...breakoutEntries]);
+    return FluxBreakoutStack(
+      cardTracker: _cardTracker,
+      slotTrackers: _slotTrackers,
+      overlays: layers.breakoutOverlays,
+      child: trackedCard,
+    );
   }
 
   bool _isResponsiveUnboundedFallback(FluxCardConstraints cardConstraints) {
-    if (widget.layout != FluxLayoutMode.responsive) {
-      return false;
-    }
-
+    if (widget.layout != FluxLayoutMode.responsive) return false;
     final hasBoundedAvailableWidth =
         cardConstraints.resolvedWidth != null || cardConstraints.parentConstraints.hasBoundedWidth;
-
     return !hasBoundedAvailableWidth;
   }
 
@@ -221,11 +274,9 @@ class _FluxCardState extends State<FluxCard> {
     if (widget.layout != FluxLayoutMode.responsive) {
       return widget.layout;
     }
-
     if (isResponsiveUnboundedFallback) {
       return FluxLayoutMode.column;
     }
-
     return cardConstraints.availableWidth >= theme.responsiveBreakpoint
         ? FluxLayoutMode.row
         : FluxLayoutMode.column;
@@ -237,10 +288,7 @@ class _FluxCardState extends State<FluxCard> {
     required TextDirection textDirection,
   }) {
     final notch = widget.notch;
-
-    if (notch == null) {
-      return theme.resolveShape(context);
-    }
+    if (notch == null) return theme.resolveShape(context);
 
     final borderRadius = notch.borderRadius ?? theme.borderRadius.resolve(textDirection);
 
@@ -255,6 +303,31 @@ class _FluxCardState extends State<FluxCard> {
       notchSide: notch.notchSide,
       side: theme.resolveBorderSide(context),
     );
+  }
+
+  double? _resolveNotchPosition(Rect cardRect) {
+    final notch = widget.notch;
+    if (notch == null || !notch.isTargeted) return null;
+
+    final markerBox = _boundaryTrackers[notch.boundary!]?.renderBox;
+    final cardBox = _cardTracker.renderBox;
+
+    if (markerBox == null || cardBox == null) return null;
+
+    try {
+      final textDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+      final resolvedAlignment = notch.boundaryAlignment.resolve(textDirection);
+
+      final pointInMarker = resolvedAlignment.alongSize(markerBox.size);
+      final pointInCard = markerBox.localToGlobal(pointInMarker, ancestor: cardBox);
+
+      if (notch.edge == FluxNotchEdge.vertical) {
+        return ((pointInCard.dy + notch.boundaryOffset) / cardRect.height).clamp(0.0, 1.0);
+      }
+      return ((pointInCard.dx + notch.boundaryOffset) / cardRect.width).clamp(0.0, 1.0);
+    } catch (_) {
+      return null;
+    }
   }
 
   Widget _buildLoadingContent({required FluxLayoutMode layout, required FluxCardThemeData theme}) {
@@ -277,30 +350,34 @@ class _FluxCardState extends State<FluxCard> {
     required FluxCardThemeData theme,
     required EdgeInsets resolvedPadding,
     required BoxConstraints? parentConstraints,
-    required _PartitionedLayers layers,
+    required FluxLayerPartitions layers,
   }) {
-    final mainContent =
-        FluxCardLayout(
-          mode: layout,
-          mediaPosition: widget.mediaPosition,
-          mediaSpan: widget.mediaSpan,
-          theme: theme,
-          resolvedPadding: resolvedPadding,
-          divider: widget.divider,
-          boundaryTrackers: widget.notch?.isTargeted == true ? _boundaryTrackers : null,
-          slotTrackers: _slotTrackers,
-          parentConstraints: parentConstraints,
-        ).build(
-          context,
-          media: widget.media,
-          header: widget.header,
-          body: widget.body,
-          footer: widget.footer,
-          underlaysByTarget: layers.underlaysByTarget,
-          ovsByTarget: layers.overlaysByTarget,
-          multiUnderlays: layers.multiUnderlays,
-          multiOvs: layers.multiOverlays,
-        );
+    // Only permit expansion if we are in an explicitly bounded environment
+    final canExpand = widget.isMediaExpanded &&
+        (widget.height != null || (parentConstraints != null && parentConstraints.hasBoundedHeight));
+
+    final mainContent = FluxCardLayout(
+      mode: layout,
+      mediaPosition: widget.mediaPosition,
+      mediaSpan: widget.mediaSpan,
+      isMediaExpanded: canExpand,
+      theme: theme,
+      resolvedPadding: resolvedPadding,
+      divider: widget.divider,
+      boundaryTrackers: widget.notch?.isTargeted == true ? _boundaryTrackers : null,
+      slotTrackers: _slotTrackers,
+      parentConstraints: parentConstraints,
+    ).build(
+      context,
+      media: widget.media,
+      header: widget.header,
+      body: widget.body,
+      footer: widget.footer,
+      underlaysByTarget: layers.underlaysByTarget,
+      ovsByTarget: layers.overlaysByTarget,
+      multiUnderlays: layers.multiUnderlays,
+      multiOvs: layers.multiOverlays,
+    );
 
     if (layers.globalUnderlays.isEmpty && layers.globalOverlays.isEmpty) {
       return mainContent;
@@ -309,9 +386,9 @@ class _FluxCardState extends State<FluxCard> {
     return Stack(
       fit: StackFit.passthrough,
       clipBehavior: Clip.none,
-      children: [
+      children:[
         ...layers.globalUnderlays.map(
-          (underlay) => FluxUnderlay.buildPositioned(context, underlay),
+              (underlay) => FluxUnderlay.buildPositioned(context, underlay),
         ),
         mainContent,
         ...layers.globalOverlays.map((overlay) => Positioned.fill(child: overlay)),
@@ -382,230 +459,22 @@ class _FluxCardState extends State<FluxCard> {
     );
   }
 
-  Widget _wrapSemantics(Widget child) {
-    if (widget.semanticLabel == null) {
-      return child;
+  Widget _wrapSemantics(Widget child, FluxCardThemeData theme) {
+    Widget wrapped = child;
+
+    if (widget.semanticLabel != null) {
+      wrapped = Semantics(
+        container: true,
+        button: widget.onTap != null || widget.onLongPress != null,
+        label: widget.semanticLabel,
+        child: wrapped,
+      );
     }
 
-    return Semantics(
-      container: true,
-      button: widget.onTap != null || widget.onLongPress != null,
-      label: widget.semanticLabel,
-      child: child,
-    );
+    if (widget.mergeSemantics ?? theme.mergeSemantics) {
+      wrapped = MergeSemantics(child: wrapped);
+    }
+
+    return wrapped;
   }
-
-  _PartitionedLayers _partitionLayers() {
-    final allUnderlays = widget.underlays ?? const <Widget>[];
-    final allOverlays = widget.overlays ?? const <Widget>[];
-
-    final underlaysByTarget = <FluxTarget, List<Widget>>{};
-    final overlaysByTarget = <FluxTarget, List<Widget>>{};
-    final multiUnderlays = <Widget>[];
-    final multiOverlays = <Widget>[];
-    final globalUnderlays = <Widget>[];
-    final globalOverlays = <Widget>[];
-    final breakoutOverlays = <FluxOverlay>[];
-
-    for (final underlay in allUnderlays) {
-      if (underlay is FluxUnderlay) {
-        if (underlay.isGlobal) {
-          globalUnderlays.add(underlay);
-        } else if (underlay.targets.length == 1) {
-          (underlaysByTarget[underlay.targets.first] ??= <Widget>[]).add(underlay);
-        } else {
-          multiUnderlays.add(underlay);
-        }
-      } else {
-        globalUnderlays.add(underlay);
-      }
-    }
-
-    for (final overlay in allOverlays) {
-      if (overlay is FluxOverlay) {
-        if (overlay.isBreakout) {
-          breakoutOverlays.add(overlay);
-        } else if (overlay.isGlobal) {
-          globalOverlays.add(overlay);
-        } else if (overlay.targets.length == 1) {
-          (overlaysByTarget[overlay.targets.first] ??= <Widget>[]).add(overlay);
-        } else {
-          multiOverlays.add(overlay);
-        }
-      } else {
-        globalOverlays.add(overlay);
-      }
-    }
-
-    int zIndexOf(Widget widget) {
-      if (widget is FluxOverlay) return widget.zIndex;
-      if (widget is FluxUnderlay) return widget.zIndex;
-      return 0;
-    }
-
-    globalOverlays.sort((a, b) => zIndexOf(a).compareTo(zIndexOf(b)));
-    multiOverlays.sort((a, b) => zIndexOf(a).compareTo(zIndexOf(b)));
-    breakoutOverlays.sort((a, b) => a.zIndex.compareTo(b.zIndex));
-    for (final list in overlaysByTarget.values) {
-      list.sort((a, b) => zIndexOf(a).compareTo(zIndexOf(b)));
-    }
-
-    globalUnderlays.sort((a, b) => zIndexOf(a).compareTo(zIndexOf(b)));
-    for (final list in underlaysByTarget.values) {
-      list.sort((a, b) => zIndexOf(a).compareTo(zIndexOf(b)));
-    }
-
-    multiUnderlays.sort((a, b) => zIndexOf(b).compareTo(zIndexOf(a)));
-
-    return _PartitionedLayers(
-      underlaysByTarget: underlaysByTarget,
-      overlaysByTarget: overlaysByTarget,
-      multiUnderlays: multiUnderlays,
-      multiOverlays: multiOverlays,
-      globalUnderlays: globalUnderlays,
-      globalOverlays: globalOverlays,
-      breakoutOverlays: breakoutOverlays,
-    );
-  }
-
-  List<Widget> _buildBreakoutOverlayEntries(List<FluxOverlay> overlays) {
-    if (overlays.isEmpty) {
-      return const <Widget>[];
-    }
-
-    final entries = <Widget>[];
-    var needsRetry = _cardTracker.renderBox == null;
-
-    for (final overlay in overlays) {
-      final rect = _resolveOverlayAnchorRect(overlay);
-      if (rect == null) {
-        needsRetry = true;
-        continue;
-      }
-
-      entries.add(Positioned.fromRect(rect: rect, child: overlay));
-    }
-
-    if (needsRetry) {
-      _scheduleBreakoutOverlayRebuild();
-    }
-
-    return entries;
-  }
-
-  Rect? _resolveOverlayAnchorRect(FluxOverlay overlay) {
-    final cardBox = _cardTracker.renderBox;
-    if (cardBox == null) {
-      return null;
-    }
-
-    if (overlay.isGlobal || overlay.targets.contains(FluxTarget.card)) {
-      return Offset.zero & cardBox.size;
-    }
-
-    final rects = <Rect>[];
-
-    for (final target in overlay.targets) {
-      final rect = _resolveTargetRect(target);
-      if (rect != null) {
-        rects.add(rect);
-      }
-    }
-
-    if (rects.isEmpty) {
-      return null;
-    }
-
-    Rect union = rects.first;
-    for (final rect in rects.skip(1)) {
-      union = union.expandToInclude(rect);
-    }
-
-    return union;
-  }
-
-  Rect? _resolveTargetRect(FluxTarget target) {
-    final cardBox = _cardTracker.renderBox;
-    if (cardBox == null) {
-      return null;
-    }
-
-    if (target == FluxTarget.card) {
-      return Offset.zero & cardBox.size;
-    }
-
-    final tracker = _slotTrackers[target];
-    final slotBox = tracker?.renderBox;
-    if (slotBox == null) {
-      return null;
-    }
-
-    final offset = slotBox.localToGlobal(Offset.zero, ancestor: cardBox);
-    return offset & slotBox.size;
-  }
-
-  void _scheduleBreakoutOverlayRebuild() {
-    if (_breakoutRebuildScheduled) {
-      return;
-    }
-
-    _breakoutRebuildScheduled = true;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _breakoutRebuildScheduled = false;
-      if (mounted) {
-        setState(() {});
-      }
-    });
-  }
-
-  double? _resolveNotchPosition(Rect cardRect) {
-    final notch = widget.notch;
-    if (notch == null || !notch.isTargeted) {
-      return null;
-    }
-
-    final markerBox = _boundaryTrackers[notch.boundary!]?.renderBox;
-    final cardBox = _cardTracker.renderBox;
-
-    if (markerBox == null || cardBox == null) {
-      return null;
-    }
-
-    try {
-      final textDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
-      final resolvedAlignment = notch.boundaryAlignment.resolve(textDirection);
-
-      final pointInMarker = resolvedAlignment.alongSize(markerBox.size);
-      final pointInCard = markerBox.localToGlobal(pointInMarker, ancestor: cardBox);
-
-      if (notch.edge == FluxNotchEdge.vertical) {
-        return ((pointInCard.dy + notch.boundaryOffset) / cardRect.height).clamp(0.0, 1.0);
-      }
-
-      return ((pointInCard.dx + notch.boundaryOffset) / cardRect.width).clamp(0.0, 1.0);
-    } catch (_) {
-      return null;
-    }
-  }
-}
-
-class _PartitionedLayers {
-  const _PartitionedLayers({
-    required this.underlaysByTarget,
-    required this.overlaysByTarget,
-    required this.multiUnderlays,
-    required this.multiOverlays,
-    required this.globalUnderlays,
-    required this.globalOverlays,
-    required this.breakoutOverlays,
-  });
-
-  final Map<FluxTarget, List<Widget>> underlaysByTarget;
-  final Map<FluxTarget, List<Widget>> overlaysByTarget;
-  final List<Widget> multiUnderlays;
-  final List<Widget> multiOverlays;
-  final List<Widget> globalUnderlays;
-  final List<Widget> globalOverlays;
-  final List<FluxOverlay> breakoutOverlays;
 }

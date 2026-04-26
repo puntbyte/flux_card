@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 /// A layout-only container for the media slot of a [FluxCard].
 ///
@@ -28,7 +29,7 @@ class FluxMedia extends StatelessWidget {
 
   /// Convenience constructor for images.
   ///
-  /// Automatically wraps the image in an [Ink] layer so that card ripples
+  /// Automatically wraps the image in an[Ink] layer so that card ripples
   /// wash seamlessly over the image, and handles [borderRadius] natively.
   const FluxMedia.image({
     super.key,
@@ -170,30 +171,10 @@ class FluxMedia extends StatelessWidget {
 
     // 4. Guard against greedy children in bounded-width / unbounded-height layouts
     //
-    // Example: row-layout FluxCard inside a scroll view, with FluxMedia(child: Ink.image(...))
-    // and no aspectRatio / no explicit height.
-    //
-    // In that case the slot has a finite width but unbounded height. Greedy children
-    // try to expand to the "biggest" size and can receive infinite height.
+    // Uses a custom render object instead of LayoutBuilder to avoid crashing
+    // the layout engine when intrinsic dimensions are evaluated by FluxMatchHeightRow.
     if (aspectRatio == null && height == null) {
-      final childForFallback = result;
-
-      result = LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxHeight.isFinite) {
-            return childForFallback;
-          }
-
-          final double? fallbackMaxHeight =
-              width ?? (constraints.maxWidth.isFinite ? constraints.maxWidth : null);
-
-          if (fallbackMaxHeight == null || fallbackMaxHeight <= 0) {
-            return childForFallback;
-          }
-
-          return LimitedBox(maxHeight: fallbackMaxHeight, child: childForFallback);
-        },
-      );
+      result = _FallbackHeightBox(explicitWidth: width, child: result);
     }
 
     // 5. Apply optional hardware clip
@@ -207,5 +188,62 @@ class FluxMedia extends StatelessWidget {
     }
 
     return result;
+  }
+}
+
+class _FallbackHeightBox extends SingleChildRenderObjectWidget {
+  const _FallbackHeightBox({required super.child, this.explicitWidth});
+
+  final double? explicitWidth;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderFallbackHeightBox(explicitWidth: explicitWidth);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderFallbackHeightBox renderObject) {
+    renderObject.explicitWidth = explicitWidth;
+  }
+}
+
+class _RenderFallbackHeightBox extends RenderProxyBox {
+  _RenderFallbackHeightBox({double? explicitWidth}) : _explicitWidth = explicitWidth;
+
+  double? _explicitWidth;
+
+  set explicitWidth(double? value) {
+    if (_explicitWidth == value) return;
+    _explicitWidth = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints _getFallbackConstraints(BoxConstraints constraints) {
+    if (!constraints.hasBoundedHeight) {
+      final fallbackMaxHeight =
+          _explicitWidth ?? (constraints.hasBoundedWidth ? constraints.maxWidth : null);
+      if (fallbackMaxHeight != null && fallbackMaxHeight > 0) {
+        return constraints.copyWith(maxHeight: fallbackMaxHeight);
+      }
+    }
+    return constraints;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      return constraints.constrain(child!.getDryLayout(_getFallbackConstraints(constraints)));
+    }
+    return computeSizeForNoChild(constraints);
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child!.layout(_getFallbackConstraints(constraints), parentUsesSize: true);
+      size = constraints.constrain(child!.size);
+    } else {
+      size = computeSizeForNoChild(constraints);
+    }
   }
 }

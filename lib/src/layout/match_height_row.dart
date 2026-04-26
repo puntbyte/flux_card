@@ -8,6 +8,9 @@ class FluxRowParentData extends BoxParentData {}
 
 /// A high-performance Row replacement that forces its children to exactly
 /// match the height of the tallest child in a single layout pass.
+///
+/// It correctly identifies explicitly sized `FluxMedia` widgets and grants them
+/// their requested width, distributing the remaining space to the content.
 class FluxMatchHeightRow extends SlottedMultiChildRenderObjectWidget<FluxRowSlot, RenderBox> {
   const FluxMatchHeightRow({
     super.key,
@@ -16,6 +19,7 @@ class FluxMatchHeightRow extends SlottedMultiChildRenderObjectWidget<FluxRowSlot
     required this.flexMedia,
     required this.flexContent,
     required this.mediaStart,
+    this.fixedMediaWidth,
   });
 
   final Widget media;
@@ -23,6 +27,7 @@ class FluxMatchHeightRow extends SlottedMultiChildRenderObjectWidget<FluxRowSlot
   final int flexMedia;
   final int flexContent;
   final bool mediaStart;
+  final double? fixedMediaWidth;
 
   @override
   Iterable<FluxRowSlot> get slots => FluxRowSlot.values;
@@ -39,12 +44,13 @@ class FluxMatchHeightRow extends SlottedMultiChildRenderObjectWidget<FluxRowSlot
 
   @override
   SlottedContainerRenderObjectMixin<FluxRowSlot, RenderBox> createRenderObject(
-    BuildContext context,
-  ) {
+      BuildContext context,
+      ) {
     return RenderFluxMatchHeightRow(
       flexMedia: flexMedia,
       flexContent: flexContent,
       mediaStart: mediaStart,
+      fixedMediaWidth: fixedMediaWidth,
     );
   }
 
@@ -53,7 +59,8 @@ class FluxMatchHeightRow extends SlottedMultiChildRenderObjectWidget<FluxRowSlot
     renderObject
       ..flexMedia = flexMedia
       ..flexContent = flexContent
-      ..mediaStart = mediaStart;
+      ..mediaStart = mediaStart
+      ..fixedMediaWidth = fixedMediaWidth;
   }
 }
 
@@ -63,9 +70,11 @@ class RenderFluxMatchHeightRow extends RenderBox
     required int flexMedia,
     required int flexContent,
     required bool mediaStart,
+    double? fixedMediaWidth,
   }) : _flexMedia = flexMedia,
-       _flexContent = flexContent,
-       _mediaStart = mediaStart;
+        _flexContent = flexContent,
+        _mediaStart = mediaStart,
+        _fixedMediaWidth = fixedMediaWidth;
 
   int _flexMedia;
 
@@ -97,11 +106,32 @@ class RenderFluxMatchHeightRow extends RenderBox
     markNeedsLayout();
   }
 
+  double? _fixedMediaWidth;
+
+  double? get fixedMediaWidth => _fixedMediaWidth;
+
+  set fixedMediaWidth(double? value) {
+    if (_fixedMediaWidth == value) return;
+    _fixedMediaWidth = value;
+    markNeedsLayout();
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! FluxRowParentData) {
       child.parentData = FluxRowParentData();
     }
+  }
+
+  double _getMediaMaxWidth(double totalAvailableWidth) {
+    // If the media child has a strict, fixed width (e.g. FluxMedia(width: 120)),
+    // respect it exactly instead of overriding it with flex ratios.
+    if (_fixedMediaWidth != null && _fixedMediaWidth! > 0 && _fixedMediaWidth! < double.infinity) {
+      return _fixedMediaWidth!;
+    }
+
+    final totalFlex = flexMedia + flexContent;
+    return (totalAvailableWidth * flexMedia / totalFlex).floorToDouble();
   }
 
   @override
@@ -120,19 +150,22 @@ class RenderFluxMatchHeightRow extends RenderBox
 
     double totalAvailableWidth = constraints.maxWidth;
     if (totalAvailableWidth == double.infinity) {
+      // For horizontal unbounded scroll views, allow the children to dictate the size.
       final intrinsicMedia = mediaChild.getMaxIntrinsicWidth(double.infinity);
       final intrinsicContent = contentChild.getMaxIntrinsicWidth(double.infinity);
       totalAvailableWidth = intrinsicMedia + intrinsicContent;
     }
 
-    final totalFlex = flexMedia + flexContent;
-    final mediaMaxWidth = (totalAvailableWidth * flexMedia / totalFlex).floorToDouble();
-    final contentWidth = totalAvailableWidth - mediaMaxWidth;
+    final mediaMaxWidth = _getMediaMaxWidth(totalAvailableWidth);
+    final contentWidth = math.max(0.0, totalAvailableWidth - mediaMaxWidth);
 
     final mediaSize = mediaChild.getDryLayout(BoxConstraints.tightFor(width: mediaMaxWidth));
     final contentSize = contentChild.getDryLayout(BoxConstraints.tightFor(width: contentWidth));
 
-    final maxHeight = math.max(mediaSize.height, contentSize.height);
+    double maxHeight = math.max(mediaSize.height, contentSize.height);
+
+    // Natively supports the Expanded wrapper in Column by forcing minimum constrained height.
+    maxHeight = math.max(maxHeight, constraints.minHeight);
 
     return constraints.constrain(Size(totalAvailableWidth, maxHeight));
   }
@@ -185,20 +218,23 @@ class RenderFluxMatchHeightRow extends RenderBox
 
     double totalAvailableWidth = constraints.maxWidth;
     if (totalAvailableWidth == double.infinity) {
+      // In unbounded horizontal scenarios, we compute the maximum intrinsic sizes manually.
       final intrinsicMedia = mediaChild.getMaxIntrinsicWidth(double.infinity);
       final intrinsicContent = contentChild.getMaxIntrinsicWidth(double.infinity);
       totalAvailableWidth = intrinsicMedia + intrinsicContent;
     }
 
-    final totalFlex = flexMedia + flexContent;
-    final mediaMaxWidth = (totalAvailableWidth * flexMedia / totalFlex).floorToDouble();
-    final contentWidth = totalAvailableWidth - mediaMaxWidth;
+    final mediaMaxWidth = _getMediaMaxWidth(totalAvailableWidth);
+    final contentWidth = math.max(0.0, totalAvailableWidth - mediaMaxWidth);
 
     // FIRST PASS: Calculate natural heights with loose height constraints
     mediaChild.layout(BoxConstraints.tightFor(width: mediaMaxWidth), parentUsesSize: true);
     contentChild.layout(BoxConstraints.tightFor(width: contentWidth), parentUsesSize: true);
 
-    final maxHeight = math.max(mediaChild.size.height, contentChild.size.height);
+    double maxHeight = math.max(mediaChild.size.height, contentChild.size.height);
+
+    // If the parent forces a larger height (e.g. Expanded), respect it!
+    maxHeight = math.max(maxHeight, constraints.minHeight);
 
     // SECOND PASS: ALWAYS force tight constraints on both children to ensure
     // framework layout contracts are strictly met!

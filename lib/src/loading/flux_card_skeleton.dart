@@ -89,98 +89,91 @@ class _FluxCardSkeletonState extends State<FluxCardSkeleton> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     final skeleton = _buildSkeleton(context);
-    if (widget.loadingWrapper != null) {
-      return widget.loadingWrapper!(context, skeleton);
-    }
+
+    if (widget.loadingWrapper != null) return widget.loadingWrapper!(context, skeleton);
+
     return _ShimmerLayer(animation: _animation, child: skeleton);
   }
 
   Widget _buildSkeleton(BuildContext context) {
     final mediaSlot = widget.hasMedia
         ? FluxMedia(
-      aspectRatio: 16 / 9,
-      child: _SkeletonBox(borderRadius: 0, color: _baseColor(context)),
-    )
+            aspectRatio: 16 / 9,
+            child: _SkeletonBox(borderRadius: 0, color: _baseColor(context)),
+          )
         : null;
 
     final headerSlot = widget.hasHeader
         ? Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _SkeletonBox(height: 14, widthFraction: 0.6, color: _baseColor(context)),
-        SizedBox(height: widget.theme.spacing / 2),
-        _SkeletonBox(height: 11, widthFraction: 0.4, color: _baseColor(context)),
-      ],
-    )
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SkeletonBox(height: 14, widthFraction: 0.6, color: _baseColor(context)),
+              SizedBox(height: widget.theme.spacing / 2),
+              _SkeletonBox(height: 11, widthFraction: 0.4, color: _baseColor(context)),
+            ],
+          )
         : null;
 
     final bodySlot = widget.hasBody
         ? Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _SkeletonBox(height: 11, color: _baseColor(context)),
-        SizedBox(height: widget.theme.spacing / 3),
-        _SkeletonBox(height: 11, widthFraction: 0.75, color: _baseColor(context)),
-      ],
-    )
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SkeletonBox(height: 11, color: _baseColor(context)),
+              SizedBox(height: widget.theme.spacing / 3),
+              _SkeletonBox(height: 11, widthFraction: 0.75, color: _baseColor(context)),
+            ],
+          )
         : null;
 
     final footerSlot = widget.hasFooter
         ? LayoutBuilder(
-      builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0;
+            builder: (context, constraints) {
+              final availableWidth = constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0;
 
-        final firstWidth = availableWidth > 0 ? availableWidth * 0.35 : null;
-        final secondWidth = availableWidth > 0 ? availableWidth * 0.25 : null;
+              final firstWidth = availableWidth > 0 ? availableWidth * 0.35 : null;
+              final secondWidth = availableWidth > 0 ? availableWidth * 0.25 : null;
 
-        Widget footerChip({
-          required double height,
-          required double borderRadius,
-          required Color color,
-          required double? width,
-        }) {
-          final box = _SkeletonBox(
-            height: height,
-            borderRadius: borderRadius,
-            color: color,
-          );
+              Widget footerChip({
+                required double height,
+                required double borderRadius,
+                required Color color,
+                required double? width,
+              }) {
+                final box = _SkeletonBox(height: height, borderRadius: borderRadius, color: color);
 
-          return width == null
-              ? Expanded(child: box)
-              : SizedBox(width: width, child: box);
-        }
+                return width == null ? Expanded(child: box) : SizedBox(width: width, child: box);
+              }
 
-        return Row(
-          children: [
-            footerChip(
-              height: 32,
-              borderRadius: 8,
-              color: _baseColor(context),
-              width: firstWidth,
-            ),
-            SizedBox(width: widget.theme.spacing),
-            footerChip(
-              height: 32,
-              borderRadius: 8,
-              color: _baseColor(context),
-              width: secondWidth,
-            ),
-          ],
-        );
-      },
-    )
+              return Row(
+                children: [
+                  footerChip(
+                    height: 32,
+                    borderRadius: 8,
+                    color: _baseColor(context),
+                    width: firstWidth,
+                  ),
+                  SizedBox(width: widget.theme.spacing),
+                  footerChip(
+                    height: 32,
+                    borderRadius: 8,
+                    color: _baseColor(context),
+                    width: secondWidth,
+                  ),
+                ],
+              );
+            },
+          )
         : null;
 
     return FluxCardLayout(
-      mode: widget.layout == FluxLayoutMode.responsive
-          ? FluxLayoutMode.column
-          : widget.layout,
+      mode: widget.layout == FluxLayoutMode.responsive ? FluxLayoutMode.column : widget.layout,
       mediaPosition: widget.mediaPosition,
       mediaSpan: widget.mediaSpan,
       theme: widget.theme,
       resolvedPadding: const EdgeInsets.all(8),
+      isMediaExpanded: false,
     ).build(
       context,
       media: mediaSlot,
@@ -218,9 +211,9 @@ class _SkeletonBox extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(borderRadius)),
     );
-    if (widthFraction != null) {
-      box = FractionallySizedBox(widthFactor: widthFraction, child: box);
-    }
+
+    if (widthFraction != null) box = FractionallySizedBox(widthFactor: widthFraction, child: box);
+
     return box;
   }
 }
@@ -241,14 +234,15 @@ class _ShimmerLayer extends StatelessWidget {
       child: AnimatedBuilder(
         animation: animation,
         builder: (context, _) {
-          final v = animation.value;
+          final value = animation.value;
+
           return ShaderMask(
             blendMode: BlendMode.srcATop,
             shaderCallback: (bounds) => LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
               colors: [base, highlight, base],
-              stops: [(v - 0.4).clamp(0.0, 1.0), v.clamp(0.0, 1.0), (v + 0.4).clamp(0.0, 1.0)],
+              stops: _stops(value),
             ).createShader(bounds),
             child: child,
           );
@@ -256,4 +250,10 @@ class _ShimmerLayer extends StatelessWidget {
       ),
     );
   }
+
+  List<double> _stops(double value) => [
+    (value - 0.4).clamp(0.0, 1.0),
+    value.clamp(0.0, 1.0),
+    (value + 0.4).clamp(0.0, 1.0),
+  ];
 }

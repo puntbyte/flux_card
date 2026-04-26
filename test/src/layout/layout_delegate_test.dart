@@ -10,6 +10,7 @@ class _TestLayoutDelegate extends FluxLayoutDelegate {
   const _TestLayoutDelegate({
     required super.mediaPosition,
     required super.mediaSpan,
+    required super.isMediaExpanded,
     required super.theme,
     required super.resolvedPadding,
     super.boundaryTrackers,
@@ -19,6 +20,7 @@ class _TestLayoutDelegate extends FluxLayoutDelegate {
   Widget build(
     BuildContext context, {
     Widget? mediaSlot,
+    double? fixedMediaWidth,
     Widget? header,
     Widget? body,
     Widget? footer,
@@ -41,6 +43,7 @@ void main() {
       const delegate = _TestLayoutDelegate(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
         boundaryTrackers: {}, // Empty
@@ -54,6 +57,7 @@ void main() {
       final delegate = _TestLayoutDelegate(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
         boundaryTrackers: {FluxSlotBoundary.afterMedia: tracker},
@@ -68,6 +72,7 @@ void main() {
       const delegate = _TestLayoutDelegate(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
