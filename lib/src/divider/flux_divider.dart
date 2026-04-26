@@ -128,7 +128,6 @@ class _DashedLinePainter extends CustomPainter {
         }
         break;
       case MainAxisAlignment.start:
-      default:
         break;
     }
 

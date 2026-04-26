@@ -12,11 +12,11 @@ abstract class FluxSlotWrapper {
   EdgeInsetsGeometry? get externalPaddingOverride;
 }
 
-class _SlotBlock {
+class SlotBlock {
   final Set<FluxTarget> targets;
   final Widget widget;
 
-  _SlotBlock(this.targets, this.widget);
+  SlotBlock(this.targets, this.widget);
 }
 
 abstract final class SlotResolver {
@@ -81,13 +81,13 @@ abstract final class SlotResolver {
     );
   }
 
-  static List<_SlotBlock> groupAndWrap(
+  static List<SlotBlock> groupAndWrap(
       BuildContext context,
-      List<_SlotBlock> blocks,
+      List<SlotBlock> blocks,
       List<Widget> multiUnderlays,
       List<Widget> multiOvs,
       ) {
-    var currentBlocks = List<_SlotBlock>.from(blocks);
+    var currentBlocks = List<SlotBlock>.from(blocks);
 
     void applyDecoration(Widget layerWidget, Set<FluxTarget> targets, bool isUnderlay) {
       int startIdx = -1;
@@ -120,7 +120,7 @@ abstract final class SlotResolver {
           ],
         );
 
-        currentBlocks.replaceRange(startIdx, endIdx + 1,[_SlotBlock(combinedTargets, stacked)]);
+        currentBlocks.replaceRange(startIdx, endIdx + 1,[SlotBlock(combinedTargets, stacked)]);
       }
     }
 
@@ -150,7 +150,7 @@ abstract final class SlotResolver {
     final present = entries.where((e) => e.$2 != null).toList();
     if (present.isEmpty) return null;
 
-    final blocks = <_SlotBlock>[];
+    final blocks = <SlotBlock>[];
 
     for (int i = 0; i < present.length; i++) {
       final target = present[i].$1;
@@ -186,7 +186,7 @@ abstract final class SlotResolver {
         } else {
           gapWidget = SizedBox(height: spacing);
         }
-        blocks.add(_SlotBlock({prevTarget, target}, gapWidget));
+        blocks.add(SlotBlock({prevTarget, target}, gapWidget));
       }
 
       EdgeInsetsGeometry? overridePad;
@@ -213,7 +213,7 @@ abstract final class SlotResolver {
         tracker: slotTrackers?[target],
       )!;
 
-      blocks.add(_SlotBlock({target}, wrapped));
+      blocks.add(SlotBlock({target}, wrapped));
     }
 
     final groupedBlocks = groupAndWrap(context, blocks, multiUnderlays, multiOvs);
