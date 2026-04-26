@@ -8,6 +8,7 @@ class FluxInlineLayout extends FluxLayoutDelegate {
   const FluxInlineLayout({
     required super.mediaPosition,
     required super.mediaSpan,
+    required super.isMediaExpanded,
     required super.theme,
     required super.resolvedPadding,
     super.divider,
@@ -18,16 +19,17 @@ class FluxInlineLayout extends FluxLayoutDelegate {
 
   @override
   Widget build(
-    BuildContext context, {
-    Widget? mediaSlot,
-    Widget? header,
-    Widget? body,
-    Widget? footer,
-    required Map<FluxTarget, List<Widget>> underlaysByTarget,
-    required Map<FluxTarget, List<Widget>> ovsByTarget,
-    required List<Widget> multiUnderlays,
-    required List<Widget> multiOvs,
-  }) {
+      BuildContext context, {
+        Widget? mediaSlot,
+        double? fixedMediaWidth,
+        Widget? header,
+        Widget? body,
+        Widget? footer,
+        required Map<FluxTarget, List<Widget>> underlaysByTarget,
+        required Map<FluxTarget, List<Widget>> ovsByTarget,
+        required List<Widget> multiUnderlays,
+        required List<Widget> multiOvs,
+      }) {
     final beforeEntries = mediaPosition == FluxMediaPosition.start
         ? <(FluxTarget, Widget?)>[(FluxTarget.header, header)]
         : <(FluxTarget, Widget?)>[(FluxTarget.header, header), (FluxTarget.body, body)];
@@ -36,8 +38,15 @@ class FluxInlineLayout extends FluxLayoutDelegate {
         ? <(FluxTarget, Widget?)>[(FluxTarget.body, body), (FluxTarget.footer, footer)]
         : <(FluxTarget, Widget?)>[(FluxTarget.footer, footer)];
 
+    final actuallyExpand = isMediaExpanded && mediaSlot != null;
+    Widget? effectiveMedia = mediaSlot;
+    if (actuallyExpand) {
+      effectiveMedia = Expanded(child: effectiveMedia!);
+    }
+
     return SlotResolver.verticalGroup(
-      slots: [
+      isExpanded: actuallyExpand,
+      slots:[
         buildSubColumn(
           context,
           beforeEntries,
@@ -48,7 +57,7 @@ class FluxInlineLayout extends FluxLayoutDelegate {
         ),
         afterMediaMarker(),
         divider?.afterMedia,
-        mediaSlot,
+        effectiveMedia,
         buildSubColumn(
           context,
           afterEntries,

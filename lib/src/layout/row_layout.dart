@@ -10,6 +10,7 @@ class FluxRowLayout extends FluxLayoutDelegate {
   const FluxRowLayout({
     required super.mediaPosition,
     required super.mediaSpan,
+    required super.isMediaExpanded,
     required super.theme,
     required super.resolvedPadding,
     super.divider,
@@ -20,31 +21,32 @@ class FluxRowLayout extends FluxLayoutDelegate {
 
   @override
   Widget build(
-    BuildContext context, {
-    Widget? mediaSlot,
-    Widget? header,
-    Widget? body,
-    Widget? footer,
-    required Map<FluxTarget, List<Widget>> underlaysByTarget,
-    required Map<FluxTarget, List<Widget>> ovsByTarget,
-    required List<Widget> multiUnderlays,
-    required List<Widget> multiOvs,
-  }) {
+      BuildContext context, {
+        Widget? mediaSlot,
+        double? fixedMediaWidth,
+        Widget? header,
+        Widget? body,
+        Widget? footer,
+        required Map<FluxTarget, List<Widget>> underlaysByTarget,
+        required Map<FluxTarget, List<Widget>> ovsByTarget,
+        required List<Widget> multiUnderlays,
+        required List<Widget> multiOvs,
+      }) {
     if (mediaSlot == null) {
       return buildFullContentColumn(
-            context,
-            header,
-            body,
-            footer,
-            underlaysByTarget,
-            ovsByTarget,
-            multiUnderlays,
-            multiOvs,
-          ) ??
+        context,
+        header,
+        body,
+        footer,
+        underlaysByTarget,
+        ovsByTarget,
+        multiUnderlays,
+        multiOvs,
+      ) ??
           const SizedBox.shrink();
     }
 
-    final present = [
+    final present =[
       (FluxTarget.header, header),
       (FluxTarget.body, body),
       (FluxTarget.footer, footer),
@@ -61,19 +63,18 @@ class FluxRowLayout extends FluxLayoutDelegate {
       final child = present[i].$2!;
 
       EdgeInsetsGeometry? overridePad;
-      // FIX: Explicitly cast to FluxSlotWrapper to resolve the property
       if (child is FluxSlotWrapper) {
         overridePad = (child as FluxSlotWrapper).externalPaddingOverride;
       }
 
       final slotPad =
           overridePad ??
-          EdgeInsets.only(
-            left: resolvedPadding.left,
-            right: resolvedPadding.right,
-            top: i == 0 ? resolvedPadding.top : 0.0,
-            bottom: i == present.length - 1 ? resolvedPadding.bottom : 0.0,
-          );
+              EdgeInsets.only(
+                left: resolvedPadding.left,
+                right: resolvedPadding.right,
+                top: i == 0 ? resolvedPadding.top : 0.0,
+                bottom: i == present.length - 1 ? resolvedPadding.bottom : 0.0,
+              );
 
       final slotWidget = SlotResolver.wrapSlot(
         context,
@@ -118,17 +119,22 @@ class FluxRowLayout extends FluxLayoutDelegate {
         ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: inCol)
         : const SizedBox.shrink();
 
-    final rowWidget = FluxMatchHeightRow(
+    Widget rowWidget = FluxMatchHeightRow(
       media: mediaSlot,
       content: inColWidget,
       flexMedia: theme.flexMedia,
       flexContent: theme.flexContent,
+      fixedMediaWidth: fixedMediaWidth,
       mediaStart: mediaPosition == FluxMediaPosition.start,
     );
 
+    if (isMediaExpanded) {
+      rowWidget = Expanded(child: rowWidget);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: isMediaExpanded ? MainAxisSize.max : MainAxisSize.min,
       children: [...beforeCol, rowWidget, ...afterCol],
     );
   }
@@ -148,7 +154,7 @@ class FluxRowLayout extends FluxLayoutDelegate {
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+          children:[
             SizedBox(height: theme.spacing / 2),
             centerWidget,
             SizedBox(height: theme.spacing / 2),

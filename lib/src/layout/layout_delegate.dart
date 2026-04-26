@@ -11,6 +11,7 @@ abstract class FluxLayoutDelegate {
   const FluxLayoutDelegate({
     required this.mediaPosition,
     required this.mediaSpan,
+    required this.isMediaExpanded,
     required this.theme,
     required this.resolvedPadding,
     this.divider,
@@ -21,6 +22,7 @@ abstract class FluxLayoutDelegate {
 
   final FluxMediaPosition mediaPosition;
   final FluxMediaSpan mediaSpan;
+  final bool isMediaExpanded;
   final FluxCardThemeData theme;
   final EdgeInsets resolvedPadding;
   final FluxDivider? divider;
@@ -31,6 +33,7 @@ abstract class FluxLayoutDelegate {
   Widget build(
     BuildContext context, {
     Widget? mediaSlot,
+    double? fixedMediaWidth,
     Widget? header,
     Widget? body,
     Widget? footer,

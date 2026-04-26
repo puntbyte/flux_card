@@ -8,6 +8,7 @@ class FluxColumnLayout extends FluxLayoutDelegate {
   const FluxColumnLayout({
     required super.mediaPosition,
     required super.mediaSpan,
+    required super.isMediaExpanded,
     required super.theme,
     required super.resolvedPadding,
     super.divider,
@@ -18,16 +19,17 @@ class FluxColumnLayout extends FluxLayoutDelegate {
 
   @override
   Widget build(
-    BuildContext context, {
-    Widget? mediaSlot,
-    Widget? header,
-    Widget? body,
-    Widget? footer,
-    required Map<FluxTarget, List<Widget>> underlaysByTarget,
-    required Map<FluxTarget, List<Widget>> ovsByTarget,
-    required List<Widget> multiUnderlays,
-    required List<Widget> multiOvs,
-  }) {
+      BuildContext context, {
+        Widget? mediaSlot,
+        double? fixedMediaWidth,
+        Widget? header,
+        Widget? body,
+        Widget? footer,
+        required Map<FluxTarget, List<Widget>> underlaysByTarget,
+        required Map<FluxTarget, List<Widget>> ovsByTarget,
+        required List<Widget> multiUnderlays,
+        required List<Widget> multiOvs,
+      }) {
     final content = buildFullContentColumn(
       context,
       header,
@@ -44,10 +46,17 @@ class FluxColumnLayout extends FluxLayoutDelegate {
     final marker = afterMediaMarker();
     final mediaDivider = divider?.afterMedia;
 
+    final actuallyExpand = isMediaExpanded;
+    Widget effectiveMedia = mediaSlot;
+    if (actuallyExpand) {
+      effectiveMedia = Expanded(child: effectiveMedia);
+    }
+
     return SlotResolver.verticalGroup(
+      isExpanded: actuallyExpand,
       slots: mediaPosition == FluxMediaPosition.start
-          ? [mediaSlot, marker, mediaDivider, content]
-          : [content, marker, mediaDivider, mediaSlot],
+          ? [effectiveMedia, marker, mediaDivider, content]
+          :[content, marker, mediaDivider, effectiveMedia],
       spacing: 0,
     );
   }

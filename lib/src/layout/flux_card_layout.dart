@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../components/flux_media.dart';
 import '../core/enums.dart';
 import '../core/theme.dart';
 import '../divider/flux_divider.dart';
@@ -16,6 +17,7 @@ class FluxCardLayout {
     required this.mode,
     required this.mediaPosition,
     required this.mediaSpan,
+    required this.isMediaExpanded,
     required this.theme,
     required this.resolvedPadding,
     this.divider,
@@ -27,6 +29,7 @@ class FluxCardLayout {
   final FluxLayoutMode mode;
   final FluxMediaPosition mediaPosition;
   final FluxMediaSpan mediaSpan;
+  final bool isMediaExpanded;
   final FluxCardThemeData theme;
   final EdgeInsets resolvedPadding;
   final FluxDivider? divider;
@@ -35,16 +38,16 @@ class FluxCardLayout {
   final BoxConstraints? parentConstraints;
 
   Widget build(
-    BuildContext context, {
-    Widget? media,
-    Widget? header,
-    Widget? body,
-    Widget? footer,
-    required Map<FluxTarget, List<Widget>> underlaysByTarget,
-    required Map<FluxTarget, List<Widget>> ovsByTarget,
-    required List<Widget> multiUnderlays,
-    required List<Widget> multiOvs,
-  }) {
+      BuildContext context, {
+        Widget? media,
+        Widget? header,
+        Widget? body,
+        Widget? footer,
+        required Map<FluxTarget, List<Widget>> underlaysByTarget,
+        required Map<FluxTarget, List<Widget>> ovsByTarget,
+        required List<Widget> multiUnderlays,
+        required List<Widget> multiOvs,
+      }) {
     final mediaSlot = SlotResolver.wrapSlot(
       context,
       target: FluxTarget.media,
@@ -54,25 +57,31 @@ class FluxCardLayout {
       tracker: slotTrackers?[FluxTarget.media],
     );
 
+    double? fixedMediaWidth;
+    if (media is FluxMedia) {
+      fixedMediaWidth = media.width;
+    }
+
     final delegate = _getDelegate();
 
     if (mode == FluxLayoutMode.responsive) {
       return delegate.buildFullContentColumn(
-            context,
-            header,
-            body,
-            footer,
-            underlaysByTarget,
-            ovsByTarget,
-            multiUnderlays,
-            multiOvs,
-          ) ??
+        context,
+        header,
+        body,
+        footer,
+        underlaysByTarget,
+        ovsByTarget,
+        multiUnderlays,
+        multiOvs,
+      ) ??
           const SizedBox.shrink();
     }
 
     return delegate.build(
       context,
       mediaSlot: mediaSlot,
+      fixedMediaWidth: fixedMediaWidth,
       header: header,
       body: body,
       footer: footer,
@@ -90,6 +99,7 @@ class FluxCardLayout {
         return FluxColumnLayout(
           mediaPosition: mediaPosition,
           mediaSpan: mediaSpan,
+          isMediaExpanded: isMediaExpanded,
           theme: theme,
           resolvedPadding: resolvedPadding,
           divider: divider,
@@ -101,6 +111,7 @@ class FluxCardLayout {
         return FluxRowLayout(
           mediaPosition: mediaPosition,
           mediaSpan: mediaSpan,
+          isMediaExpanded: isMediaExpanded,
           theme: theme,
           resolvedPadding: resolvedPadding,
           divider: divider,
@@ -112,6 +123,7 @@ class FluxCardLayout {
         return FluxInlineLayout(
           mediaPosition: mediaPosition,
           mediaSpan: mediaSpan,
+          isMediaExpanded: isMediaExpanded,
           theme: theme,
           resolvedPadding: resolvedPadding,
           divider: divider,

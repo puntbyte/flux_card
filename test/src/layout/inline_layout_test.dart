@@ -14,6 +14,7 @@ void main() {
       const layout = FluxInlineLayout(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -52,6 +53,7 @@ void main() {
       const layout = FluxInlineLayout(
         mediaPosition: FluxMediaPosition.end,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -90,6 +92,7 @@ void main() {
       const layout = FluxInlineLayout(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -130,6 +133,7 @@ void main() {
       const layout = FluxInlineLayout(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
         boundaryTrackers: null,
@@ -142,6 +146,7 @@ void main() {
               final customLayout = FluxInlineLayout(
                 mediaPosition: layout.mediaPosition,
                 mediaSpan: layout.mediaSpan,
+                isMediaExpanded: false,
                 theme: layout.theme,
                 resolvedPadding: layout.resolvedPadding,
                 boundaryTrackers: {FluxSlotBoundary.afterMedia: tracker},

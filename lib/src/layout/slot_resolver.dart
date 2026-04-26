@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../components/flux_underlay.dart'; // Ensure it's imported as underlay!
+import '../components/flux_underlay.dart';
 import '../components/flux_overlay.dart';
 import '../core/enums.dart';
 import '../divider/flux_divider.dart';
@@ -21,18 +21,18 @@ class _SlotBlock {
 
 abstract final class SlotResolver {
   static Widget? wrapSlot(
-    BuildContext context, {
-    required FluxTarget target,
-    required Widget? child,
-    required Map<FluxTarget, List<Widget>> underlaysByTarget,
-    required Map<FluxTarget, List<Widget>> ovsByTarget,
-    EdgeInsetsGeometry? contentPadding,
-    BoundaryTracker? tracker,
-  }) {
+      BuildContext context, {
+        required FluxTarget target,
+        required Widget? child,
+        required Map<FluxTarget, List<Widget>> underlaysByTarget,
+        required Map<FluxTarget, List<Widget>> ovsByTarget,
+        EdgeInsetsGeometry? contentPadding,
+        BoundaryTracker? tracker,
+      }) {
     if (child == null) return null;
 
     final underlays = underlaysByTarget[target] ?? const [];
-    final ovs = ovsByTarget[target] ?? const [];
+    final ovs = ovsByTarget[target] ?? const[];
 
     final Widget paddedChild = (contentPadding != null && contentPadding != EdgeInsets.zero)
         ? Padding(padding: contentPadding, child: child)
@@ -46,7 +46,7 @@ abstract final class SlotResolver {
       result = Stack(
         fit: StackFit.passthrough,
         clipBehavior: Clip.none,
-        children: [
+        children:[
           ...underlays.map((und) => FluxUnderlay.buildPositioned(context, und)),
           paddedChild,
           ...ovs.map((ov) => Positioned.fill(child: ov)),
@@ -61,14 +61,18 @@ abstract final class SlotResolver {
     return result;
   }
 
-  static Widget verticalGroup({required List<Widget?> slots, required double spacing}) {
+  static Widget verticalGroup({
+    required List<Widget?> slots,
+    required double spacing,
+    bool isExpanded = false,
+  }) {
     final validSlots = slots.whereType<Widget>().toList();
     if (validSlots.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
+      mainAxisSize: isExpanded ? MainAxisSize.max : MainAxisSize.min,
+      children:[
         for (int i = 0; i < validSlots.length; i++) ...[
           if (i > 0 && spacing > 0) SizedBox(height: spacing),
           validSlots[i],
@@ -78,11 +82,11 @@ abstract final class SlotResolver {
   }
 
   static List<_SlotBlock> groupAndWrap(
-    BuildContext context,
-    List<_SlotBlock> blocks,
-    List<Widget> multiUnderlays,
-    List<Widget> multiOvs,
-  ) {
+      BuildContext context,
+      List<_SlotBlock> blocks,
+      List<Widget> multiUnderlays,
+      List<Widget> multiOvs,
+      ) {
     var currentBlocks = List<_SlotBlock>.from(blocks);
 
     void applyDecoration(Widget layerWidget, Set<FluxTarget> targets, bool isUnderlay) {
@@ -109,14 +113,14 @@ abstract final class SlotResolver {
         final stacked = Stack(
           fit: StackFit.passthrough,
           clipBehavior: Clip.none,
-          children: [
+          children:[
             if (isUnderlay) FluxUnderlay.buildPositioned(context, layerWidget),
             column,
             if (!isUnderlay) Positioned.fill(child: layerWidget),
           ],
         );
 
-        currentBlocks.replaceRange(startIdx, endIdx + 1, [_SlotBlock(combinedTargets, stacked)]);
+        currentBlocks.replaceRange(startIdx, endIdx + 1,[_SlotBlock(combinedTargets, stacked)]);
       }
     }
 
@@ -131,18 +135,18 @@ abstract final class SlotResolver {
   }
 
   static Widget? contentColumn(
-    BuildContext context, {
-    required List<(FluxTarget, Widget?)> entries,
-    required Map<FluxTarget, List<Widget>> underlaysByTarget,
-    required Map<FluxTarget, List<Widget>> ovsByTarget,
-    required List<Widget> multiUnderlays,
-    required List<Widget> multiOvs,
-    required EdgeInsets padding,
-    required double spacing,
-    FluxDivider? divider,
-    Map<FluxSlotBoundary, BoundaryTracker>? boundaryTrackers,
-    Map<FluxTarget, BoundaryTracker>? slotTrackers,
-  }) {
+      BuildContext context, {
+        required List<(FluxTarget, Widget?)> entries,
+        required Map<FluxTarget, List<Widget>> underlaysByTarget,
+        required Map<FluxTarget, List<Widget>> ovsByTarget,
+        required List<Widget> multiUnderlays,
+        required List<Widget> multiOvs,
+        required EdgeInsets padding,
+        required double spacing,
+        FluxDivider? divider,
+        Map<FluxSlotBoundary, BoundaryTracker>? boundaryTrackers,
+        Map<FluxTarget, BoundaryTracker>? slotTrackers,
+      }) {
     final present = entries.where((e) => e.$2 != null).toList();
     if (present.isEmpty) return null;
 
@@ -173,7 +177,7 @@ abstract final class SlotResolver {
           gapWidget = Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+            children:[
               SizedBox(height: spacing / 2),
               centerWidget,
               SizedBox(height: spacing / 2),
@@ -192,12 +196,12 @@ abstract final class SlotResolver {
 
       final slotPad =
           overridePad ??
-          EdgeInsets.only(
-            left: padding.left,
-            right: padding.right,
-            top: i == 0 ? padding.top : 0.0,
-            bottom: i == present.length - 1 ? padding.bottom : 0.0,
-          );
+              EdgeInsets.only(
+                left: padding.left,
+                right: padding.right,
+                top: i == 0 ? padding.top : 0.0,
+                bottom: i == present.length - 1 ? padding.bottom : 0.0,
+              );
 
       final wrapped = wrapSlot(
         context,

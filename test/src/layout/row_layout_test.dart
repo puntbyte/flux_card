@@ -41,6 +41,7 @@ void main() {
       const layout = FluxRowLayout(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -75,6 +76,7 @@ void main() {
       const layout = FluxRowLayout(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -115,6 +117,7 @@ void main() {
       const layout = FluxRowLayout(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.body,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -155,6 +158,7 @@ void main() {
 
     testWidgets('respects external padding override from FluxSlotWrapper', (tester) async {
       const layout = FluxRowLayout(
+        isMediaExpanded: false,
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
         theme: theme,

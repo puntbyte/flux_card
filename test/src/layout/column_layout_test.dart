@@ -13,6 +13,7 @@ void main() {
       const layout = FluxColumnLayout(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -46,6 +47,7 @@ void main() {
       const layout = FluxColumnLayout(
         mediaPosition: FluxMediaPosition.end,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -81,6 +83,7 @@ void main() {
       const layout = FluxColumnLayout(
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );

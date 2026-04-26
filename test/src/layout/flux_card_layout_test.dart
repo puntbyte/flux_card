@@ -38,6 +38,7 @@ void main() {
         mode: FluxLayoutMode.column,
         mediaPosition: FluxMediaPosition.start,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -77,6 +78,7 @@ void main() {
         mode: FluxLayoutMode.row,
         mediaPosition: FluxMediaPosition.end,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );
@@ -116,6 +118,7 @@ void main() {
         mode: FluxLayoutMode.inline,
         mediaPosition: FluxMediaPosition.end,
         mediaSpan: FluxMediaSpan.all,
+        isMediaExpanded: false,
         theme: theme,
         resolvedPadding: EdgeInsets.zero,
       );

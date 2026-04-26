@@ -42,6 +42,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     this.flexContent = 3,
     this.responsiveBreakpoint = 600.0,
     this.shape,
+    this.mergeSemantics = false,
   });
 
   final EdgeInsetsGeometry padding;
@@ -81,6 +82,10 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
   /// and [borderSide]. Use [FluxTicketShape] here for notch-style cards.
   final ShapeBorder? shape;
 
+  /// Whether to wrap the card in a [MergeSemantics] widget so screen readers
+  /// announce the entire card content cohesively.
+  final bool mergeSemantics;
+
   // ── Presets ──────────────────────────────────────────────────────────────
 
   /// Flat card with balanced spacing and radius.
@@ -111,7 +116,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   /// Resolves the [borderSide] color, replacing the sentinel value with the
-  /// ambient [ColorScheme.outline] when appropriate.
+  /// ambient[ColorScheme.outline] when appropriate.
   BorderSide resolveBorderSide(BuildContext context) {
     if (borderSide == BorderSide.none) return BorderSide.none;
     if (borderSide.color == _kThemeOutlineColor) {
@@ -129,7 +134,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
 
   // ── Theme lookup ──────────────────────────────────────────────────────────
 
-  /// Finds the nearest [FluxCardThemeData] in [context].
+  /// Finds the nearest[FluxCardThemeData] in [context].
   ///
   /// Priority: [FluxCardTheme] InheritedWidget → [ThemeExtension] → [standard].
   static FluxCardThemeData of(BuildContext context) {
@@ -149,7 +154,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     List<BoxShadow>? defaultShadows,
     TextStyle? defaultTitleStyle,
     TextStyle? defaultSubtitleStyle,
-    TextStyle? defaultDescriptionStyle, // Added
+    TextStyle? defaultDescriptionStyle,
     Color? cardColor,
     Color? shadowColor,
     Color? surfaceTintColor,
@@ -159,6 +164,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     int? flexContent,
     double? responsiveBreakpoint,
     ShapeBorder? shape,
+    bool? mergeSemantics,
   }) => FluxCardThemeData(
     padding: padding ?? this.padding,
     spacing: spacing ?? this.spacing,
@@ -168,7 +174,6 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     defaultTitleStyle: defaultTitleStyle ?? this.defaultTitleStyle,
     defaultSubtitleStyle: defaultSubtitleStyle ?? this.defaultSubtitleStyle,
     defaultDescriptionStyle: defaultDescriptionStyle ?? this.defaultDescriptionStyle,
-    // Added
     cardColor: cardColor ?? this.cardColor,
     shadowColor: shadowColor ?? this.shadowColor,
     surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
@@ -178,6 +183,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     flexContent: flexContent ?? this.flexContent,
     responsiveBreakpoint: responsiveBreakpoint ?? this.responsiveBreakpoint,
     shape: shape ?? this.shape,
+    mergeSemantics: mergeSemantics ?? this.mergeSemantics,
   );
 
   @override
@@ -196,7 +202,6 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
         other.defaultDescriptionStyle,
         t,
       ),
-      // Added
       cardColor: Color.lerp(cardColor, other.cardColor, t),
       shadowColor: Color.lerp(shadowColor, other.shadowColor, t),
       surfaceTintColor: Color.lerp(surfaceTintColor, other.surfaceTintColor, t),
@@ -207,6 +212,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
       responsiveBreakpoint:
           lerpDouble(responsiveBreakpoint, other.responsiveBreakpoint, t) ?? responsiveBreakpoint,
       shape: ShapeBorder.lerp(shape, other.shape, t),
+      mergeSemantics: t < 0.5 ? mergeSemantics : other.mergeSemantics,
     );
   }
 
@@ -220,7 +226,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
       listEquals(other.defaultShadows, defaultShadows) &&
       other.defaultTitleStyle == defaultTitleStyle &&
       other.defaultSubtitleStyle == defaultSubtitleStyle &&
-      other.defaultDescriptionStyle == defaultDescriptionStyle && // Added
+      other.defaultDescriptionStyle == defaultDescriptionStyle &&
       other.cardColor == cardColor &&
       other.shadowColor == shadowColor &&
       other.surfaceTintColor == surfaceTintColor &&
@@ -229,7 +235,8 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
       other.flexMedia == flexMedia &&
       other.flexContent == flexContent &&
       other.responsiveBreakpoint == responsiveBreakpoint &&
-      other.shape == shape;
+      other.shape == shape &&
+      other.mergeSemantics == mergeSemantics;
 
   @override
   int get hashCode => Object.hash(
@@ -250,6 +257,7 @@ class FluxCardThemeData extends ThemeExtension<FluxCardThemeData> {
     flexContent,
     responsiveBreakpoint,
     shape,
+    mergeSemantics,
   );
 }
 
